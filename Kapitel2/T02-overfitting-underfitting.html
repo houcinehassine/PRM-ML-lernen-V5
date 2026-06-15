@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Overfitting & Underfitting – K2 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .35rem .9rem; border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      font-size: var(--text-xs); font-weight: 700; cursor: pointer;
+      color: var(--btn-color, var(--color-text-faint));
+      transition: all .15s;
+    }
+    .mark-btn:hover { border-color: var(--color-success); color: var(--color-success); }
+    .stufe-footer {
+      margin-top: var(--space-6); padding-top: var(--space-4);
+      border-top: 1px solid var(--color-border);
+      display: flex; justify-content: flex-end;
+    }
+    .fit-diagram {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4); margin: var(--space-5) 0;
+    }
+    .fit-card {
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      text-align: center;
+    }
+    .fit-card.under { background: color-mix(in oklab, #3498db 12%, var(--color-surface)); border: 2px solid #3498db; }
+    .fit-card.good  { background: color-mix(in oklab, var(--color-success) 12%, var(--color-surface)); border: 2px solid var(--color-success); }
+    .fit-card.over  { background: color-mix(in oklab, var(--color-error,#e74c3c) 12%, var(--color-surface)); border: 2px solid var(--color-error,#e74c3c); }
+    .fit-card h4 { margin: 0 0 var(--space-2); font-size: var(--text-sm); }
+    .fit-visual { font-size: 2.5rem; margin: var(--space-2) 0; }
+    .curve-visual {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--space-2); margin: var(--space-3) 0;
+    }
+    .curve-row {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-size: var(--text-sm);
+    }
+    .curve-bar {
+      flex: 1; height: 20px; border-radius: var(--radius-sm);
+      position: relative; overflow: hidden;
+    }
+    .curve-bar-fill { height: 100%; border-radius: var(--radius-sm); }
+    @media (max-width: 640px) { .fit-diagram { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <site-header active="k2" title="Overfitting &amp; Underfitting – K2 · PRM V5"></site-header>
+  <lern-pfad topic="k2/t02"></lern-pfad>
+
+  <div class="layout">
+    <site-sidebar active="k2/t02"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K2 · Thema 2 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">📈 Overfitting &amp; Underfitting</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">
+          Das Generalisierungsproblem: Wann lernt ein Modell zu wenig — wann zu viel? Und wie erkennt man den Unterschied?
+        </p>
+      </section>
+
+      <!-- STUFE 1: Ziel & Kontext -->
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 1</span>
+          <h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Die Analogie: Lernen für die Prüfung</h3>
+          <p>Stell dir drei Schüler vor, die für eine Mathe-Prüfung lernen:</p>
+          <div class="fit-diagram">
+            <div class="fit-card under">
+              <div class="fit-visual">😴</div>
+              <h4>Schüler A – Underfitting</h4>
+              <p style="font-size:var(--text-xs)">Hat kaum gelernt. Versteht nicht mal die Grundregeln. Scheitert an Trainingsaufgaben UND Prüfung.</p>
+            </div>
+            <div class="fit-card good">
+              <div class="fit-visual">🎯</div>
+              <h4>Schüler B – Just Right</h4>
+              <p style="font-size:var(--text-xs)">Hat das Konzept verstanden. Löst bekannte UND neue Aufgaben gut. Generalisiert.</p>
+            </div>
+            <div class="fit-card over">
+              <div class="fit-visual">📖</div>
+              <h4>Schüler C – Overfitting</h4>
+              <p style="font-size:var(--text-xs)">Hat alle Übungsaufgaben auswendig gelernt. Perfekt auf Training — versagt bei neuen Aufgaben.</p>
+            </div>
+          </div>
+          <div class="info-box warning">
+            <strong>Das Ziel von ML:</strong> Ein Modell trainieren, das auf <em>ungesehenen</em> Daten gut funktioniert — nicht nur auf den Trainingsdaten.
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button>
+        </div>
+      </div>
+
+      <!-- STUFE 2: Theorie -->
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 2</span>
+          <h2 class="stufe-title">🧠 Theorie &amp; Intuition</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Wie man Overfitting/Underfitting erkennt</h3>
+          <p>Man vergleicht Training Accuracy mit Test Accuracy:</p>
+
+          <table>
+            <thead><tr><th>Situation</th><th>Train Acc</th><th>Test Acc</th><th>Diagnose</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Modell zu einfach</td>
+                <td style="color:#e74c3c">Niedrig (~60%)</td>
+                <td style="color:#e74c3c">Niedrig (~59%)</td>
+                <td><strong>Underfitting</strong></td>
+              </tr>
+              <tr>
+                <td>Ideales Modell</td>
+                <td style="color:var(--color-success)">Hoch (~95%)</td>
+                <td style="color:var(--color-success)">Hoch (~93%)</td>
+                <td><strong>Gute Generalisierung</strong></td>
+              </tr>
+              <tr>
+                <td>Modell zu komplex</td>
+                <td style="color:var(--color-success)">Sehr hoch (~99%)</td>
+                <td style="color:#e74c3c">Niedrig (~72%)</td>
+                <td><strong>Overfitting</strong></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Ursachen und Lösungen</h3>
+          <table>
+            <thead><tr><th></th><th>Underfitting (High Bias)</th><th>Overfitting (High Variance)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Ursache</strong></td><td>Modell zu simpel, Features fehlen</td><td>Modell zu komplex, zu wenig Daten</td></tr>
+              <tr><td><strong>Lösung</strong></td><td>Komplexeres Modell, mehr Features</td><td>Regularisierung, mehr Daten, Dropout</td></tr>
+              <tr><td><strong>Beispiel</strong></td><td>Lineare Kurve durch quadratische Daten</td><td>Grad-15 Polynom durch 10 Datenpunkte</td></tr>
+              <tr><td><strong>sklearn fix</strong></td><td>Grad erhöhen, mehr Estimators</td><td><code>max_depth</code>, <code>C</code>, <code>alpha</code> kleiner</td></tr>
+            </tbody>
+          </table>
+
+          <div class="compare-grid">
+            <div class="compare-card compare-card-a">
+              <div class="compare-card-label">📉 Underfitting (High Bias)</div>
+              <p>Modell ist zu simpel, um das Muster in den Daten zu erfassen. Train- UND
+              Test-Accuracy sind beide niedrig und liegen nah beieinander. Lösung:
+              komplexeres Modell, mehr Features, weniger Regularisierung.</p>
+            </div>
+            <div class="compare-card-arrow">↔</div>
+            <div class="compare-card compare-card-b">
+              <div class="compare-card-label">📈 Overfitting (High Variance)</div>
+              <p>Modell ist zu komplex und merkt sich die Trainingsdaten statt das
+              zugrundeliegende Muster zu lernen. Train-Accuracy ist sehr hoch, Test-Accuracy
+              fällt stark ab. Lösung: Regularisierung, mehr Daten, einfacheres Modell.</p>
+            </div>
+          </div>
+
+          <h3>Die Learning Curve</h3>
+          <p>Eine Learning Curve plottet Train/Test-Accuracy gegen die Anzahl der Trainingsdaten:</p>
+          <div class="info-box">
+            <strong>Underfitting:</strong> Beide Kurven konvergieren auf niedrigem Niveau<br>
+            <strong>Overfitting:</strong> Großer Gap zwischen Train (hoch) und Test (niedrig)<br>
+            <strong>Good Fit:</strong> Kurven konvergieren auf hohem Niveau
+          </div>
+
+          <h3>Regularisierung: Die wichtigste Gegenstrategie</h3>
+          <p>Regularisierung bestraft große Modellgewichte und zwingt das Modell zu Einfachheit:</p>
+          <table>
+            <thead><tr><th>Methode</th><th>Was sie tut</th><th>Parameter</th></tr></thead>
+            <tbody>
+              <tr><td><strong>L2 (Ridge)</strong></td><td>Straft große Gewichte quadratisch</td><td><code>alpha</code> oder <code>C</code></td></tr>
+              <tr><td><strong>L1 (Lasso)</strong></td><td>Straft |Gewichte|, setzt viele auf 0 (Feature Selection)</td><td><code>alpha</code></td></tr>
+              <tr><td><strong>max_depth</strong></td><td>Bäume nicht zu tief wachsen lassen</td><td><code>max_depth=5</code></td></tr>
+              <tr><td><strong>min_samples</strong></td><td>Mindest-Samples für Blätter</td><td><code>min_samples_leaf=5</code></td></tr>
+            </tbody>
+          </table>
+          <div class="note note-xref"><div class="note-label">🔗 Querverweis</div><p style="margin:0;font-size:var(--text-sm)">Learning Curves zur Diagnose von Over-/Underfitting werden in <a href="../Kapitel7/T04-cross-validation-eval.html">K7-T04 · CV &amp; Fehleranalyse</a> praktisch mit sklearn berechnet und interpretiert.</p></div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button>
+        </div>
+      </div>
+
+      <!-- STUFE 3: Algorithmus -->
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 3</span>
+          <h2 class="stufe-title">⚙️ Overfitting diagnostizieren — Schritt für Schritt</h2>
+        </div>
+        <div class="stufe-body">
+          <div class="algo-steps">
+            <div class="algo-step">
+              <div class="algo-step-num">1</div>
+              <div class="algo-step-body">
+                <strong>Modell trainieren &amp; Train/Test Accuracy messen</strong>
+                <p>Wenn Train Acc » Test Acc → Overfitting. Wenn beide niedrig → Underfitting.</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">2</div>
+              <div class="algo-step-body">
+                <strong>Modellkomplexität variieren (Validation Curve)</strong>
+                <p>Einen Hyperparameter (z.B. <code>max_depth</code>) von klein bis groß variieren. Train und Test Accuracy plotten.</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">3</div>
+              <div class="algo-step-body">
+                <strong>Sweet Spot finden</strong>
+                <p>Den Punkt wählen, wo Test Accuracy maximal ist — vor dem Overfitting-Bereich.</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">4</div>
+              <div class="algo-step-body">
+                <strong>Cross-Validation für robuste Schätzung</strong>
+                <p>Nicht nur eine Train/Test-Aufteilung — CV gibt stabilere Metriken (nächstes Thema).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="algo">✓ Diagnose-Schema klar</button>
+        </div>
+      </div>
+
+      <!-- STUFE 4: Von Scratch -->
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 4</span>
+          <h2 class="stufe-title">🛠️ Von Scratch: Overfitting sichtbar machen</h2>
+        </div>
+        <div class="stufe-body">
+          <p>Wir erzeugen Daten und zeigen wie Polynomgrad Overfitting verursacht:</p>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 1/2a — Funktion: polynomial_fit_and_evaluate</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import numpy as np
+
+def polynomial_fit_and_evaluate(X_train, y_train, X_test, y_test, degree):
+    """Polynom-Regression Grad 'degree' von Scratch (ohne sklearn)."""
+    # Vandermonde-Matrix aufbauen: [1, x, x², x³, ...]
+    def make_features(X, d):
+        return np.column_stack([X**i for i in range(d+1)])
+
+    X_tr = make_features(X_train, degree)
+    X_te = make_features(X_test, degree)
+
+    # Kleinste Quadrate: w = (XᵀX)⁻¹ Xᵀy
+    w = np.linalg.lstsq(X_tr, y_train, rcond=None)[0]
+
+    train_mse = np.mean((X_tr @ w - y_train)**2)
+    test_mse  = np.mean((X_te @ w - y_test)**2)
+    return train_mse, test_mse
+</code></pre>
+          </div>
+
+          <p>
+            Jetzt erzeugen wir Daten (<code>y = sin(2πx) + Rauschen</code>) und testen
+            verschiedene Polynomgrade:
+          </p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 1/2b — Test: Polynomgrade vergleichen</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">np.random.seed(42)
+X_all = np.linspace(0, 1, 100)
+y_all = np.sin(2 * np.pi * X_all) + np.random.normal(0, 0.3, 100)
+
+# 20 Trainings-, 80 Testpunkte
+idx = np.random.choice(100, 20, replace=False)
+X_train, y_train = X_all[idx], y_all[idx]
+X_test  = np.delete(X_all, idx)
+y_test  = np.delete(y_all, idx)
+
+print(f"{'Grad':>6} | {'Train MSE':>10} | {'Test MSE':>10} | Diagnose")
+print("-" * 50)
+for d in [1, 3, 5, 9, 15]:
+    tr_mse, te_mse = polynomial_fit_and_evaluate(
+        X_train, y_train, X_test, y_test, d
+    )
+    if tr_mse < 0.05 and te_mse > 0.2:
+        diag = "⚠️  OVERFITTING"
+    elif tr_mse > 0.15:
+        diag = "📉 Underfitting"
+    else:
+        diag = "✅ OK"
+    print(f"{d:>6} | {tr_mse:>10.4f} | {te_mse:>10.4f} | {diag}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>  Grad |  Train MSE |   Test MSE | Diagnose
+--------------------------------------------------
+     1 |     0.2405 |     0.2426 | 📉 Underfitting
+     3 |     0.1120 |     0.0861 | ✅ OK
+     5 |     0.0680 |     0.1383 | ✅ OK
+     9 |     0.0527 |     0.2760 | ✅ OK
+    15 |     0.0080 | 259048.6904 | ⚠️  OVERFITTING</pre>
+              </div>
+            </div>
+          </div>
+          <div class="info-box">
+            <strong>Beobachtung:</strong> Ab Grad 9 sinkt der Train-Fehler weiter, aber der Test-Fehler explodiert. Das Modell hat sich die 20 Trainings-Punkte "gemerkt" statt das Muster zu lernen.
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Polynom-Fits unterschiedlicher Grade</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X_train, y_train)
+import matplotlib.pyplot as plt
+
+def make_features(X, d):
+    return np.column_stack([X**i for i in range(d+1)])
+
+x_plot = np.linspace(0, 1, 200)
+
+fig, ax = plt.subplots(figsize=(5.5, 3.6))
+ax.scatter(X_train, y_train, color='#3a7ca5', s=30, zorder=3, label='Trainingsdaten')
+
+for d, color in zip([1, 3, 9, 15], ['#999999', '#2e8b57', '#d9a23a', '#d9534f']):
+    w = np.linalg.lstsq(make_features(X_train, d), y_train, rcond=None)[0]
+    ax.plot(x_plot, make_features(x_plot, d) @ w, color=color, label=f'Grad {d}')
+
+ax.set_ylim(-2, 2)
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_title("Polynom-Fits unterschiedlicher Grade")
+ax.legend(fontsize=8)
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Polynom-Fits unterschiedlicher Grade</div>
+            <p>
+              Grad 1 ist eine fast gerade Linie, die der sin-Kurve nicht folgen kann
+              (<strong>Underfitting</strong>). Grad 3 folgt der allgemeinen Wellenform gut.
+              Grad 9 und vor allem Grad 15 schlängeln sich exakt durch jeden Trainingspunkt —
+              mit wilden Ausschlägen zwischen den Punkten, die weit außerhalb des sinnvollen
+              Wertebereichs liegen (<strong>Overfitting</strong>).
+            </p>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button>
+        </div>
+      </div>
+
+      <!-- STUFE 5: Mit sklearn -->
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 5</span>
+          <h2 class="stufe-title">🚀 Overfitting mit sklearn diagnostizieren</h2>
+        </div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 1 — Daten erzeugen &amp; splitten</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+
+X, y = make_classification(
+    n_samples=300,
+    n_features=10,
+    n_informative=5,
+    random_state=42
+)
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.3,
+    random_state=42
+)
+
+print(f"X_train: {X_train.shape}, X_test: {X_test.shape}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>X_train: (210, 10), X_test: (90, 10)</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 2 — Validation Curve über max_depth</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import validation_curve
+
+depths = range(1, 21)
+train_scores, val_scores = validation_curve(
+    DecisionTreeClassifier(random_state=42),
+    X_train,
+    y_train,
+    param_name='max_depth',
+    param_range=depths,
+    cv=5,
+    scoring='accuracy'
+)
+
+print(f"{'max_depth':>10} | {'Train Acc':>10} | {'Val Acc':>10} | Diagnose")
+print("-" * 55)
+for d, tr, va in zip(depths,
+                     train_scores.mean(axis=1),
+                     val_scores.mean(axis=1)):
+    gap = tr - va
+    if gap > 0.1:
+        diag = "⚠️  Overfitting"
+    elif tr < 0.8:
+        diag = "📉 Underfitting"
+    else:
+        diag = "✅ OK"
+    print(f"{d:>10} | {tr:>10.2%} | {va:>10.2%} | {diag}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre> max_depth |  Train Acc |    Val Acc | Diagnose
+-------------------------------------------------------
+         1 |     75.24% |     74.29% | 📉 Underfitting
+         2 |     86.19% |     81.90% | ✅ OK
+         3 |     90.60% |     80.48% | ⚠️  Overfitting
+         4 |     93.57% |     76.67% | ⚠️  Overfitting
+         5 |     95.83% |     77.14% | ⚠️  Overfitting
+         6 |     97.86% |     78.10% | ⚠️  Overfitting
+         7 |     98.93% |     78.10% | ⚠️  Overfitting
+         8 |     99.52% |     78.10% | ⚠️  Overfitting
+         9 |     99.88% |     76.19% | ⚠️  Overfitting
+        10 |     99.88% |     75.71% | ⚠️  Overfitting
+        11 |    100.00% |     75.24% | ⚠️  Overfitting
+        12 |    100.00% |     75.24% | ⚠️  Overfitting
+        13 |    100.00% |     75.24% | ⚠️  Overfitting
+        14 |    100.00% |     75.24% | ⚠️  Overfitting
+        15 |    100.00% |     75.24% | ⚠️  Overfitting
+        16 |    100.00% |     75.24% | ⚠️  Overfitting
+        17 |    100.00% |     75.24% | ⚠️  Overfitting
+        18 |    100.00% |     75.24% | ⚠️  Overfitting
+        19 |    100.00% |     75.24% | ⚠️  Overfitting
+        20 |    100.00% |     75.24% | ⚠️  Overfitting</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 3 — Bestes max_depth wählen &amp; final testen</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import numpy as np
+
+best_depth = depths[np.argmax(val_scores.mean(axis=1))]
+print(f"Bestes max_depth: {best_depth}")
+
+final_model = DecisionTreeClassifier(
+    max_depth=best_depth,
+    random_state=42
+)
+final_model.fit(X_train, y_train)
+print(f"Test Accuracy: {final_model.score(X_test, y_test):.2%}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Bestes max_depth: 2
+Test Accuracy: 75.56%</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Validation Curve (Train vs. Val Accuracy)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (depths, train_scores, val_scores, best_depth)
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(5.5, 3.4))
+ax.plot(depths, train_scores.mean(axis=1), 'o-', color='#3a7ca5', label='Train Acc')
+ax.plot(depths, val_scores.mean(axis=1), 'o-', color='#2e8b57', label='Val Acc')
+ax.axvline(best_depth, color='#d9534f', linestyle='--', label=f'Sweet Spot (depth={best_depth})')
+ax.set_xlabel("max_depth")
+ax.set_ylabel("Accuracy")
+ax.set_title("Validation Curve: Train vs. Val Accuracy")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Validation Curve (Train vs. Val Accuracy)</div>
+            <p>
+              Die Train-Kurve steigt schnell auf 100% und bleibt dort. Die Val-Kurve
+              steigt zunächst (von 75% auf ~82% bei depth=2), fällt danach aber kontinuierlich
+              ab auf ~75%. Der <strong>Sweet Spot</strong> liegt genau am Maximum der
+              Val-Kurve — hier bei <code>max_depth=2</code>. Rechts davon öffnet sich eine
+              immer größere Lücke zwischen den Kurven = Overfitting.
+            </p>
+          </div>
+
+          <h3>Learning Curve mit sklearn</h3>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Python — Learning Curve</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.model_selection import learning_curve
+from sklearn.svm import SVC
+
+train_sizes, train_scores, val_scores = learning_curve(
+    SVC(kernel='rbf'),
+    X,
+    y,
+    train_sizes=np.linspace(0.1, 1.0, 10),
+    cv=5,
+    scoring='accuracy'
+)
+
+print("Trainings-Größe | Train Acc | Val Acc")
+for size, tr, va in zip(train_sizes,
+                        train_scores.mean(axis=1),
+                        val_scores.mean(axis=1)):
+    print(f"{int(size):>15} | {tr:.2%}   | {va:.2%}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Trainings-Größe | Train Acc | Val Acc
+             24 | 89.17%   | 73.67%
+             48 | 90.42%   | 79.67%
+             72 | 90.83%   | 83.67%
+             96 | 89.38%   | 86.00%
+            120 | 90.00%   | 86.00%
+            144 | 88.47%   | 85.67%
+            168 | 89.88%   | 86.00%
+            192 | 90.00%   | 86.67%
+            216 | 90.56%   | 86.67%
+            240 | 90.50%   | 87.00%</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Learning Curve</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (train_sizes, train_scores, val_scores)
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(5.5, 3.4))
+ax.plot(train_sizes, train_scores.mean(axis=1), 'o-', color='#3a7ca5', label='Train Acc')
+ax.plot(train_sizes, val_scores.mean(axis=1), 'o-', color='#2e8b57', label='Val Acc')
+ax.set_xlabel("Trainingsgröße")
+ax.set_ylabel("Accuracy")
+ax.set_title("Learning Curve")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Learning Curve</div>
+            <p>
+              Die Val-Accuracy steigt von 74% (bei 24 Samples) kontinuierlich auf 87%
+              (bei 240 Samples), während die Train-Accuracy stabil bei ~90% bleibt. Die
+              Lücke zwischen beiden Kurven schrumpft mit mehr Daten — ein klares Zeichen,
+              dass dieses Modell von <strong>mehr Trainingsdaten</strong> profitieren würde.
+              Wenn die Val-Kurve schon bei wenigen Samples ihr Plateau erreicht hätte,
+              würde mehr Daten nicht helfen.
+            </p>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button>
+        </div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T01-was-ist-ml.html" class="nav-arrow">
+          <div class="nav-arrow-icon">←</div>
+          <div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">🤖 Was ist ML?</div></div>
+        </a>
+        <a href="T03-bias-variance-tradeoff.html" class="nav-arrow next">
+          <div class="nav-arrow-icon">→</div>
+          <div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">⚖️ Bias-Variance Tradeoff</div></div>
+        </a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K2 · T2 · Overfitting &amp; Underfitting"></site-footer>
+
+  <script>
+    function copyCode(btn) {
+      const cell = btn.closest('.code-cell');
+      const code = cell.querySelector('code').textContent;
+      const out = cell.querySelector('.code-cell-output-body pre');
+      const text = out ? code + '\n\n# Ausgabe:\n' + out.textContent : code;
+      navigator.clipboard.writeText(text);
+      btn.textContent = 'Kopiert!';
+      setTimeout(() => btn.textContent = 'Kopieren', 2000);
+    }
+  </script>
+</body>
+</html>

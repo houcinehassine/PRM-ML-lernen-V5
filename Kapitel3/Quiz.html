@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz K3 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <site-header active="k3" title="Quiz K3 · SVM – PRM V5"></site-header>
+  <div class="layout">
+    <site-sidebar active="k3/quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K3 · Quiz · 20 Fragen</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🧠 Quiz: SVM &amp; Klassifikation</h1>
+        <p style="color:var(--color-text-muted)">Klicke auf eine Frage um die Antwort aufzudecken. Beantworte sie erst selbst!</p>
+      </section>
+
+      <section id="hyperebene-margin">
+        <h2>Hyperebene &amp; Margin</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q1</span> Was ist eine Hyperebene und wie lautet ihre allgemeine Gleichung?</summary>
+          <div class="frage-antwort">Eine Hyperebene in n Dimensionen ist eine (n-1)-dimensionale Fläche. Gleichung: <code>wᵀx + b = 0</code> — <strong>w</strong> ist der Normalenvektor (senkrecht zur Ebene), <strong>b</strong> der Bias-Term. In 2D ist es eine Gerade, in 3D eine Ebene.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q2</span> Was sind Support Vectors?</summary>
+          <div class="frage-antwort">Support Vectors sind die Datenpunkte, die direkt auf dem Rand des Margins liegen (wᵀxᵢ + b = ±1). Nur sie bestimmen die Hyperebene — alle anderen Punkte könnten entfernt werden, ohne das Modell zu ändern!</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q3</span> Wie groß ist der Margin einer SVM? Warum wird er maximiert?</summary>
+          <div class="frage-antwort">Margin-Breite = <code>2 / ||w||</code>. Maximaler Margin entspricht dem Minimieren von <code>||w||</code>. Ein großer Margin bedeutet Robustheit — neue Punkte können weiter von der Grenze abweichen, ohne falsch klassifiziert zu werden (bessere Generalisierung).</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q4</span> Wie klassifiziert eine SVM einen neuen Punkt x?</summary>
+          <div class="frage-antwort">
+            f(x) = sign(wᵀx + b)<br>
+            • wᵀx + b &gt; 0 → Klasse +1<br>
+            • wᵀx + b &lt; 0 → Klasse −1<br>
+            Der Abstand zur Hyperebene ist |wᵀx + b| / ||w||.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q5</span> Wie lautet das Optimierungsproblem der Hard-Margin SVM?</summary>
+          <div class="frage-antwort">
+            <strong>Minimiere:</strong> ½ · ||w||²<br>
+            <strong>unter:</strong> yᵢ · (wᵀxᵢ + b) ≥ 1  für alle i<br>
+            Die Bedingung stellt sicher, dass alle Punkte korrekt klassifiziert außerhalb der Margin-Zone liegen.
+          </div>
+        </details>
+      </section>
+
+      <section id="soft-margin-c-parameter">
+        <h2>Soft Margin &amp; C-Parameter</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q6</span> Warum braucht man Soft-Margin statt Hard-Margin?</summary>
+          <div class="frage-antwort">Reale Daten sind selten perfekt linear trennbar — es gibt Ausreißer, Rauschen und überlappende Klassen. Hard-Margin SVM hat keine Lösung wenn Daten nicht trennbar sind. Soft-Margin erlaubt Margin-Verletzungen durch Slack-Variablen ξᵢ ≥ 0.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q7</span> Was bedeutet ein kleines C vs. großes C?</summary>
+          <div class="frage-antwort">
+            <strong>Kleines C (z.B. 0.01):</strong> Viele Fehler erlaubt → breiter Margin → starke Regularisierung → Underfitting-Gefahr<br>
+            <strong>Großes C (z.B. 1000):</strong> Wenige Fehler → schmaler Margin → schwache Regularisierung → Overfitting-Gefahr<br>
+            C ist der Kehrwert der Regularisierungsstärke.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q8</span> Was ist der Hinge Loss?</summary>
+          <div class="frage-antwort">
+            <code>L = max(0, 1 − y · f(x))</code><br>
+            • Korrekt außerhalb Margin: Loss = 0<br>
+            • Korrekt im Margin: kleiner positiver Loss<br>
+            • Falsch klassifiziert: großer Loss<br>
+            Die SVM minimiert: ½||w||² + C · Σ max(0, 1 − yᵢfᵢ)
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q9</span> Was sind Slack-Variablen ξᵢ?</summary>
+          <div class="frage-antwort">ξᵢ misst das Ausmaß der Margin-Verletzung: ξᵢ=0 (korrekt, außerhalb), 0&lt;ξᵢ≤1 (korrekt, im Margin), ξᵢ&gt;1 (falsch klassifiziert). Die Summe Σξᵢ wird in der Zielfunktion mit Gewicht C bestraft.</div>
+        </details>
+      </section>
+
+      <section id="kernel-trick">
+        <h2>Kernel-Trick</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q10</span> Was ist die Grundidee des Kernel-Tricks?</summary>
+          <div class="frage-antwort">In der dualen SVM-Formulierung braucht man nur Skalarprodukte ⟨xᵢ, xⱼ⟩. Ein Kernel K(xᵢ, xⱼ) = ⟨φ(xᵢ), φ(xⱼ)⟩ berechnet das Skalarprodukt im höherdimensionalen Raum implizit — ohne φ(x) explizit auszurechnen. Man erhält nichtlineare Entscheidungsgrenzen bei linearer Rechenaufwand.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q11</span> Schreibe die Formel des RBF-Kernels und erkläre γ.</summary>
+          <div class="frage-antwort">
+            <code>K(x, z) = exp(−γ · ||x − z||²)</code><br>
+            γ steuert die "Reichweite" eines Support Vectors:<br>
+            • Kleines γ → weit → glatte Grenze → Underfitting<br>
+            • Großes γ → eng → gezackte Grenze → Overfitting<br>
+            Standard: <code>gamma='scale'</code> = 1/(n_features · Var(X))
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q12</span> Wann verwendest du 'linear' vs. 'rbf' Kernel?</summary>
+          <div class="frage-antwort">
+            <strong>Linear:</strong> Wenn n_features ≫ n_samples (z.B. Text-Klassifikation), wenn lineare Trennbarkeit wahrscheinlich ist, oder bei sehr großen Datensätzen (schneller).<br>
+            <strong>RBF:</strong> Standard-Wahl für unbekannte, nichtlineare Strukturen, mittelgroße Datensätze.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q13</span> Wie sieht die Vorhersagefunktion der Kernel-SVM aus?</summary>
+          <div class="frage-antwort">
+            <code>f(x) = sign(Σᵢ αᵢ · yᵢ · K(xᵢ, x) + b)</code><br>
+            Die Summe läuft nur über die Support Vectors (αᵢ &gt; 0). K(xᵢ, x) ist der Kernel zwischen dem i-ten Support Vector und dem Testpunkt.
+          </div>
+        </details>
+      </section>
+
+      <section id="svc-professionell">
+        <h2>SVC professionell</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q14</span> Warum muss man VOR der SVM zwingend skalieren?</summary>
+          <div class="frage-antwort">SVM basiert auf Distanzen und Skalarprodukten. Features mit großer Varianz dominieren die Berechnungen. StandardScaler stellt gleiche Wichtung aller Features sicher. Ohne Scaling kann die Accuracy drastisch schlechter sein.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q15</span> Wie suchst du C und gamma effizient?</summary>
+          <div class="frage-antwort">
+            Log-skaliert: C ∈ {0.001, 0.01, 0.1, 1, 10, 100, 1000}<br>
+            Gamma ∈ {0.001, 0.01, 0.1, 'scale', 'auto'}<br>
+            Mit GridSearchCV(cv=StratifiedKFold(5)) und Pipeline(Scaler + SVC).<br>
+            <strong>Wichtig:</strong> C und gamma zusammen suchen — sie interagieren!
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q16</span> Was ist One-vs-Rest (OvR) vs. One-vs-One (OvO)?</summary>
+          <div class="frage-antwort">
+            <strong>OvR:</strong> K Binär-Modelle (jede Klasse vs. alle anderen) → K Modelle<br>
+            <strong>OvO:</strong> Jedes Klassenpaar → K(K-1)/2 Modelle, Voting<br>
+            sklearn SVC nutzt intern OvO. Für K=3: 3 Modelle. Für K=10: 45 Modelle.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q17</span> Wann ist SVM eine schlechte Wahl?</summary>
+          <div class="frage-antwort">
+            ❌ Sehr große Datensätze (n &gt; 100k) — O(n²) bis O(n³) Komplexität<br>
+            ❌ Wenn Interpretierbarkeit nötig ist (Black Box)<br>
+            ❌ Sehr viele Klassen (OvO wird explosiv)<br>
+            ❌ Wenn Wahrscheinlichkeiten wichtig sind (kalibrierte Probs nur mit probability=True, langsam)
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q18</span> Was ist SVR? Welche Parameter hat es zusätzlich?</summary>
+          <div class="frage-antwort">SVR (Support Vector Regression) passt SVM für Regressionsprobleme an. Zusätzlicher Parameter: <code>epsilon</code> — Breite des ε-Schlauchs. Punkte innerhalb des Schlauchs erzeugen keinen Verlust. C bestraft Punkte außerhalb des Schlauchs.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q19</span> Was gibt <code>svm.decision_function(X)</code> zurück?</summary>
+          <div class="frage-antwort">Den vorzeichenbehafteten Abstand jedes Punkts zur Entscheidungshyperebene (skaliert auf den Margin). Positiv → Klasse +1, Negativ → Klasse −1. Der Betrag gibt die Konfidenz an — weiter von der Grenze = sicherer.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q20</span> Du trainierst eine SVM, aber die Konvergenz schlägt fehl (max_iter Warnung). Was tust du?</summary>
+          <div class="frage-antwort">
+            1. Daten skalieren (falls noch nicht: StandardScaler)<br>
+            2. max_iter erhöhen (z.B. 10000)<br>
+            3. C verkleinern (numerische Probleme bei sehr großem C)<br>
+            4. Bei sehr großen Daten: LinearSVC oder SGDClassifier(loss='hinge') statt SVC verwenden — diese skalieren besser.
+          </div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="T04-svc-sklearn.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Letztes Thema</div><div class="nav-arrow-title">🚀 SVC mit sklearn</div></div></a>
+        <a href="Uebung.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">✏️ Übungsaufgaben</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K3 · Quiz · PRM V5"></site-footer>
+</body>
+</html>

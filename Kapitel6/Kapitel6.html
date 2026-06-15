@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>K6 · GMM &amp; EM – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <site-header active="k6" title="K6 · GMM &amp; EM – PRM V5"></site-header>
+  <div class="layout">
+    <site-sidebar active=""></site-sidebar>
+    <main class="content" id="main-content">
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">Kapitel 6 · 4 Themen</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">GMM &amp; EM-Algorithmus</h1>
+        <p style="color:var(--color-text-muted)">Gaussian Mixture Models und der Expectation-Maximization Algorithmus — weiches Clustering mit Wahrscheinlichkeiten.</p>
+      </section>
+      <section>
+        <h2>Themen</h2>
+        <div style="display:grid;gap:var(--space-3);margin-top:var(--space-4)">
+          <a href="T01-gaussverteilung.html" style="text-decoration:none;color:inherit"><div style="padding:var(--space-4) var(--space-5);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);display:flex;align-items:center;gap:var(--space-4);transition:border-color .15s" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'"><span style="font-size:1.6rem">🔔</span><div><div style="font-weight:700;font-size:var(--text-sm)">T1: Gaußverteilung</div><div style="color:var(--color-text-muted);font-size:var(--text-xs);margin-top:2px">N(μ,σ²) · Multivariat · Kovarianz-Matrix</div></div><span style="margin-left:auto;color:var(--color-text-faint)">→</span></div></a>
+          <a href="T02-em-algorithmus.html" style="text-decoration:none;color:inherit"><div style="padding:var(--space-4) var(--space-5);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);display:flex;align-items:center;gap:var(--space-4);transition:border-color .15s" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'"><span style="font-size:1.6rem">🔄</span><div><div style="font-weight:700;font-size:var(--text-sm)">T2: EM-Algorithmus</div><div style="color:var(--color-text-muted);font-size:var(--text-xs);margin-top:2px">ELBO · Konvergenz · Lokale Maxima</div></div><span style="margin-left:auto;color:var(--color-text-faint)">→</span></div></a>
+          <a href="T03-e-step-m-step.html" style="text-decoration:none;color:inherit"><div style="padding:var(--space-4) var(--space-5);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);display:flex;align-items:center;gap:var(--space-4);transition:border-color .15s" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'"><span style="font-size:1.6rem">⚙️</span><div><div style="font-weight:700;font-size:var(--text-sm)">T3: E-Step &amp; M-Step</div><div style="color:var(--color-text-muted);font-size:var(--text-xs);margin-top:2px">Responsibilities · Analytische Parameter-Updates</div></div><span style="margin-left:auto;color:var(--color-text-faint)">→</span></div></a>
+          <a href="T04-gaussianmixture-sklearn.html" style="text-decoration:none;color:inherit"><div style="padding:var(--space-4) var(--space-5);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);display:flex;align-items:center;gap:var(--space-4);transition:border-color .15s" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'"><span style="font-size:1.6rem">🚀</span><div><div style="font-weight:700;font-size:var(--text-sm)">T4: GaussianMixture sklearn</div><div style="color:var(--color-text-muted);font-size:var(--text-xs);margin-top:2px">BIC/AIC · Anomalie-Detektion · Generatives Modell</div></div><span style="margin-left:auto;color:var(--color-text-faint)">→</span></div></a>
+          <a href="Quiz.html" style="text-decoration:none;color:inherit"><div style="padding:var(--space-4) var(--space-5);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);display:flex;align-items:center;gap:var(--space-4);transition:border-color .15s" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'"><span style="font-size:1.6rem">🧠</span><div><div style="font-weight:700;font-size:var(--text-sm)">Quiz · 20 Fragen</div><div style="color:var(--color-text-muted);font-size:var(--text-xs);margin-top:2px">Gaußverteilung · EM · GMM · sklearn</div></div><span style="margin-left:auto;color:var(--color-text-faint)">→</span></div></a>
+        </div>
+      </section>
+      <div class="nav-arrows">
+        <a href="../Kapitel5/Kapitel5.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges</div><div class="nav-arrow-title">5 · Random Forest</div></div></a>
+        <a href="../Kapitel7/Kapitel7.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes</div><div class="nav-arrow-title">7 · Evaluation</div></div></a>
+      </div>
+    </main>
+  </div>
+  <site-footer caption="K6 · GMM &amp; EM · PRM V5"></site-footer>
+</body>
+</html>

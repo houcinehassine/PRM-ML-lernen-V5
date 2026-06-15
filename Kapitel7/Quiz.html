@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz K7 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <site-header active="k7" title="Quiz K7 · Evaluation – PRM V5"></site-header>
+  <div class="layout">
+    <site-sidebar active="k7/quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K7 · Quiz · 21 Fragen</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🧠 Quiz: Evaluation</h1>
+        <p style="color:var(--color-text-muted)">Klicke auf eine Frage um die Antwort aufzudecken.</p>
+      </section>
+
+      <section id="confusion-matrix">
+        <h2>Confusion Matrix</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q1</span> Was ist ein False Positive (FP)?</summary><div class="frage-antwort">Ein FP ist ein Fall, den das Modell als positiv vorhersagt, der aber wirklich negativ ist. Beispiel Spam-Filter: legitime E-Mail als Spam markiert. FP-Rate = FP/(FP+TN) = 1 − Specificity.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q2</span> Was ist ein False Negative (FN)?</summary><div class="frage-antwort">Ein FN ist ein Fall, den das Modell als negativ vorhersagt, der aber wirklich positiv ist. Beispiel Krebserkennung: Patient hat Krebs, Modell sagt "gesund". FN-Rate = FN/(FN+TP) = 1 − Recall.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q3</span> Warum ist Accuracy bei unbalancierten Daten trügerisch?</summary><div class="frage-antwort">Bei 99% negativen Fällen: Modell "alles negativ" → Accuracy=99%, aber Recall=0% (kein Positiver erkannt). Accuracy misst nicht wie gut die seltene Klasse erkannt wird. Besser: F1, PR-AUC, oder klassenspezifische Metriken.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q4</span> Was misst der F1-Score?</summary><div class="frage-antwort">Harmonisches Mittel aus Precision und Recall: F1 = 2·P·R/(P+R). Bestraft extreme Ungleichgewichte — wenn Precision oder Recall 0 ist, ist F1=0. Gute Metrik bei Klassenunbalance.</div></details>
+      </section>
+
+      <section id="roc-auc">
+        <h2>ROC &amp; AUC</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q5</span> Was sind die Achsen der ROC-Kurve?</summary><div class="frage-antwort">X-Achse: FPR = FP/(FP+TN) = False Positive Rate. Y-Achse: TPR = TP/(TP+FN) = True Positive Rate = Recall. Idealer Punkt: (0,1) oben links. Diagonale = zufälliges Modell (AUC=0.5).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q6</span> Was bedeutet AUC = 0.85 intuitiv?</summary><div class="frage-antwort">Wenn man zufällig einen positiven und einen negativen Punkt wählt, sagt das Modell dem positiven Punkt zu 85% einen höheren Score. AUC = P(score(pos) > score(neg)). AUC ist threshold-unabhängig.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q7</span> Wann ist PR-AUC besser als ROC-AUC?</summary><div class="frage-antwort">Bei stark unbalancierten Daten (viele Negative, wenige Positive). ROC-AUC wird optimistisch weil TN den FPR stark beeinflusst. PR-AUC ist pessimistischer und realistischer für die seltene Klasse.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q8</span> Wie findet man den optimalen Threshold?</summary><div class="frage-antwort">Youden-Index: J = TPR − FPR maximieren → bestes Balance zwischen Sensitivity und Specificity. Oder: F1 über alle Thresholds maximieren. Oder: spezifische Anforderung (z.B. Recall ≥ 0.95 bei max. Precision).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q9</span> Wie berechnet man ROC-AUC bei mehr als 2 Klassen?</summary><div class="frage-antwort">Zwei Strategien: One-vs-Rest (OvR) — für jede Klasse eine "Klasse vs. Rest"-ROC-Kurve, dann macro- oder weighted-Mittel über k AUCs. One-vs-One (OvO) — eine ROC-Kurve pro Klassenpaar, gemittelt über k·(k−1)/2 Paare. In sklearn: roc_auc_score(y_true, y_proba, multi_class='ovr'|'ovo', average='macro'|'weighted'), wobei y_proba die volle predict_proba()-Matrix ist.</div></details>
+      </section>
+
+      <section id="precision-recall">
+        <h2>Precision &amp; Recall</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q10</span> Was passiert mit Precision und Recall wenn man den Threshold senkt?</summary><div class="frage-antwort">Threshold sinkt → Mehr Positive vorhergesagt → Recall steigt (mehr echte Positive gefunden), Precision sinkt (mehr FP). Das ist der Precision-Recall Tradeoff.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q11</span> Was ist der Fβ-Score und wann nutzt man β=2?</summary><div class="frage-antwort">Fβ = (1+β²)·P·R/(β²·P+R). Bei β=2 ist Recall doppelt so gewichtet wie Precision — nützlich wenn FN teurer als FP, z.B. Krebserkennung, Fraud Detection. Bei β=0.5 umgekehrt.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q12</span> Was ist Macro-F1 vs. Weighted-F1?</summary><div class="frage-antwort">Macro-F1: ungewichteter Mittelwert über alle Klassen — jede Klasse gleich wichtig, unabhängig von ihrer Größe. Weighted-F1: gewichtet nach Klassenanzahl — häufige Klassen haben mehr Einfluss. Bei Unbalance: Weighted kann Probleme verbergen.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q13</span> Was ist Average Precision (AP)?</summary><div class="frage-antwort">AP = AUC der Precision-Recall-Kurve. Berechnet als gewichtete Summe: AP = Σₙ (Recallₙ − Recallₙ₋₁)·Precisionₙ. In sklearn: average_precision_score(). Gut für Ranking-Qualität.</div></details>
+      </section>
+
+      <section id="cv-fehleranalyse">
+        <h2>CV &amp; Fehleranalyse</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q14</span> Was ist Data Leakage in CV und warum ist es gefährlich?</summary><div class="frage-antwort">Data Leakage: Information aus dem Test-Set fließt ins Training. Typischer Fehler: StandardScaler vor CV auf alle Daten fitten — Test-Statistiken beeinflussen Training. Lösung: Scaler in sklearn Pipeline, die innerhalb des CV-Loops refittet.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q15</span> Was zeigt eine Lernkurve (Learning Curve)?</summary><div class="frage-antwort">Train-Score und Validation-Score als Funktion der Trainings-Datenmenge. Große Lücke zwischen Train und Val → Overfitting (Variance). Beide konvergieren zu niedriger Wert → Underfitting (Bias). Wichtig: mit mehr Daten konvergieren beide.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q16</span> Was ist Nested Cross-Validation und warum braucht man es?</summary><div class="frage-antwort">Nested CV hat zwei Schleifen: äußere Schleife schätzt generalisierungs-Performance, innere Schleife sucht Hyperparameter. Verhindert, dass die CV-Performance zu optimistisch ist (weil Hyperparameter auf den Validation-Daten gewählt wurden).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q17</span> Was ist ein Bootstrap-Konfidenzintervall für AUC?</summary><div class="frage-antwort">B Bootstrap-Stichproben (mit Zurücklegen) vom Test-Set ziehen, für jede AUC berechnen, dann Perzentile nehmen: CI = [P2.5%, P97.5%]. Gibt Unsicherheits-Quantifizierung: "AUC = 0.93 [95%-CI: 0.89, 0.96]".</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q18</span> Warum sollte der finale Test-Datensatz nur einmal bewertet werden?</summary><div class="frage-antwort">Mehrfache Evaluation auf dem Test-Set ist indirektes Hyperparameter-Tuning — man wählt das Modell mit der besten Test-Performance. Das ist Data Leakage. Lösung: Konfiguration vor dem Test-Set einfrieren.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q19</span> Prüfungsfrage: Model A hat CV-F1 = 0.82 ± 0.08, Model B hat 0.81 ± 0.02. Welches wählt man?</summary><div class="frage-antwort">Model B: ähnliche mittlere Performance aber viel stabiler (niedrigere Standardabweichung). Instabilität (hohes Std) bedeutet Anfälligkeit für schlechte Splits — in der Praxis unzuverlässiger. Bei ähnlichem Mittelwert ist stabilere Lösung vorzuziehen.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q20</span> Was ist der DummyClassifier und wofür nutzt man ihn?</summary><div class="frage-antwort">Ein Baseline-Klassifikator der keine echten Muster lernt: 'stratified' wählt zufällig proportional zur Klassenverteilung, 'most_frequent' sagt immer die häufigste Klasse. Nützlich als untere Schranke — jedes trainierte Modell sollte besser als Dummy sein.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q21</span> Wie unterscheidet man Overfitting von Underfitting mit Cross-Validation?</summary><div class="frage-antwort">Train-Score >> Val-Score: Overfitting (High Variance) — Regularisierung, mehr Daten, einfacheres Modell. Train-Score ≈ Val-Score (beide niedrig): Underfitting (High Bias) — komplexeres Modell, mehr Features. Hohe CV-Std: instabiles Modell — stabileres Algorithmus oder mehr Daten.</div></details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="T04-cross-validation-eval.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Letztes Thema</div><div class="nav-arrow-title">🔄 CV &amp; Fehleranalyse</div></div></a>
+        <a href="Uebung.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">✏️ Übungsaufgaben</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K7 · Quiz · PRM V5"></site-footer>
+</body>
+</html>

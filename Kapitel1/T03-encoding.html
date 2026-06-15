@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Encoding – K1 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s}
+    .mark-btn:hover{border-color:var(--color-success);color:var(--color-success)}
+    .stufe-footer{margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end}
+  </style>
+</head>
+<body>
+  <site-header active="k1" title="Encoding – K1 · PRM V5"></site-header>
+  <script>
+    window.__lernpfadSteps__ = [
+      { id: 'einleitung', icon: '🎯', label: 'Einleitung',      cls: 'lp-ziel'     },
+      { id: 'label',      icon: '1️⃣', label: 'LabelEncoder',    cls: 'lp-scratch'  },
+      { id: 'ordinal',    icon: '2️⃣', label: 'OrdinalEncoder',  cls: 'lp-algo'     },
+      { id: 'onehot',     icon: '3️⃣', label: 'OneHotEncoder',   cls: 'lp-sklearn'  },
+      { id: 'vergleich',  icon: '⚖️', label: 'Vergleich',       cls: 'lp-vergleich'},
+    ];
+  </script>
+  <lern-pfad topic="k1/t03"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k1/t03"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K1 · Thema 3 von 5</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🔢 Encoding: Kategorien → Zahlen</h1>
+        <p style="color:var(--color-text-muted)">ML-Algorithmen rechnen mit Zahlen — aber Daten enthalten oft Text-Kategorien. Label-Encoding, Ordinal-Encoding und One-Hot-Encoding: wann was und warum.</p>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+           EINLEITUNG – ZIEL & KONTEXT
+      ════════════════════════════════════════ -->
+      <div class="stufe stufe-ziel" id="stufe-einleitung">
+        <div class="stufe-header"><span class="stufe-icon">🎯</span><div><div class="stufe-label">Einleitung</div><div class="stufe-title">Ziel &amp; Kontext</div></div></div>
+        <div class="stufe-body">
+          <h3>Das Problem: Kategoriale Variablen</h3>
+          <p>Du hast ein Feature <code>Farbe</code> mit Werten <code>["rot", "blau", "grün"]</code>. Ein Algorithmus wie SVM oder k-NN kann damit nicht rechnen — er braucht Zahlen. Encoding ist die Lösung.</p>
+          <div class="frage-box"><div class="frage-label">Die Kernfrage</div><p>Wie kodiere ich Kategorien in Zahlen, ohne dem Algorithmus falsche Ordnungen oder Abstände zu vermitteln?</p></div>
+          <p>Es gibt drei grundlegende Ansätze — und die Wahl des falschen kann das Modell systematisch falsche Zusammenhänge lernen lassen. Jede Methode wird im Folgenden komplett von <strong>Theorie bis sklearn</strong> durchgegangen:</p>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <h4 style="margin:0 0 var(--space-2);font-size:var(--text-sm);font-weight:700">🔢 1️⃣ Label-Encoding</h4>
+              <p style="font-size:var(--text-sm);margin:0">Für die <strong>Zielvariable y</strong> — jede Klasse bekommt eine Zahl. → <a href="#stufe-label">Zu Methode 1</a></p>
+            </div>
+            <div class="compare-card">
+              <h4 style="margin:0 0 var(--space-2);font-size:var(--text-sm);font-weight:700">📶 2️⃣ Ordinal-Encoding</h4>
+              <p style="font-size:var(--text-sm);margin:0">Für <strong>ordinale Features</strong> mit echter Reihenfolge (klein &lt; mittel &lt; groß). → <a href="#stufe-ordinal">Zu Methode 2</a></p>
+            </div>
+            <div class="compare-card">
+              <h4 style="margin:0 0 var(--space-2);font-size:var(--text-sm);font-weight:700">0️⃣1️⃣ 3️⃣ One-Hot-Encoding</h4>
+              <p style="font-size:var(--text-sm);margin:0">Für <strong>nominale Features</strong> ohne Ordnung (Farbe, Stadt). → <a href="#stufe-onehot">Zu Methode 3</a></p>
+            </div>
+          </div>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted)">Am Ende vergleichen wir alle drei direkt im Abschnitt <a href="#stufe-vergleich">Vergleich</a> und kombinieren sie mit einem <code>ColumnTransformer</code>.</p>
+          <div class="so-what"><div class="so-what-label">Lernziel</div><p>Du weißt, wann Label-, Ordinal- und One-Hot-Encoding verwendet wird, und kannst alle drei selbst implementieren und mit sklearn anwenden.</p></div>
+          <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="einleitung">○ Als erledigt markieren</button></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════
+           METHODE 1 – LABELENCODER
+      ════════════════════════════════════════ -->
+      <div class="methode-section" id="stufe-label">
+        <div class="methode-header">
+          <div class="methode-number">1</div>
+          <div class="methode-title">Label-Encoding (<code>LabelEncoder</code>)</div>
+        </div>
+        <p>Jeder Kategorie wird eine ganze Zahl zugewiesen — gedacht für die <strong>Zielvariable y</strong>.</p>
+        <nav class="method-pfad" aria-label="Schritte für LabelEncoder">
+          <a href="#label-theorie" class="mp-theorie">🧠 Theorie</a>
+          <a href="#label-algo" class="mp-algo">⚙️ Algorithmus</a>
+          <a href="#label-scratch" class="mp-scratch">🛠️ Von Scratch</a>
+          <a href="#label-sklearn" class="mp-sklearn">🚀 Mit sklearn</a>
+        </nav>
+
+        <!-- ── LabelEncoder: Theorie ── -->
+        <div class="stufe stufe-theorie" id="label-theorie">
+          <div class="stufe-header"><span class="stufe-icon">🧠</span><div><div class="stufe-label">Theorie</div><div class="stufe-title">Label-Encoding — Intuition</div></div></div>
+          <div class="stufe-body">
+            <p>Jeder Kategorie wird eine ganze Zahl zugewiesen: <code>rot → 0, blau → 1, grün → 2</code>.</p>
+            <table>
+              <thead><tr><th>Original</th><th>Label-Encoded</th></tr></thead>
+              <tbody><tr><td>rot</td><td>0</td></tr><tr><td>blau</td><td>1</td></tr><tr><td>grün</td><td>2</td></tr></tbody>
+            </table>
+            <div class="note note-warning"><div class="note-label">Problem: Künstliche Ordnung</div><p style="margin:0;font-size:var(--text-sm)">Label-Encoding suggeriert dem Algorithmus: <em>grün (2) &gt; blau (1) &gt; rot (0)</em> und <em>Abstand(rot,grün) = 2× Abstand(rot,blau)</em>. Bei Farben ist das sinnlos! Nur für die <strong>Zielvariable y</strong> (Klassen-Label) ist LabelEncoder korrekt.</p></div>
+            <div class="note"><div class="note-label">OrdinalEncoder vs. LabelEncoder</div><p style="margin:0;font-size:var(--text-sm)"><code>OrdinalEncoder</code> arbeitet auf Features (2D-Matrix X), <code>LabelEncoder</code> auf der Zielvariable (1D-Vektor y). Verwende <strong>niemals</strong> LabelEncoder für Features X — er hat keine Möglichkeit, die gewünschte Reihenfolge festzulegen.</p></div>
+            <div class="so-what"><div class="so-what-label">Merksatz</div><p>LabelEncoder = Mapping Kategorie → Zahl für y. Niemals für Features X verwenden, da die entstehende Ordnung/Abstände willkürlich sind.</p></div>
+          </div>
+        </div>
+
+        <!-- ── LabelEncoder: Algorithmus ── -->
+        <div class="stufe stufe-algo" id="label-algo">
+          <div class="stufe-header"><span class="stufe-icon">⚙️</span><div><div class="stufe-label">Algorithmus</div><div class="stufe-title">Label-Encoding — Schritt für Schritt</div></div></div>
+          <div class="stufe-body">
+            <div class="algo-steps">
+              <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Unique-Kategorien ermitteln (Fit)</strong><p>Sammle alle einzigartigen Werte und sortiere sie: <code>{"blau", "grün", "rot"}</code> → alphabetisch.</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>Mapping erstellen</strong><p>Index = Reihenfolge: <code>{"blau": 0, "grün": 1, "rot": 2}</code></p></div></div>
+              <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Werte ersetzen (Transform)</strong><p><code>["rot","blau","grün"] → [2, 0, 1]</code></p></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LabelEncoder: Von Scratch ── -->
+        <div class="stufe stufe-scratch" id="label-scratch">
+          <div class="stufe-header"><span class="stufe-icon">🛠️</span><div><div class="stufe-label">Von Scratch</div><div class="stufe-title">LabelEncoder selbst implementieren</div></div></div>
+          <div class="stufe-body">
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 1/2 — Klasse: LabelEncoder_Scratch (für y)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">import numpy as np
+
+class LabelEncoder_Scratch:
+    """Für Zielvariable y. Lernt Klassen und encodet/dekodet sie."""
+
+    def fit(self, y):
+        self.classes_ = np.unique(y)                         # Sortiert, eindeutig
+        self.mapping_ = {c: i for i, c in enumerate(self.classes_)}
+        self.inv_map_ = {i: c for c, i in self.mapping_.items()}
+        return self
+
+    def transform(self, y):
+        return np.array([self.mapping_[val] for val in y])
+
+    def fit_transform(self, y):
+        return self.fit(y).transform(y)
+
+    def inverse_transform(self, y_encoded):
+        return np.array([self.inv_map_[val] for val in y_encoded])
+</code></pre>
+            </div>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 2/2 — Test: LabelEncoder_Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">farben = np.array(["rot", "blau", "grün", "rot", "blau"])
+
+le = LabelEncoder_Scratch()
+encoded = le.fit_transform(farben)
+
+print("Label-Encoding (für y):")
+print(f"  {farben} → {encoded}")
+print(f"  Klassen: {le.classes_}")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>Label-Encoding (für y):
+  ['rot' 'blau' 'grün' 'rot' 'blau'] → [2 0 1 2 0]
+  Klassen: ['blau' 'grün' 'rot']</pre></div>
+              </div>
+            </div>
+
+            <div class="so-what"><div class="so-what-label">Einblick</div><p>Der Kern ist ein <strong>Dictionary-Mapping</strong>: Kategorie → Zahl, plus die Umkehrabbildung für <code>inverse_transform</code>. Genau dieses Muster taucht bei allen drei Encodern wieder auf.</p></div>
+          </div>
+        </div>
+
+        <!-- ── LabelEncoder: Mit sklearn ── -->
+        <div class="stufe stufe-sklearn" id="label-sklearn">
+          <div class="stufe-header"><span class="stufe-icon">🚀</span><div><div class="stufe-label">Mit sklearn</div><div class="stufe-title">LabelEncoder — professionell nutzen</div></div></div>
+          <div class="stufe-body">
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 LabelEncoder (für Zielvariable y)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">from sklearn.preprocessing import LabelEncoder
+import numpy as np
+
+y = np.array(["cat", "dog", "cat", "bird", "dog"])
+le = LabelEncoder()
+y_enc = le.fit_transform(y)
+print("LabelEncoder:")
+print(f"  {y} → {y_enc}")
+print(f"  Klassen: {le.classes_}")
+print(f"  Rück: {le.inverse_transform(y_enc)}")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>LabelEncoder:
+  ['cat' 'dog' 'cat' 'bird' 'dog'] → [1 2 1 0 2]
+  Klassen: ['bird' 'cat' 'dog']
+  Rück: ['cat' 'dog' 'cat' 'bird' 'dog']</pre></div>
+              </div>
+            </div>
+
+            <div class="so-what"><div class="so-what-label">Zusammenfassung</div><p><code>LabelEncoder</code> kodiert die Zielvariable y als ganze Zahlen 0..K-1 und kann mit <code>inverse_transform</code> zurückübersetzen. Für Features X: niemals LabelEncoder — stattdessen Methode 2 oder 3.</p></div>
+            <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="label">○ Methode als erledigt markieren</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════
+           METHODE 2 – ORDINALENCODER
+      ════════════════════════════════════════ -->
+      <div class="methode-section" id="stufe-ordinal">
+        <div class="methode-header">
+          <div class="methode-number">2</div>
+          <div class="methode-title">Ordinal-Encoding (<code>OrdinalEncoder</code>)</div>
+        </div>
+        <p>Ähnlich wie Label-Encoding, aber die Reihenfolge wird <strong>explizit festgelegt</strong> — für ordinale Features X wie Größe, Note oder Zufriedenheit.</p>
+        <nav class="method-pfad" aria-label="Schritte für OrdinalEncoder">
+          <a href="#ordinal-theorie" class="mp-theorie">🧠 Theorie</a>
+          <a href="#ordinal-algo" class="mp-algo">⚙️ Algorithmus</a>
+          <a href="#ordinal-scratch" class="mp-scratch">🛠️ Von Scratch</a>
+          <a href="#ordinal-sklearn" class="mp-sklearn">🚀 Mit sklearn</a>
+        </nav>
+
+        <!-- ── OrdinalEncoder: Theorie ── -->
+        <div class="stufe stufe-theorie" id="ordinal-theorie">
+          <div class="stufe-header"><span class="stufe-icon">🧠</span><div><div class="stufe-label">Theorie</div><div class="stufe-title">Ordinal-Encoding — Intuition</div></div></div>
+          <div class="stufe-body">
+            <table>
+              <thead><tr><th>Original</th><th>Ordinal-Encoded</th><th>Korrekt, weil</th></tr></thead>
+              <tbody>
+                <tr><td>klein</td><td>0</td><td rowspan="4" style="vertical-align:middle">klein &lt; mittel &lt; groß &lt; XL<br>Diese Ordnung existiert wirklich!</td></tr>
+                <tr><td>mittel</td><td>1</td></tr>
+                <tr><td>groß</td><td>2</td></tr>
+                <tr><td>XL</td><td>3</td></tr>
+              </tbody>
+            </table>
+            <div class="note"><div class="note-label">OrdinalEncoder vs. LabelEncoder</div><p style="margin:0;font-size:var(--text-sm)"><code>OrdinalEncoder</code> arbeitet auf Features (2D-Matrix X) und erlaubt eine <strong>explizit definierte</strong> Reihenfolge je Spalte — anders als <code>LabelEncoder</code>, der einfach alphabetisch sortiert.</p></div>
+            <div class="so-what"><div class="so-what-label">Merksatz</div><p>Ordinal-Encoding ist nur korrekt, wenn die numerische Ordnung der echten, inhaltlichen Ordnung entspricht (klein &lt; mittel &lt; groß &lt; XL).</p></div>
+          </div>
+        </div>
+
+        <!-- ── OrdinalEncoder: Algorithmus ── -->
+        <div class="stufe stufe-algo" id="ordinal-algo">
+          <div class="stufe-header"><span class="stufe-icon">⚙️</span><div><div class="stufe-label">Algorithmus</div><div class="stufe-title">Ordinal-Encoding — Schritt für Schritt</div></div></div>
+          <div class="stufe-body">
+            <div class="algo-steps">
+              <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Reihenfolge definieren (Fit)</strong><p>Explizite Liste: <code>["klein", "mittel", "groß", "XL"]</code>. Die Position bestimmt den Code.</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>Mapping erstellen</strong><p><code>{"klein": 0, "mittel": 1, "groß": 2, "XL": 3}</code></p></div></div>
+              <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Werte ersetzen (Transform)</strong><p><code>["groß","klein","XL"] → [2, 0, 3]</code> — die numerische Ordnung spiegelt die echte wider.</p></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── OrdinalEncoder: Von Scratch ── -->
+        <div class="stufe stufe-scratch" id="ordinal-scratch">
+          <div class="stufe-header"><span class="stufe-icon">🛠️</span><div><div class="stufe-label">Von Scratch</div><div class="stufe-title">OrdinalEncoder selbst implementieren</div></div></div>
+          <div class="stufe-body">
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 1/2 — Klasse: OrdinalEncoder_Scratch (für ordinale Features)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">class OrdinalEncoder_Scratch:
+    """Für ordinale Features X mit bekannter Reihenfolge."""
+
+    def __init__(self, categories):
+        # categories: Liste von Listen, eine pro Feature-Spalte.
+        # Die Reihenfolge bestimmt den Code (Index in der Liste).
+        self.categories = categories
+
+    def fit(self, X):
+        self.mappings_ = []
+        for i, cats in enumerate(self.categories):
+            self.mappings_.append({c: j for j, c in enumerate(cats)})
+        return self
+
+    def transform(self, X):
+        result = np.zeros(X.shape, dtype=float)
+        for i, m in enumerate(self.mappings_):
+            result[:, i] = [m[val] for val in X[:, i]]
+        return result
+
+    def fit_transform(self, X):
+        return self.fit(X).transform(X)
+</code></pre>
+            </div>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 2/2 — Test: OrdinalEncoder_Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">groesse = np.array([
+    ["groß"], ["klein"], ["XL"], ["mittel"], ["groß"]
+])
+
+oe = OrdinalEncoder_Scratch(
+    categories=[["klein", "mittel", "groß", "XL"]]
+)
+encoded_ord = oe.fit_transform(groesse)
+
+print("Ordinal-Encoding (für ordinales Feature):")
+print(f"  {groesse.flatten()} → {encoded_ord.flatten()}")
+print("  → klein=0 < mittel=1 < groß=2 < XL=3 ✓")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>Ordinal-Encoding (für ordinales Feature):
+  ['groß' 'klein' 'XL' 'mittel' 'groß'] → [2. 0. 3. 1. 2.]
+  → klein=0 < mittel=1 < groß=2 < XL=3 ✓</pre></div>
+              </div>
+            </div>
+
+            <div class="so-what"><div class="so-what-label">Einblick</div><p>Anders als bei <code>LabelEncoder_Scratch</code> kommt die Reihenfolge hier <strong>von außen</strong> (Parameter <code>categories</code>) — nicht aus alphabetischer Sortierung. Das ist der entscheidende Unterschied.</p></div>
+          </div>
+        </div>
+
+        <!-- ── OrdinalEncoder: Mit sklearn ── -->
+        <div class="stufe stufe-sklearn" id="ordinal-sklearn">
+          <div class="stufe-header"><span class="stufe-icon">🚀</span><div><div class="stufe-label">Mit sklearn</div><div class="stufe-title">OrdinalEncoder — professionell nutzen</div></div></div>
+          <div class="stufe-body">
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 OrdinalEncoder (für ordinale Features X)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">from sklearn.preprocessing import OrdinalEncoder
+import numpy as np
+
+groesse = np.array([["groß"], ["klein"], ["XL"], ["mittel"]])
+
+oe = OrdinalEncoder(
+    categories=[["klein", "mittel", "groß", "XL"]],  # Explizite Reihenfolge!
+    handle_unknown='use_encoded_value',  # Unbekannte Kategorien → NaN
+    unknown_value=np.nan
+)
+encoded_ord = oe.fit_transform(groesse)
+print("OrdinalEncoder:")
+print(f"  {groesse.flatten()} → {encoded_ord.flatten()}")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>OrdinalEncoder:
+  ['groß' 'klein' 'XL' 'mittel'] → [2. 0. 3. 1.]</pre></div>
+              </div>
+            </div>
+
+            <div class="note"><div class="note-label">handle_unknown</div><p style="margin:0;font-size:var(--text-sm)">Mit <code>handle_unknown='use_encoded_value', unknown_value=np.nan</code> werden unbekannte Kategorien (im Test, aber nicht im Training) zu <code>NaN</code> statt einen Fehler zu werfen.</p></div>
+
+            <div class="so-what"><div class="so-what-label">Zusammenfassung</div><p><code>OrdinalEncoder</code> kodiert Features X gemäß einer explizit definierten Reihenfolge. Wichtig: <code>categories</code> immer selbst angeben, sonst wird alphabetisch sortiert — das entspricht meist nicht der gewünschten Ordnung.</p></div>
+            <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ordinal">○ Methode als erledigt markieren</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════
+           METHODE 3 – ONEHOTENCODER
+      ════════════════════════════════════════ -->
+      <div class="methode-section" id="stufe-onehot">
+        <div class="methode-header">
+          <div class="methode-number">3</div>
+          <div class="methode-title">One-Hot-Encoding (<code>OneHotEncoder</code>)</div>
+        </div>
+        <p>Für jede Kategorie wird eine binäre Spalte erstellt (0 oder 1) — für <strong>nominale Features</strong> ohne Ordnung.</p>
+        <nav class="method-pfad" aria-label="Schritte für OneHotEncoder">
+          <a href="#onehot-theorie" class="mp-theorie">🧠 Theorie</a>
+          <a href="#onehot-algo" class="mp-algo">⚙️ Algorithmus</a>
+          <a href="#onehot-scratch" class="mp-scratch">🛠️ Von Scratch</a>
+          <a href="#onehot-sklearn" class="mp-sklearn">🚀 Mit sklearn</a>
+        </nav>
+
+        <!-- ── OneHotEncoder: Theorie ── -->
+        <div class="stufe stufe-theorie" id="onehot-theorie">
+          <div class="stufe-header"><span class="stufe-icon">🧠</span><div><div class="stufe-label">Theorie</div><div class="stufe-title">One-Hot-Encoding — Intuition</div></div></div>
+          <div class="stufe-body">
+            <p>Für jede Kategorie wird eine binäre Spalte erstellt (0 oder 1). Keine falsche Ordnung mehr.</p>
+            <table>
+              <thead><tr><th>Original</th><th>rot</th><th>blau</th><th>grün</th></tr></thead>
+              <tbody>
+                <tr><td>rot</td><td><strong>1</strong></td><td>0</td><td>0</td></tr>
+                <tr><td>blau</td><td>0</td><td><strong>1</strong></td><td>0</td></tr>
+                <tr><td>grün</td><td>0</td><td>0</td><td><strong>1</strong></td></tr>
+              </tbody>
+            </table>
+
+            <h3>Die Dummy-Variable-Trap (Multikollinearität)</h3>
+            <p>Bei 3 Kategorien sind nur 2 Spalten <em>unabhängig</em> — die dritte ergibt sich immer aus den anderen zwei (wenn rot=0 und blau=0, muss grün=1 sein). Diese Redundanz heißt <strong>Dummy-Variable-Trap</strong>.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin:var(--space-4) 0">
+              <div style="padding:var(--space-4);background:color-mix(in oklab,#ef4444 8%,var(--color-surface));border:1px solid color-mix(in oklab,#ef4444 25%,var(--color-border));border-radius:var(--radius-xl)">
+                <div style="font-weight:700;font-size:var(--text-xs);color:#ef4444;margin-bottom:var(--space-2)">❌ 3 Spalten (redundant)</div>
+                <code style="font-size:.75rem">rot=[1,0,0], blau=[0,1,0], grün=[0,0,1]</code><br>
+                <span style="font-size:.7rem;color:var(--color-text-muted)">Problem bei linearen Modellen (Singulärmatrix)</span>
+              </div>
+              <div style="padding:var(--space-4);background:color-mix(in oklab,var(--color-success) 8%,var(--color-surface));border:1px solid color-mix(in oklab,var(--color-success) 25%,var(--color-border));border-radius:var(--radius-xl)">
+                <div style="font-weight:700;font-size:var(--text-xs);color:var(--color-success);margin-bottom:var(--space-2)">✅ 2 Spalten (drop_first=True)</div>
+                <code style="font-size:.75rem">blau=[0,1,0], grün=[0,0,1]</code><br>
+                <span style="font-size:.7rem;color:var(--color-text-muted)">rot ist implizit: wenn blau=0 und grün=0</span>
+              </div>
+            </div>
+            <div class="note"><div class="note-label">Wann drop_first?</div><p style="margin:0;font-size:var(--text-sm)">Für <strong>lineare Modelle</strong> (Logistische Regression, Lineare Regression): <code>drop='first'</code> ist wichtig. Für <strong>Tree-based Modelle</strong> (RF, XGBoost): kein Unterschied. Für <strong>Interpretation</strong>: drop_first kann sinnvoll sein. Im Zweifel: beide ausprobieren.</p></div>
+
+            <div class="so-what"><div class="so-what-label">Bonus: Bag-of-Words für Text</div><p>Wenn eine Kategorie ein ganzer Text ist (z.B. Produktbeschreibung), funktioniert OHE nicht. <strong>Bag-of-Words</strong> zählt, wie oft jedes Wort im Text vorkommt — und erstellt einen Feature-Vektor der Länge |Vokabular|. <code>sklearn.feature_extraction.text.CountVectorizer</code> implementiert das. Achtung: Wortstellung geht verloren, und das Feature kann sehr hochdimensional werden.</p></div>
+          </div>
+        </div>
+
+        <!-- ── OneHotEncoder: Algorithmus ── -->
+        <div class="stufe stufe-algo" id="onehot-algo">
+          <div class="stufe-header"><span class="stufe-icon">⚙️</span><div><div class="stufe-label">Algorithmus</div><div class="stufe-title">One-Hot-Encoding — Schritt für Schritt</div></div></div>
+          <div class="stufe-body">
+            <div class="algo-steps">
+              <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Unique-Kategorien ermitteln (K Stück)</strong><p>Bestimme alle K einzigartigen Werte aus den Trainingsdaten.</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>K neue binäre Spalten erstellen</strong><p>Eine Spalte pro Kategorie, benannt nach der Kategorie.</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Jede Zeile kodieren</strong><p>Setze 1 in der Spalte der zutreffenden Kategorie, 0 in allen anderen.</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">4</div><div class="algo-step-body"><strong>Optional: erste Spalte droppen</strong><p>Zur Vermeidung der Dummy-Variable-Trap bei linearen Modellen: eine Spalte entfernen (sie ist redundant).</p></div></div>
+            </div>
+
+            <h3>Beispiel: OHE Schritt für Schritt</h3>
+            <table>
+              <thead><tr><th>Schritt</th><th>Ergebnis</th></tr></thead>
+              <tbody>
+                <tr><td>Trainingsdaten</td><td><code>["rot", "blau", "grün", "rot"]</code></td></tr>
+                <tr><td>Unique-Kategorien (K=3)</td><td><code>["blau", "grün", "rot"]</code> (alphabetisch)</td></tr>
+                <tr><td>Erstelle 3 Spalten</td><td>Spalten: blau, grün, rot</td></tr>
+                <tr><td>Enkodierung "rot"</td><td>[0, 0, 1]</td></tr>
+                <tr><td>Enkodierung "blau"</td><td>[1, 0, 0]</td></tr>
+                <tr><td>Enkodierung "grün"</td><td>[0, 1, 0]</td></tr>
+                <tr><td>Mit drop_first=True</td><td>Spalte "blau" entfernen → nur [grün, rot] bleiben</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── OneHotEncoder: Von Scratch ── -->
+        <div class="stufe stufe-scratch" id="onehot-scratch">
+          <div class="stufe-header"><span class="stufe-icon">🛠️</span><div><div class="stufe-label">Von Scratch</div><div class="stufe-title">OneHotEncoder selbst implementieren</div></div></div>
+          <div class="stufe-body">
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 1/2 — Klasse: OneHotEncoder_Scratch (für nominale Features)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">class OneHotEncoder_Scratch:
+    """Für nominale Features X ohne Reihenfolge."""
+
+    def fit(self, X_col):
+        self.categories_ = np.unique(X_col)
+        self.n_categories_ = len(self.categories_)
+        self.mapping_ = {c: i for i, c in enumerate(self.categories_)}
+        return self
+
+    def transform(self, X_col, drop_first=False):
+        n = len(X_col)
+        result = np.zeros((n, self.n_categories_), dtype=int)
+        for i, val in enumerate(X_col):
+            if val in self.mapping_:
+                result[i, self.mapping_[val]] = 1
+        if drop_first:
+            result = result[:, 1:]
+        return result
+
+    def fit_transform(self, X_col, drop_first=False):
+        return self.fit(X_col).transform(X_col, drop_first)
+</code></pre>
+            </div>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 2/2 — Test: OneHotEncoder_Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">farben = np.array(["rot", "blau", "grün", "rot", "blau"])
+
+ohe = OneHotEncoder_Scratch()
+oh_matrix = ohe.fit_transform(farben)
+
+print("One-Hot-Encoding (für nominales Feature):")
+print(f"  Kategorien: {ohe.categories_}")
+print(oh_matrix)
+
+print("\nMit drop_first=True:")
+oh_drop = ohe.transform(farben, drop_first=True)
+print(oh_drop)
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>One-Hot-Encoding (für nominales Feature):
+  Kategorien: ['blau' 'grün' 'rot']
+[[0 0 1]
+ [1 0 0]
+ [0 1 0]
+ [0 0 1]
+ [1 0 0]]
+
+Mit drop_first=True:
+[[0 1]
+ [0 0]
+ [1 0]
+ [0 1]
+ [0 0]]</pre></div>
+              </div>
+            </div>
+
+            <div class="vis-box">
+              <div class="vis-box-label">📊 Visualisierung — One-Hot-Matrix als Heatmap</div>
+              <p>
+                Die One-Hot-Matrix lässt sich auch als Heatmap zeichnen: jede Zeile ist ein Sample,
+                jede Spalte eine Kategorie. Genau eine "1" (helle Zelle) pro Zeile — der Rest ist 0.
+                So sieht man auf einen Blick, dass jedes Sample <strong>genau einer</strong> Kategorie
+                zugeordnet ist, ohne dass eine Kategorie "größer" als eine andere wäre.
+              </p>
+            </div>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: One-Hot-Matrix als Heatmap</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python"># baut auf der vorherigen Zelle auf (farben, ohe, oh_matrix)
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(4.5, 3.4))
+ax.imshow(oh_matrix, cmap='Blues', aspect='auto')
+
+ax.set_xticks(range(len(ohe.categories_)))
+ax.set_xticklabels(ohe.categories_)
+ax.set_yticks(range(len(farben)))
+ax.set_yticklabels(farben)
+
+for i in range(oh_matrix.shape[0]):
+    for j in range(oh_matrix.shape[1]):
+        ax.text(j, i, oh_matrix[i, j], ha='center', va='center')
+
+ax.set_title("One-Hot-Matrix (Zeile = Sample, Spalte = Kategorie)")
+plt.show()
+</code></pre>
+            </div>
+
+            <div class="so-what"><div class="so-what-label">Einblick</div><p>Anders als Label-/OrdinalEncoder erstellt OneHotEncoder eine <strong>neue binäre Spalte pro Kategorie</strong> statt einer einzigen Zahl. Das vermeidet jede künstliche Ordnung — kostet aber Dimensionen.</p></div>
+          </div>
+        </div>
+
+        <!-- ── OneHotEncoder: Mit sklearn ── -->
+        <div class="stufe stufe-sklearn" id="onehot-sklearn">
+          <div class="stufe-header"><span class="stufe-icon">🚀</span><div><div class="stufe-label">Mit sklearn</div><div class="stufe-title">OneHotEncoder — professionell nutzen</div></div></div>
+          <div class="stufe-body">
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 OneHotEncoder (für nominale Features X)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">from sklearn.preprocessing import OneHotEncoder
+import numpy as np
+
+farben = np.array([["rot"], ["blau"], ["grün"], ["rot"]])  # 2D-Array!
+
+ohe = OneHotEncoder(
+    drop='first',                   # Dummy-Variable-Trap vermeiden
+    sparse_output=False,            # Dense Array (numpy) statt Sparse
+    handle_unknown='ignore'         # Unbekannte Kategorie → alles 0
+)
+X_ohe = ohe.fit_transform(farben)
+print("OneHotEncoder:")
+print(f"  Kategorien: {ohe.categories_}")
+print(X_ohe)
+print(f"  Feature-Namen: {ohe.get_feature_names_out(['farbe'])}")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>OneHotEncoder:
+  Kategorien: [array(['blau', 'grün', 'rot'], dtype=object)]
+[[0. 1.]
+ [0. 0.]
+ [1. 0.]
+ [0. 1.]]
+  Feature-Namen: ['farbe_grün' 'farbe_rot']</pre></div>
+              </div>
+            </div>
+
+            <h3>pandas get_dummies (häufig in der Praxis)</h3>
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 pandas get_dummies — für schnelle Analyse</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">import pandas as pd
+
+df = pd.DataFrame({
+    'farbe': ['rot', 'blau', 'grün', 'rot', 'blau'],
+    'größe': ['S', 'M', 'L', 'M', 'S'],
+    'preis': [10.5, 20.0, 15.3, 11.0, 22.5]
+})
+
+# Nur kategoriale Spalten encoden
+df_encoded = pd.get_dummies(
+    df,
+    columns=['farbe', 'größe'],
+    drop_first=True
+)
+print(df_encoded)
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>   preis  farbe_grün  farbe_rot  größe_M  größe_S
+0   10.5       False       True    False    True
+1   20.0       False      False     True    False
+2   15.3        True      False    False    False
+3   11.0       False       True     True    False
+4   22.5       False      False    False     True</pre></div>
+              </div>
+            </div>
+
+            <div class="so-what"><div class="so-what-label">Zusammenfassung</div><p><code>OneHotEncoder</code> erstellt eine binäre Spalte pro Kategorie. Mit <code>drop='first'</code> wird die Dummy-Variable-Trap vermieden, mit <code>handle_unknown='ignore'</code> sind unbekannte Kategorien im Test kein Problem. <code>pd.get_dummies</code> ist die schnelle Variante für explorative Analysen.</p></div>
+            <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="onehot">○ Methode als erledigt markieren</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════
+           VERGLEICH
+      ════════════════════════════════════════ -->
+      <div class="stufe stufe-vergleich" id="stufe-vergleich">
+        <div class="stufe-header"><span class="stufe-icon">⚖️</span><div><div class="stufe-label">Vergleich</div><div class="stufe-title">LabelEncoder vs. OrdinalEncoder vs. OneHotEncoder</div></div></div>
+        <div class="stufe-body">
+          <h3>Entscheidungsbaum: Wann was?</h3>
+          <table>
+            <thead><tr><th>Kategorie-Typ</th><th>Beispiel</th><th>Methode</th></tr></thead>
+            <tbody>
+              <tr><td>Nominal (keine Ordnung)</td><td>Farbe, Stadt, Geschlecht</td><td>✅ One-Hot-Encoding</td></tr>
+              <tr><td>Ordinal (mit Ordnung)</td><td>klein/mittel/groß, Note 1–5</td><td>✅ OrdinalEncoder</td></tr>
+              <tr><td>Zielvariable y (Klassen)</td><td>Klasse 0/1/2</td><td>✅ LabelEncoder</td></tr>
+              <tr><td>Viele Kategorien (&gt;15)</td><td>Postleitzahl, Produkt-ID</td><td>⚠️ Target-Encoding oder Embeddings</td></tr>
+              <tr><td>Text (Wörter)</td><td>Produktbeschreibung, Tweet</td><td>⚠️ Bag-of-Words / TF-IDF (Bonus)</td></tr>
+            </tbody>
+          </table>
+
+          <h3>ColumnTransformer: Gemischte Daten (numerisch + kategorial)</h3>
+          <p>Datensatz mit drei unterschiedlichen Spaltentypen: Alter (numerisch), Farbe (nominal), Größe (ordinal) — alle drei Encoder kombiniert in einer Pipeline.</p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 1 — Daten anlegen</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+
+X_train = np.array([
+    [25, "rot",  "klein"],
+    [32, "blau", "groß"],
+    [28, "grün", "mittel"],
+    [45, "rot",  "XL"]
+], dtype=object)
+y_train = np.array([0, 1, 0, 1])
+
+X_test = np.array([
+    [30, "blau", "mittel"],
+    [50, "grün", "groß"]
+], dtype=object)
+
+print("X_train Spalten: Alter | Farbe | Größe")
+print(X_train)
+</code></pre>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 2 — ColumnTransformer: pro Spalte eine Transformation</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
+
+preprocessor = ColumnTransformer(transformers=[
+    ('num',     StandardScaler(),                                 [0]),  # Spalte 0: numerisch
+    ('nominal', OneHotEncoder(drop='first', sparse_output=False), [1]),  # Spalte 1: nominal
+    ('ordinal', OrdinalEncoder(categories=[["klein", "mittel", "groß", "XL"]]), [2]),  # Spalte 2: ordinal
+])
+
+X_transformed = preprocessor.fit_transform(X_train)
+print("Transformiert (Alter | blau | grün | Größe):")
+print(X_transformed.round(2))
+</code></pre>
+            <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body"><pre>Transformiert (Alter | blau | grün | Größe):
+[[-1.178  0.     1.     0.   ]
+ [ 0.     1.     0.     2.   ]
+ [-0.588  0.     0.     1.   ]
+ [ 1.765  0.     1.     3.   ]]</pre></div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 3 — Pipeline: Preprocessing + Modell</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+
+pipe = Pipeline([
+    ('prep', preprocessor),
+    ('clf', LogisticRegression(random_state=42))
+])
+
+pipe.fit(X_train, y_train)
+pred = pipe.predict(X_test)
+
+print("Vorhergesagte Klassen:", pred)
+</code></pre>
+            <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body"><pre>Vorhergesagte Klassen: [1 1]</pre></div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: transformierte Trainingsdaten</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf den vorherigen Zellen auf (X_transformed)
+import matplotlib.pyplot as plt
+
+spalten = ["Alter (skaliert)", "blau", "grün", "Größe (ordinal)"]
+
+fig, ax = plt.subplots(figsize=(5, 3.4))
+im = ax.imshow(X_transformed, cmap='coolwarm', aspect='auto')
+
+ax.set_xticks(range(len(spalten)))
+ax.set_xticklabels(spalten, rotation=20, ha='right')
+ax.set_yticks(range(len(X_transformed)))
+ax.set_yticklabels([f"Sample {i}" for i in range(len(X_transformed))])
+
+for i in range(X_transformed.shape[0]):
+    for j in range(X_transformed.shape[1]):
+        ax.text(j, i, round(X_transformed[i, j], 2), ha='center', va='center')
+
+ax.set_title("ColumnTransformer-Ergebnis (numerisch + One-Hot + ordinal)")
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="fallen-item"><span class="fallen-icon">⚠️</span><div><strong>LabelEncoder für Features X verwenden</strong><p>LabelEncoder ist nur für die Zielvariable y gedacht. Er bietet keine Möglichkeit, die Reihenfolge zu definieren.</p><div class="fallen-fix">✅ Features: <code>OrdinalEncoder</code> (ordinal) oder <code>OneHotEncoder</code> (nominal) · Zielvariable: <code>LabelEncoder</code></div></div></div>
+
+          <div class="fallen-item"><span class="fallen-icon">⚠️</span><div><strong>Unbekannte Kategorien in Testdaten</strong><p>Wenn im Test eine Kategorie auftaucht, die im Training nicht vorkam, wirft sklearn standardmäßig einen Fehler.</p><div class="fallen-fix">✅ OneHotEncoder: <code>handle_unknown='ignore'</code> → unbekannte Kategorie = alles 0. OrdinalEncoder: <code>handle_unknown='use_encoded_value', unknown_value=np.nan</code></div></div></div>
+
+          <div class="fallen-item"><span class="fallen-icon">⚠️</span><div><strong>chi2-Test mit negativen Werten</strong><p>Die Score-Funktion <code>chi2</code> in SelectKBest erwartet nicht-negative Werte (X ≥ 0). Nach One-Hot-Encoding ist das erfüllt. Aber nach einem StandardScaler (der negative Werte erzeugt) nicht!</p><div class="fallen-fix">✅ Reihenfolge bei chi2: Encoding → SelectKBest(chi2). Nicht: StandardScaler → SelectKBest(chi2).</div></div></div>
+
+          <div class="so-what"><div class="so-what-label">Zusammenfassung</div><p>Drei Encoder für drei Situationen: <strong>LabelEncoder</strong> für Zielvariable y, <strong>OrdinalEncoder</strong> für Features mit echter Reihenfolge, <strong>OneHotEncoder</strong> für nominale Features ohne Reihenfolge. <code>ColumnTransformer</code> kombiniert alle in einer einzigen sauberen Pipeline.</p></div>
+          <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="vergleich">○ Als erledigt markieren</button></div>
+        </div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T02-normalisierung.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">📏 Normalisierung</div></div></a>
+        <a href="T04-feature-scaling.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">⚖️ Feature Scaling</div></div></a>
+      </div>
+    </main>
+  </div>
+  <site-footer caption="K1 · Thema 3: Encoding · PRM V5"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text).then(()=>{btn.textContent='✓ Kopiert!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Kopieren';btn.classList.remove('copied')},2000)})}  </script>
+</body>
+</html>

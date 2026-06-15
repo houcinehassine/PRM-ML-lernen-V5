@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Übungsaufgaben K5 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .uebung{
+      border:1px solid var(--color-border);border-radius:var(--radius-xl);
+      background:var(--color-surface);box-shadow:var(--shadow-sm);
+      padding:var(--space-5);margin-bottom:var(--space-6);scroll-margin-top:90px;
+    }
+    .uebung-head{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-2)}
+    .uebung-num{
+      width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+      background:var(--color-primary);color:#fff;font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    .uebung-head h2{margin:0;font-size:var(--text-lg)}
+    .uebung-diff{margin-left:auto;font-size:var(--text-xs);font-weight:700;letter-spacing:.05em;
+      padding:.15rem .6rem;border-radius:var(--radius-full);
+      background:var(--color-surface-2);color:var(--color-text-muted)}
+    .uebung-diff.d1{color:#15803d;background:color-mix(in oklab,#16a34a 12%,var(--color-surface-2))}
+    .uebung-diff.d2{color:#b45309;background:color-mix(in oklab,#d97706 12%,var(--color-surface-2))}
+    .uebung-diff.d3{color:#b91c1c;background:color-mix(in oklab,#dc2626 12%,var(--color-surface-2))}
+    .uebung-aufgabe{font-size:var(--text-sm);line-height:1.7;margin-bottom:var(--space-3)}
+    .uebung-aufgabe ul{margin:var(--space-2) 0 0;padding-left:1.4em}
+    .uebung-aufgabe li{margin-bottom:.3em}
+
+    /* ─── Musterlösung (einklappbar) ─────────────────────── */
+    details.loesung{
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      background:var(--color-surface-2);margin-top:var(--space-3);overflow:hidden;
+    }
+    details.loesung summary{
+      cursor:pointer;padding:var(--space-3) var(--space-4);font-weight:700;font-size:var(--text-sm);
+      display:flex;align-items:center;gap:var(--space-3);list-style:none;user-select:none;transition:background .15s;
+      color:var(--color-primary);
+    }
+    details.loesung summary::-webkit-details-marker{display:none}
+    details.loesung summary::before{content:'▶';font-size:.7rem;transition:transform .2s;flex-shrink:0}
+    details.loesung[open] summary::before{transform:rotate(90deg)}
+    details.loesung summary:hover{background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))}
+    details.loesung[open]{border-color:color-mix(in oklab,var(--color-primary) 30%,var(--color-border))}
+    .loesung-body{padding:0 var(--space-4) var(--space-4)}
+    .loesung-body p{font-size:var(--text-sm);line-height:1.7}
+    .loesung-body .code-cell{margin-top:var(--space-3)}
+
+    /* ─── Freier Code-Bereich: live im Browser ausführen (Pyodide) ─── */
+    .playground{
+      margin-top:var(--space-4);padding-top:var(--space-4);
+      border-top:1px dashed var(--color-border);
+    }
+    .playground-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);display:flex;align-items:center;gap:var(--space-2);
+    }
+    .code-exercise{margin-top:var(--space-2)}
+    .code-input{
+      width:100%;min-height:160px;box-sizing:border-box;
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      padding:var(--space-4);border-radius:var(--radius-lg);
+      border:1px solid var(--color-border);background:var(--color-surface-offset);
+      color:var(--color-text);resize:vertical;tab-size:4;white-space:pre;
+    }
+    .code-input:focus{outline:2px solid var(--color-primary);outline-offset:-1px}
+    .code-exercise-toolbar{display:flex;align-items:center;gap:var(--space-3);margin-top:var(--space-2);flex-wrap:wrap}
+    .run-btn{
+      background:var(--color-primary);color:#fff;border:none;
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-btn:hover{filter:brightness(1.07)}
+    .run-btn:disabled{opacity:.6;cursor:wait}
+    .reset-btn{
+      background:var(--color-surface-2);color:var(--color-text-muted);
+      border:1px solid var(--color-border);
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-status{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .code-output{
+      margin-top:var(--space-2);min-height:2.6em;
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      border-radius:var(--radius-lg);padding:var(--space-4);
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      color:var(--color-text);white-space:pre-wrap;word-break:break-word;
+    }
+    .code-output.has-error{
+      color:#b91c1c;border-color:color-mix(in oklab,#dc2626 30%,var(--color-border));
+      background:color-mix(in oklab,#dc2626 6%,var(--color-surface-2));
+    }
+    .erwartete-ausgabe{margin-top:var(--space-3)}
+
+    /* ─── Plots: live (Pyodide) & statisch (vorgerendert) ─── */
+    .code-output-plot{margin-top:var(--space-2)}
+    .code-output-plot-img,
+    .erwartete-ausgabe img,
+    .loesung-body img{
+      max-width:100%;height:auto;display:block;margin-top:var(--space-2);
+      border-radius:var(--radius-lg);border:1px solid var(--color-border);
+    }
+    .loesung-extra{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border)}
+    .loesung-extra-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k5" title="Übungsaufgaben K5 · Random Forest – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="k5/uebung"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">K5 · Übungsaufgaben · 6 Aufgaben</span>
+            <h1>Selbst <span class="key" style="--key-color:var(--color-primary)">programmieren</span></h1>
+            <p>
+              Lies die Aufgabenstellung und vergleiche dein Ziel mit der <strong>„Erwarteten Ausgabe“</strong>.
+              Schreibe deine Lösung dann selbst im <strong>freien Code-Bereich</strong>,
+              der per Klick auf <strong>„▶ Code ausführen“</strong> echtes Python (Pyodide, inkl. numpy/pandas/scikit-learn)
+              im Browser ausführt. Erst danach die Musterlösung aufklappen.
+              Alle Aufgaben arbeiten mit dem <code>iris</code>-Datensatz (150 Samples, 4 Features, 3 Klassen).
+            </p>
+            <div class="pill-row">
+              <span class="pill">Erwartete Ausgabe</span>
+              <span class="pill">Freier Bereich · live ausführen</span>
+              <span class="pill">Musterlösung einklappbar</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">So funktioniert's</h2>
+            <p>
+              1. Lies die Aufgabenstellung &amp; die „Erwartete Ausgabe“.<br>
+              2. Schreibe deine Lösung in den <strong>freien Code-Bereich</strong> (Setup ist schon vorhanden).<br>
+              3. Klicke auf <strong>„▶ Code ausführen“</strong> — beim ersten Mal lädt Pyodide (10-20 Sek.).<br>
+              4. Vergleiche deine Ausgabe mit der „Erwarteten Ausgabe“.<br>
+              5. Klicke auf <strong>„💡 Musterlösung anzeigen“</strong> nur wenn du nicht weiterkommst.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 1 ═══════════════ -->
+      <section id="uebung-1" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">1</span>
+          <h2>🌳 Entscheidungsbaum: Tiefe & Blätter</h2>
+          <span class="uebung-diff d1">Leicht</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Trainiere einen <code>DecisionTreeClassifier</code> ohne Tiefenbegrenzung und untersuche seine Struktur.</p>
+          <ul>
+            <li>Trainiere <code>DecisionTreeClassifier(random_state=42)</code> auf <code>X_train, y_train</code>.</li>
+            <li>Gib die Test-Accuracy aus (3 Nachkommastellen).</li>
+            <li>Gib die tatsächliche Tiefe (<code>get_depth()</code>) und die Anzahl Blätter (<code>get_n_leaves()</code>) aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Test-Accuracy: 0.933
+Tree depth: 5
+Leaves: 8</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+from sklearn.tree import DecisionTreeClassifier
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Ohne <code>max_depth</code> wächst der Baum, bis alle Blätter „rein“ sind (nur noch eine Klasse
+              enthalten) oder zu wenige Samples für einen weiteren Split übrig sind. Hier entstehen <strong>8 Blätter</strong>
+              bei einer Tiefe von <strong>5</strong> — ein einzelner Baum ist sehr flexibel, aber auch anfällig
+              für Overfitting auf einzelne Trainingsbeispiele.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.tree import DecisionTreeClassifier
+
+tree = DecisionTreeClassifier(random_state=42)
+tree.fit(X_train, y_train)
+
+print("Test-Accuracy:", round(tree.score(X_test, y_test), 3))
+print("Tree depth:", tree.get_depth())
+print("Leaves:", tree.get_n_leaves())</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Test-Accuracy: 0.933
+Tree depth: 5
+Leaves: 8</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 2 ═══════════════ -->
+      <section id="uebung-2" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">2</span>
+          <h2>🎒 Bagging: viele Bäume aus Bootstrap-Samples</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Vergleiche einen einzelnen Entscheidungsbaum mit einem <code>BaggingClassifier</code> aus 50 Bäumen.</p>
+          <ul>
+            <li>Trainiere <code>DecisionTreeClassifier(random_state=42)</code> (Single Tree).</li>
+            <li>Trainiere <code>BaggingClassifier(DecisionTreeClassifier(), n_estimators=50, random_state=42)</code>.</li>
+            <li>Gib die Test-Accuracy beider Modelle aus (3 Nachkommastellen).</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Single Tree: 0.933
+Bagging (50 trees): 0.967</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import BaggingClassifier
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <strong>Bagging</strong> (Bootstrap Aggregating) trainiert viele Bäume auf zufälligen Stichproben
+              <em>mit Zurücklegen</em> aus den Trainingsdaten und mittelt am Ende über alle Vorhersagen
+              (Mehrheitsentscheid). Da einzelne Bäume stark auf zufällige Trainingsdaten reagieren (hohe Varianz),
+              gleicht das Mitteln viele dieser Fehler aus — die Bagging-Ensemble-Accuracy ist hier etwas höher als
+              die des einzelnen Baums.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import BaggingClassifier
+
+tree = DecisionTreeClassifier(random_state=42)
+tree.fit(X_train, y_train)
+
+bag = BaggingClassifier(DecisionTreeClassifier(), n_estimators=50, random_state=42)
+bag.fit(X_train, y_train)
+
+print("Single Tree:", round(tree.score(X_test, y_test), 3))
+print("Bagging (50 trees):", round(bag.score(X_test, y_test), 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Single Tree: 0.933
+Bagging (50 trees): 0.967</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 3 ═══════════════ -->
+      <section id="uebung-3" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">3</span>
+          <h2>🌲 Random Forest: Train- vs. Test-Accuracy</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Trainiere einen <code>RandomForestClassifier</code> mit 100 Bäumen.</p>
+          <ul>
+            <li>Erstelle <code>RandomForestClassifier(n_estimators=100, random_state=42)</code> und fitte ihn auf <code>X_train, y_train</code>.</li>
+            <li>Gib Train- und Test-Accuracy aus (3 Nachkommastellen).</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Train: 1.0
+Test: 0.9</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+from sklearn.ensemble import RandomForestClassifier
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Ein Random Forest besteht aus vielen Bäumen, die zusätzlich zum Bootstrap-Sampling bei jedem Split
+              nur eine <strong>zufällige Teilmenge der Features</strong> betrachten — das macht die einzelnen
+              Bäume weniger korreliert als bei reinem Bagging. Train-Accuracy ist (wie bei einem einzelnen
+              ungebremsten Baum) bei 1.0, da jeder Baum die Trainingsdaten perfekt auswendig lernt. Wichtig ist
+              der Vergleich auf <strong>neuen</strong> Daten (Test-Accuracy) — auf dem kleinen, einfachen
+              Iris-Datensatz bringt der Random Forest hier keinen großen Vorteil gegenüber einem einzelnen Baum,
+              sein eigentlicher Nutzen zeigt sich vor allem auf größeren, „rauschigeren“ Datensätzen.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.ensemble import RandomForestClassifier
+
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+
+print("Train:", round(rf.score(X_train, y_train), 3))
+print("Test:", round(rf.score(X_test, y_test), 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Train: 1.0
+Test: 0.9</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 4 ═══════════════ -->
+      <section id="uebung-4" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">4</span>
+          <h2>📊 Feature Importance des Random Forest</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Bestimme, welche der 4 Iris-Features für den Random Forest am wichtigsten sind.</p>
+          <ul>
+            <li>Trainiere wie in Aufgabe 3 <code>RandomForestClassifier(n_estimators=100, random_state=42)</code>.</li>
+            <li>Iteriere über <code>feature_names</code> und <code>rf.feature_importances_</code> und gib für jedes Feature den Wert aus (3 Nachkommastellen).</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>sepal_length: 0.116
+sepal_width: 0.015
+petal_length: 0.431
+petal_width: 0.437</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+from sklearn.ensemble import RandomForestClassifier
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>feature_importances_</code> misst, wie stark jedes Feature im Durchschnitt über alle Bäume
+              zur Reduktion der Unreinheit (Gini) beigetragen hat. <code>petal_length</code> und
+              <code>petal_width</code> dominieren mit zusammen <strong>87%</strong> — das deckt sich mit dem
+              biologischen Wissen, dass die Blütenblattgröße die Iris-Arten am stärksten unterscheidet, während
+              <code>sepal_width</code> kaum Information beiträgt.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.ensemble import RandomForestClassifier
+
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+
+for name, imp in zip(feature_names, rf.feature_importances_):
+    print(f"{name}: {imp:.3f}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>sepal_length: 0.116
+sepal_width: 0.015
+petal_length: 0.431
+petal_width: 0.437</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 5 ═══════════════ -->
+      <section id="uebung-5" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">5</span>
+          <h2>🚀 Boosting: Train-Accuracy über die Stufen</h2>
+          <span class="uebung-diff d3">Schwer</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Untersuche, wie sich Train- und Test-Accuracy von <code>GradientBoostingClassifier</code> mit wachsender Anzahl Bäume verändern.</p>
+          <ul>
+            <li>Trainiere für <code>n_estimators in [1, 5, 20, 100]</code> jeweils ein <code>GradientBoostingClassifier(n_estimators=n, random_state=42)</code>.</li>
+            <li>Gib für jedes <code>n_estimators</code> Train- und Test-Accuracy aus (3 Nachkommastellen).</li>
+            <li>Wie verändert sich die Lücke zwischen Train- und Test-Accuracy?</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>n_estimators=1: train=0.992 test=0.967
+n_estimators=5: train=0.992 test=0.967
+n_estimators=20: train=1.000 test=0.967
+n_estimators=100: train=1.000 test=0.967</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+from sklearn.ensemble import GradientBoostingClassifier
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Boosting baut Bäume <strong>sequenziell</strong>: jeder neue Baum korrigiert die Fehler (Residuen)
+              der bisherigen Ensemble-Vorhersage. Mit mehr Bäumen sinkt der Trainingsfehler kontinuierlich
+              (Train-Accuracy steigt von 0.992 auf 1.0), während die Test-Accuracy bereits ab <code>n_estimators=1</code>
+              ihr Plateau bei 0.967 erreicht hat. Das zeigt: zusätzliche Bäume verbessern hier nur noch die
+              Anpassung an die Trainingsdaten, ohne die Generalisierung zu verbessern — ein Hinweis darauf,
+              dass zu viele Boosting-Stufen zu Overfitting führen können.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.ensemble import GradientBoostingClassifier
+
+for n in [1, 5, 20, 100]:
+    gb = GradientBoostingClassifier(n_estimators=n, random_state=42)
+    gb.fit(X_train, y_train)
+    print(f"n_estimators={n}: train={gb.score(X_train,y_train):.3f} "
+          f"test={gb.score(X_test,y_test):.3f}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>n_estimators=1: train=0.992 test=0.967
+n_estimators=5: train=0.992 test=0.967
+n_estimators=20: train=1.000 test=0.967
+n_estimators=100: train=1.000 test=0.967</pre>
+                  
+                </div>
+              </div>
+            </div>
+        <div class="loesung-extra">
+          <div class="loesung-extra-label">📊 Erweiterung: Visualisierung</div>
+          <p>
+              Im Plot sieht man sehr schön, wie die <strong>Train-Accuracy</strong> (blau) langsam von
+              0.992 auf 1.0 steigt, während die <strong>Test-Accuracy</strong> (orange) von Anfang an bei
+              0.967 ein Plateau bildet und nicht weiter ansteigt. Die kleine, aber wachsende Lücke zwischen
+              beiden Linien ist der Beginn von Overfitting — zusätzliche Boosting-Stufen bringen ab einem
+              bestimmten Punkt keinen Nutzen mehr für neue Daten.
+          </p>
+          <div class="code-cell">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Python — Visualisierung</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import matplotlib.pyplot as plt
+
+ns = [1, 5, 20, 100]
+train_acc, test_acc = [], []
+for n in ns:
+    gb = GradientBoostingClassifier(n_estimators=n, random_state=42)
+    gb.fit(X_train, y_train)
+    train_acc.append(gb.score(X_train, y_train))
+    test_acc.append(gb.score(X_test, y_test))
+
+plt.plot(ns, train_acc, marker='o', label='Train-Accuracy')
+plt.plot(ns, test_acc, marker='o', label='Test-Accuracy')
+plt.xlabel("n_estimators"); plt.ylabel("Accuracy")
+plt.title("Gradient Boosting: Train vs. Test")
+plt.legend()
+plt.show()</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <img src="../assets/img/uebung/k5-ex5-boosting-curve.png" alt="Linienplot: Train-Accuracy steigt leicht auf 1.0, Test-Accuracy bleibt bei 0.967 stabil">
+              </div>
+            </div>
+          </div>
+        </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 6 ═══════════════ -->
+      <section id="uebung-6" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">6</span>
+          <h2>📊 Feature Importance als Balkendiagramm</h2>
+          <span class="uebung-diff d1">Leicht</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Stelle die <code>feature_importances_</code> des Random Forest aus Aufgabe 4 als horizontales Balkendiagramm dar.</p>
+          <ul>
+            <li>Trainiere wie in Aufgabe 3/4 <code>RandomForestClassifier(n_estimators=100, random_state=42)</code>.</li>
+            <li>Nutze <code>plt.barh(feature_names, rf.feature_importances_)</code> für ein horizontales Balkendiagramm.</li>
+            <li>Beschrifte die x-Achse mit „Importance“ und gib dem Plot einen Titel.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Ein horizontales Balkendiagramm mit 4 Balken (einer pro Feature).
+petal_length und petal_width haben die längsten Balken (~0.43),
+sepal_width den kürzesten (~0.02).</pre>
+            <img src="../assets/img/uebung/k5-ex6-feature-importance.png" alt="Balkendiagramm: petal_length und petal_width mit der höchsten Importance, sepal_width am niedrigsten">
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+feature_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+from sklearn.ensemble import RandomForestClassifier
+import matplotlib.pyplot as plt
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Der Balkenplot übersetzt die Zahlen aus Aufgabe 4 direkt in ein Bild: <code>petal_length</code>
+              und <code>petal_width</code> haben mit Abstand die längsten Balken (zusammen ~87% der
+              Gesamt-Importance), <code>sepal_width</code> den kürzesten. Solche Plots sind in der Praxis
+              oft der erste Schritt, um zu entscheiden, welche Features man überhaupt behalten möchte
+              (Feature Selection) oder welche Messungen man bei neuen Daten priorisieren sollte.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.ensemble import RandomForestClassifier
+import matplotlib.pyplot as plt
+
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+
+plt.barh(feature_names, rf.feature_importances_, color='#4f7cff')
+plt.xlabel("Importance")
+plt.title("Random Forest Feature Importance")
+plt.show()</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre></pre>
+                  <img src="../assets/img/uebung/k5-ex6-feature-importance.png" alt="Balkendiagramm: petal_length und petal_width mit der höchsten Importance, sepal_width am niedrigsten">
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="Quiz.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Zurück</div><div class="nav-arrow-title">🧠 Quiz</div></div></a>
+        <a href="../Kapitel6/Kapitel6.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">6 · GMM & EM</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K5 · Übungsaufgaben · PRM V5"></site-footer>
+</body>
+</html>

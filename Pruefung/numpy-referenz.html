@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NumPy-Referenz – PRM V5</title>
+  <meta name="description" content="Die wichtigsten NumPy-Befehle und Funktionen für ML-Aufgaben: Arrays, Indexing, Aggregation, lineare Algebra, Broadcasting, Zufallszahlen."/>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-6) var(--space-4) 0;text-align:center}
+    .pruef-hero h1{font-family:var(--font-display);font-size:var(--text-xl);margin-bottom:var(--space-2)}
+    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:64ch;margin:0 auto}
+    .pruef-section{max-width:1120px;margin:0 auto var(--space-10);padding:0 var(--space-4)}
+    .pruef-section h2{
+      display:flex;align-items:center;gap:var(--space-3);
+      margin-bottom:var(--space-4);padding-bottom:var(--space-2);
+      border-bottom:2px solid var(--color-border);
+      scroll-margin-top:4.5rem;
+    }
+    .pruef-num{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:2rem;height:2rem;border-radius:var(--radius-md);
+      background:var(--color-primary-highlight);color:var(--color-primary);
+      font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    table code{font-size:var(--text-xs)}
+
+    /* ═══ Befehl-Karten: 1-4 pro Zeile, je nach Browserbreite ═══ */
+    .cmd-grid{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+      gap:var(--space-3);
+    }
+    .cmd-card{
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      background:var(--color-surface);padding:var(--space-3);
+      display:flex;flex-direction:column;gap:.5rem;
+    }
+    .cmd-head{
+      font-size:var(--text-sm);font-weight:800;color:var(--color-primary);
+      word-break:break-word;text-align:center;
+    }
+    .cmd-desc{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5;margin:0}
+    .cmd-desc code{font-size:var(--text-xs)}
+    .cmd-code{
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      border-radius:var(--radius-md);padding:var(--space-2);
+      font-size:.72rem;line-height:1.5;overflow-x:auto;margin:0;
+    }
+    .cmd-out{
+      background:color-mix(in oklab,var(--color-success) 6%,var(--color-surface));
+      border:1px solid var(--color-border);border-radius:var(--radius-md);
+      padding:var(--space-2);font-size:.72rem;line-height:1.5;
+      color:var(--color-text-muted);overflow-x:auto;margin:0;
+      font-family:var(--font-mono);
+    }
+    .cmd-card .cmd-out:before{content:"→ ";color:var(--color-success);font-weight:800}
+    .cmd-out--wrap{white-space:pre-wrap;word-break:break-word;overflow-x:hidden}
+  </style>
+</head>
+<body>
+  <site-header active="pruefung" title="NumPy-Referenz – PRM V5"></site-header>
+
+  <div class="pruef-layout">
+    <nav class="pruef-side">
+      <div class="pruef-side-group">
+        <div class="pruef-side-label">Während der Prüfung</div>
+        <a href="cheatsheet.html">📋 Cheat-Sheet</a>
+        <a href="entscheidungshilfe.html">🧭 Entscheidungshilfe</a>
+        <a href="numpy-referenz.html" class="active">🔢 NumPy</a>
+        <a href="sklearn-referenz.html">🚀 sklearn</a>
+        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
+        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
+        <a href="code-scratch-referenz.html">🛠️ Von Scratch</a>
+      </div>
+      <div class="pruef-side-group" id="section-nav">
+        <div class="pruef-side-label">Auf dieser Seite</div>
+        <a href="#arrays">1 · Arrays &amp; Form</a>
+        <a href="#indexing">2 · Indexing &amp; Masken</a>
+        <a href="#aggregation">3 · Aggregation</a>
+        <a href="#linalg">4 · Lineare Algebra</a>
+        <a href="#random">5 · Zufallszahlen</a>
+        <a href="#broadcasting">6 · Broadcasting</a>
+      </div>
+    </nav>
+
+    <div class="pruef-hero">
+      <h1>🔢 NumPy-Referenz</h1>
+      <p>Die NumPy-Befehle, die in Scratch-Implementierungen (K1–K7) am häufigsten vorkommen — gruppiert nach Anwendungsfall.</p>
+    </div>
+
+  <main id="main-content" class="pruef-main">
+
+    <!-- ═══ 1 · ARRAYS ERSTELLEN & FORM ═══ -->
+    <section class="pruef-section" id="arrays">
+      <h2><span class="pruef-num">1</span> Arrays erstellen &amp; Form</h2>
+      <div class="cmd-grid">
+        <div class="cmd-card">
+          <code class="cmd-head">np.array([1,2,3])</code>
+          <p class="cmd-desc">Array aus Liste erstellen</p>
+          <pre class="cmd-code"><code class="language-python">np.array([1, 2, 3])</code></pre>
+          <pre class="cmd-out">[1 2 3]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.zeros((n,m)) / np.ones((n,m))</code>
+          <p class="cmd-desc">Array mit Nullen/Einsen, Shape (n,m)</p>
+          <pre class="cmd-code"><code class="language-python">np.zeros((2, 3))</code></pre>
+          <pre class="cmd-out">[[0. 0. 0.]
+ [0. 0. 0.]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.arange(start,stop,step)</code>
+          <p class="cmd-desc">Wertebereich wie <code>range()</code>, als Array</p>
+          <pre class="cmd-code"><code class="language-python">np.arange(0, 10, 2)</code></pre>
+          <pre class="cmd-out">[0 2 4 6 8]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.linspace(start,stop,num)</code>
+          <p class="cmd-desc"><code>num</code> gleichmäßig verteilte Werte zwischen start/stop</p>
+          <pre class="cmd-code"><code class="language-python">np.linspace(0, 1, 5)</code></pre>
+          <pre class="cmd-out">[0.   0.25 0.5  0.75 1.  ]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.eye(n)</code>
+          <p class="cmd-desc">n×n Einheitsmatrix</p>
+          <pre class="cmd-code"><code class="language-python">np.eye(3)</code></pre>
+          <pre class="cmd-out">[[1. 0. 0.]
+ [0. 1. 0.]
+ [0. 0. 1.]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.shape</code>
+          <p class="cmd-desc">Tupel der Dimensionen, z.B. (100, 4)</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.zeros((3, 4))
+arr.shape</code></pre>
+          <pre class="cmd-out">(3, 4)</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.reshape(a,b)</code>
+          <p class="cmd-desc">Form ändern (Gesamtanzahl Elemente muss gleich bleiben)</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.arange(6)
+arr.reshape(2, 3)</code></pre>
+          <pre class="cmd-out">[[0 1 2]
+ [3 4 5]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.reshape(-1,1)</code>
+          <p class="cmd-desc">1D → Spaltenvektor (häufig für sklearn-Inputs)</p>
+          <pre class="cmd-code"><code class="language-python">np.array([1, 2, 3]).reshape(-1, 1)</code></pre>
+          <pre class="cmd-out">[[1]
+ [2]
+ [3]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.T oder arr.transpose()</code>
+          <p class="cmd-desc">Transponieren (Zeilen ↔ Spalten)</p>
+          <pre class="cmd-code"><code class="language-python">np.array([[1, 2],
+           [3, 4]]).T</code></pre>
+          <pre class="cmd-out">[[1 3]
+ [2 4]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.flatten()</code>
+          <p class="cmd-desc">Mehrdimensionales Array zu 1D</p>
+          <pre class="cmd-code"><code class="language-python">np.array([[1, 2],
+           [3, 4]]).flatten()</code></pre>
+          <pre class="cmd-out">[1 2 3 4]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.astype(int)</code>
+          <p class="cmd-desc">Datentyp umwandeln</p>
+          <pre class="cmd-code"><code class="language-python">np.array([1.7, 2.2]).astype(int)</code></pre>
+          <pre class="cmd-out">[1 2]</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 2 · INDEXING & SLICING ═══ -->
+    <section class="pruef-section" id="indexing">
+      <h2><span class="pruef-num">2</span> Indexing, Slicing &amp; Masken</h2>
+      <div class="cmd-grid">
+        <div class="cmd-card">
+          <code class="cmd-head">arr[0] / arr[-1]</code>
+          <p class="cmd-desc">Erstes / letztes Element</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([10, 20, 30])
+arr[0], arr[-1]</code></pre>
+          <pre class="cmd-out">(10, 30)</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr[1:4]</code>
+          <p class="cmd-desc">Slice (Index 1 bis 3)</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.arange(6)
+arr[1:4]</code></pre>
+          <pre class="cmd-out">[1 2 3]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr[:, 0]</code>
+          <p class="cmd-desc">Erste Spalte (alle Zeilen)</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([[1, 2],
+                 [3, 4],
+                 [5, 6]])
+arr[:, 0]</code></pre>
+          <pre class="cmd-out">[1 3 5]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr[0, :]</code>
+          <p class="cmd-desc">Erste Zeile (alle Spalten)</p>
+          <pre class="cmd-code"><code class="language-python">arr[0, :]</code></pre>
+          <pre class="cmd-out">[1 2]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr[arr &gt; 5]</code>
+          <p class="cmd-desc">Boolean Mask — alle Elemente &gt; 5</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([1, 4, 6, 8])
+arr[arr > 5]</code></pre>
+          <pre class="cmd-out">[6 8]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr[(arr&gt;1)&amp;(arr&lt;5)]</code>
+          <p class="cmd-desc">Mehrere Bedingungen kombinieren (Klammern! <code>&amp;</code>/<code>|</code> statt <code>and</code>/<code>or</code>)</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([1, 2, 3, 4, 5])
+arr[(arr > 1) & (arr < 5)]</code></pre>
+          <pre class="cmd-out">[2 3 4]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.where(cond, a, b)</code>
+          <p class="cmd-desc">Elementweise: <code>a</code> wenn cond True, sonst <code>b</code></p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([1, 5, 2, 8])
+np.where(arr > 3, 1, 0)</code></pre>
+          <pre class="cmd-out">[0 1 0 1]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr[idx_array]</code>
+          <p class="cmd-desc">Fancy Indexing mit Index-Array (z.B. zufällige Reihenfolge)</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([10, 20, 30])
+idx = np.array([2, 0, 1])
+arr[idx]</code></pre>
+          <pre class="cmd-out">[30 10 20]</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 3 · AGGREGATION & STATISTIK ═══ -->
+    <section class="pruef-section" id="aggregation">
+      <h2><span class="pruef-num">3</span> Aggregation &amp; Statistik</h2>
+      <div class="cmd-grid">
+        <div class="cmd-card">
+          <code class="cmd-head">arr.sum() / arr.sum(axis=0)</code>
+          <p class="cmd-desc">Summe gesamt / pro Spalte (axis=0) bzw. pro Zeile (axis=1)</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([[1, 2],
+                 [3, 4]])
+arr.sum(), arr.sum(axis=0)</code></pre>
+          <pre class="cmd-out">(10, array([4, 6]))</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.mean(axis=0)</code>
+          <p class="cmd-desc">Mittelwert pro Spalte — z.B. für Normalisierung</p>
+          <pre class="cmd-code"><code class="language-python">arr.mean(axis=0)</code></pre>
+          <pre class="cmd-out">[2. 3.]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.std(axis=0)</code>
+          <p class="cmd-desc">Standardabweichung pro Spalte (Z-Score)</p>
+          <pre class="cmd-code"><code class="language-python">arr.std(axis=0)</code></pre>
+          <pre class="cmd-out">[1. 1.]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.min() / arr.max()</code>
+          <p class="cmd-desc">Minimum / Maximum</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([3, 1, 4, 1, 5])
+arr.min(), arr.max()</code></pre>
+          <pre class="cmd-out">(1, 5)</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.median(arr)</code>
+          <p class="cmd-desc">Median</p>
+          <pre class="cmd-code"><code class="language-python">np.median(arr)</code></pre>
+          <pre class="cmd-out">3.0</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.percentile(arr, 25)</code>
+          <p class="cmd-desc">Quantil/Perzentil (für IQR: Q1=25, Q3=75)</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([1, 2, 3, 4])
+np.percentile(arr, 25)</code></pre>
+          <pre class="cmd-out">1.75</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.var(arr)</code>
+          <p class="cmd-desc">Varianz</p>
+          <pre class="cmd-code"><code class="language-python">np.var(arr)</code></pre>
+          <pre class="cmd-out">1.25</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.bincount(y)</code>
+          <p class="cmd-desc">Häufigkeit jedes Klassen-Labels (für Klassenverteilung)</p>
+          <pre class="cmd-code"><code class="language-python">y = np.array([0, 1, 1, 2, 2, 2])
+np.bincount(y)</code></pre>
+          <pre class="cmd-out">[1 2 3]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.unique(arr, return_counts=True)</code>
+          <p class="cmd-desc">Eindeutige Werte + ihre Häufigkeiten</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([1, 1, 2, 3, 3, 3])
+np.unique(arr, return_counts=True)</code></pre>
+          <pre class="cmd-out">(array([1, 2, 3]), array([2, 1, 3]))</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">arr.argmax() / arr.argmin()</code>
+          <p class="cmd-desc">Index des größten/kleinsten Werts (z.B. argmax für Klassen-Vorhersage)</p>
+          <pre class="cmd-code"><code class="language-python">arr = np.array([3, 7, 2])
+arr.argmax(), arr.argmin()</code></pre>
+          <pre class="cmd-out">(1, 2)</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 4 · LINEARE ALGEBRA & DISTANZEN ═══ -->
+    <section class="pruef-section" id="linalg">
+      <h2><span class="pruef-num">4</span> Lineare Algebra &amp; Distanzen</h2>
+      <div class="cmd-grid">
+        <div class="cmd-card">
+          <code class="cmd-head">np.dot(a,b) oder a @ b</code>
+          <p class="cmd-desc">Skalarprodukt / Matrixmultiplikation</p>
+          <pre class="cmd-code"><code class="language-python">a = np.array([1, 2])
+b = np.array([3, 4])
+np.dot(a, b)</code></pre>
+          <pre class="cmd-out">11</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.linalg.norm(x)</code>
+          <p class="cmd-desc">Euklidische Norm ‖x‖ (z.B. für Margin = 2/‖w‖)</p>
+          <pre class="cmd-code"><code class="language-python">x = np.array([3, 4])
+np.linalg.norm(x)</code></pre>
+          <pre class="cmd-out">5.0</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.linalg.norm(a-b)</code>
+          <p class="cmd-desc">Euklidische Distanz zwischen zwei Punkten</p>
+          <pre class="cmd-code"><code class="language-python">a = np.array([0, 0])
+b = np.array([3, 4])
+np.linalg.norm(a - b)</code></pre>
+          <pre class="cmd-out">5.0</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.linalg.inv(A)</code>
+          <p class="cmd-desc">Inverse einer Matrix (z.B. Σ⁻¹ in der Gauß-Formel)</p>
+          <pre class="cmd-code"><code class="language-python">A = np.array([[1, 2],
+               [3, 4]])
+np.linalg.inv(A)</code></pre>
+          <pre class="cmd-out">[[-2.   1. ]
+ [ 1.5 -0.5]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.linalg.det(A)</code>
+          <p class="cmd-desc">Determinante (z.B. |Σ| in der Gauß-Formel)</p>
+          <pre class="cmd-code"><code class="language-python">np.linalg.det(A)</code></pre>
+          <pre class="cmd-out">-2.0</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.cov(X.T)</code>
+          <p class="cmd-desc">Kovarianzmatrix der Features</p>
+          <pre class="cmd-code"><code class="language-python">X = np.array([[1, 2],
+               [3, 4],
+               [5, 6]])
+np.cov(X.T)</code></pre>
+          <pre class="cmd-out">[[4. 4.]
+ [4. 4.]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.sum((a-b)**2)</code>
+          <p class="cmd-desc">Quadrierte euklidische Distanz (z.B. WCSS-Term)</p>
+          <pre class="cmd-code"><code class="language-python">a = np.array([1, 2])
+b = np.array([4, 6])
+np.sum((a - b)**2)</code></pre>
+          <pre class="cmd-out">25</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 5 · ZUFALLSZAHLEN ═══ -->
+    <section class="pruef-section" id="random">
+      <h2><span class="pruef-num">5</span> Zufallszahlen &amp; Sampling</h2>
+      <div class="cmd-grid">
+        <div class="cmd-card">
+          <code class="cmd-head">np.random.seed(42)</code>
+          <p class="cmd-desc">Reproduzierbarkeit fixieren</p>
+          <pre class="cmd-code"><code class="language-python">np.random.seed(42)</code></pre>
+          <pre class="cmd-out"># fixiert den Zufallsgenerator</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.random.rand(n,m)</code>
+          <p class="cmd-desc">Uniform verteilte Zufallszahlen [0,1), Shape (n,m)</p>
+          <pre class="cmd-code"><code class="language-python">np.random.rand(2, 2)</code></pre>
+          <pre class="cmd-out">[[0.3745 0.9507]
+ [0.732  0.5987]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.random.randn(n,m)</code>
+          <p class="cmd-desc">Standardnormalverteilte Zufallszahlen</p>
+          <pre class="cmd-code"><code class="language-python">np.random.randn(2, 2)</code></pre>
+          <pre class="cmd-out">[[-0.2342 -0.2341]
+ [ 1.5792  0.7674]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.random.randint(low,high,size)</code>
+          <p class="cmd-desc">Zufällige Ganzzahlen</p>
+          <pre class="cmd-code"><code class="language-python">np.random.randint(0, 10, 5)</code></pre>
+          <pre class="cmd-out">[5 4 1 7 5]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.random.choice(arr, size, replace=True)</code>
+          <p class="cmd-desc">Zufällige Stichprobe — <code>replace=True</code> = Bootstrap (mit Zurücklegen)</p>
+          <pre class="cmd-code"><code class="language-python">np.random.choice([10, 20, 30], size=5, replace=True)</code></pre>
+          <pre class="cmd-out">[20 10 10 20 20]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">np.random.permutation(n)</code>
+          <p class="cmd-desc">Zufällige Reihenfolge der Indizes 0..n-1 (für train_test_split)</p>
+          <pre class="cmd-code"><code class="language-python">np.random.permutation(5)</code></pre>
+          <pre class="cmd-out">[1 2 0 3 4]</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 6 · BROADCASTING ═══ -->
+    <section class="pruef-section" id="broadcasting">
+      <h2><span class="pruef-num">6</span> Broadcasting-Regeln</h2>
+      <div class="info-box">
+        NumPy vergleicht Shapes von <strong>hinten nach vorne</strong>. Zwei Dimensionen sind kompatibel, wenn sie gleich sind <strong>oder</strong> eine von ihnen 1 ist.
+      </div>
+      <div class="cmd-grid">
+        <div class="cmd-card">
+          <code class="cmd-head">(100, 4) + (4,)</code>
+          <pre class="cmd-out cmd-out--wrap">→ (100, 4) — Vektor wird auf jede Zeile angewendet (z.B. Normalisierung)</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">(100, 1) + (1, 5)</code>
+          <pre class="cmd-out cmd-out--wrap">→ (100, 5) — "Outer"-Broadcast, z.B. für Distanzmatrizen</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">(100, 4) + (100, 4)</code>
+          <pre class="cmd-out cmd-out--wrap">→ (100, 4) — elementweise Operation</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">(100, 4) + (3,)</code>
+          <pre class="cmd-out cmd-out--wrap">→ ❌ Fehler — letzte Dimension 4 ≠ 3 und keine ist 1</pre>
+        </div>
+      </div>
+      <div class="info-box" style="font-family:var(--font-mono)">
+        k-Means Distanzberechnung mit Broadcasting:<br>
+        <code>dists = np.linalg.norm(X[:,None,:] - centroids[None,:,:], axis=2)</code> &nbsp;→ Shape (n_samples, k)
+      </div>
+    </section>
+
+  </main>
+  </div>
+
+  <site-footer caption="PRM · Während der Prüfung · NumPy-Referenz"></site-footer>
+
+  <script>
+    const sideLinks = document.querySelectorAll('#section-nav a');
+    const sections = document.querySelectorAll('.pruef-section');
+    const setActive = () => {
+      let current = sections[0]?.id;
+      const probe = window.scrollY + 140;
+      sections.forEach(sec => {
+        if (sec.offsetTop <= probe) current = sec.id;
+      });
+      sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    };
+    document.addEventListener('scroll', setActive, { passive: true });
+    setActive();
+  </script>
+</body>
+</html>

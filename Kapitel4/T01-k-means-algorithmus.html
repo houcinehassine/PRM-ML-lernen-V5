@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>k-means Algorithmus – K4 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn { display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s; }
+    .mark-btn:hover { border-color:var(--color-success);color:var(--color-success); }
+    .stufe-footer { margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end; }
+  </style>
+</head>
+<body>
+  <site-header active="k4" title="k-means Algorithmus – K4 · PRM V5"></site-header>
+  <lern-pfad topic="k4/t01"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k4/t01"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K4 · Thema 1 von 5</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🔵 k-means Algorithmus</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Wie teilt k-means Datenpunkte in k Gruppen auf — und was passiert intern bei jeder Iteration?</p>
+      </section>
+
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header"><span class="stufe-label">Stufe 1</span><h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2></div>
+        <div class="stufe-body">
+          <h3>Unsupervised Learning: keine Labels</h3>
+          <p>k-means gehört zum Unsupervised Learning — es gibt keine vorgegebenen Labels. Das Ziel ist, ähnliche Datenpunkte in <em>k</em> Gruppen (Cluster) zusammenzufassen, ohne vorher zu wissen welche Gruppen existieren.</p>
+          <div class="info-box">
+            <strong>Anwendungsbeispiele:</strong><br>
+            • Kundensegmentierung (welche Kundentypen gibt es?)<br>
+            • Bildkompression (k häufigste Farben)<br>
+            • Anomalie-Erkennung (Punkte weit vom nächsten Zentroid)<br>
+            • Vorstufe für Supervised Learning
+          </div>
+          <div class="info-box warning">
+            <strong>Kernfrage:</strong> Wie findet man die k "natürlichsten" Gruppen — und wie wählt man k?
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button></div>
+      </div>
+
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header"><span class="stufe-label">Stufe 2</span><h2 class="stufe-title">🧠 Theorie: Zielfunktion und Konvergenz</h2></div>
+        <div class="stufe-body">
+          <h3>Was k-means minimiert</h3>
+          <p>k-means minimiert die <strong>Within-Cluster Sum of Squares (WCSS)</strong> — auch Inertia genannt:</p>
+          <div class="info-box" style="font-family:var(--font-mono);text-align:center">
+            WCSS = Σₖ Σᵢ∈Cₖ ||xᵢ − μₖ||²
+          </div>
+          <p>wobei μₖ der Centroid (Mittelpunkt) von Cluster k ist. WCSS misst, wie "kompakt" die Cluster sind.</p>
+          <h3>Eigenschaften</h3>
+          <table>
+            <thead><tr><th>Eigenschaft</th><th>Details</th></tr></thead>
+            <tbody>
+              <tr><td>Konvergenz</td><td>Garantiert — WCSS sinkt monoton. Aber: möglicherweise lokales Minimum!</td></tr>
+              <tr><td>Empfindlichkeit</td><td>Gegen Initialisierung und Ausreißer. k-means++ hilft bei der Init.</td></tr>
+              <tr><td>Clusterform</td><td>Setzt sphärische (kugelförmige) Cluster voraus.</td></tr>
+              <tr><td>Skalierung</td><td>Features MÜSSEN skaliert werden — k-means ist Distanz-basiert.</td></tr>
+            </tbody>
+          </table>
+          <h3>k-means++ Initialisierung</h3>
+          <div class="info-box">
+            Statt zufälliger Centroid-Wahl: erster Centroid zufällig, jeder weitere proportional zu seinem Abstand zum nächsten bestehenden Centroid. Verhindert das Zusammenfallen von Centroids. Standard in sklearn (<code>init='k-means++'</code>).
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button></div>
+      </div>
+
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header"><span class="stufe-label">Stufe 3</span><h2 class="stufe-title">⚙️ Lloyd's Algorithmus — Schritt für Schritt</h2></div>
+        <div class="stufe-body">
+          <div class="algo-steps">
+            <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Initialisierung: k Centroids zufällig wählen (oder k-means++)</strong><p>μ₁, μ₂, ..., μₖ als Startpunkte setzen.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>Assignment-Schritt: Jeden Punkt dem nächsten Centroid zuweisen</strong><p>cᵢ = argminₖ ||xᵢ − μₖ||²</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Update-Schritt: Centroids als Mittelpunkt ihrer Cluster neu berechnen</strong><p>μₖ = (1/|Cₖ|) · Σᵢ∈Cₖ xᵢ</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">4</div><div class="algo-step-body"><strong>Wiederholen bis Convergenz</strong><p>Wenn keine Punkt-Zuweisungen sich mehr ändern → fertig. WCSS ist minimal.</p></div></div>
+          </div>
+          <div class="info-box">
+            <strong>Zeitkomplexität:</strong> O(n · k · t · d) — n Punkte, k Cluster, t Iterationen, d Dimensionen. Sehr skalierbar!
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="algo">✓ Algorithmus klar</button></div>
+      </div>
+
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ Von Scratch: k-means implementieren</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span>🐍 1/2a — Klasse: KMeans (von Scratch)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+
+class KMeans:
+    """k-means Clustering (Lloyd's Algorithmus) von Scratch."""
+
+    def __init__(self, k=3, max_iter=300, tol=1e-4, random_state=42):
+        self.k = k
+        self.max_iter = max_iter
+        self.tol = tol
+        self.rng = np.random.default_rng(random_state)
+
+    def _init_centroids(self, X):
+        """k-means++ Initialisierung."""
+        n = len(X)
+        # Ersten Centroid zufällig wählen
+        centroids = [X[self.rng.integers(n)]]
+        for _ in range(self.k - 1):
+            # Distanz zum nächsten bestehenden Centroid
+            dists = np.array([
+                min(np.sum((x - c)**2) for c in centroids)
+                for x in X
+            ])
+            # Proportional zu Distanz² wählen
+            probs = dists / dists.sum()
+            idx = self.rng.choice(n, p=probs)
+            centroids.append(X[idx])
+        return np.array(centroids)
+
+    def fit(self, X):
+        X = np.array(X)
+        self.centroids_ = self._init_centroids(X)
+        self.inertia_history_ = []
+
+        for iteration in range(self.max_iter):
+            # Assignment-Schritt
+            labels = self._assign(X)
+
+            # Update-Schritt: neue Centroids
+            new_centroids = np.array([
+                X[labels == k].mean(axis=0) if np.sum(labels == k) > 0
+                else self.centroids_[k]          # leeren Cluster behalten
+                for k in range(self.k)
+            ])
+
+            # Inertia berechnen
+            inertia = sum(
+                np.sum((X[labels == k] - new_centroids[k])**2)
+                for k in range(self.k)
+            )
+            self.inertia_history_.append(inertia)
+
+            # Konvergenz prüfen
+            shift = np.max(np.linalg.norm(new_centroids - self.centroids_, axis=1))
+            self.centroids_ = new_centroids
+            if shift < self.tol:
+                break
+
+        self.labels_ = self._assign(X)
+        self.inertia_ = self.inertia_history_[-1]
+        self.n_iter_ = iteration + 1
+        return self
+
+    def _assign(self, X):
+        dists = np.array([
+            np.sum((X - c)**2, axis=1)
+            for c in self.centroids_
+        ])  # Shape: (k, n)
+        return np.argmin(dists, axis=0)
+
+    def predict(self, X):
+        return self._assign(np.array(X))</code></pre>
+          </div>
+
+          <p>Test mit synthetischen Blob-Daten und Vergleich mit sklearns Implementierung:</p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span>🐍 1/2b — Test: KMeans von Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.datasets import make_blobs
+
+X, y_true = make_blobs(
+    n_samples=300,
+    centers=4,
+    cluster_std=0.8,
+    random_state=42
+)
+
+km = KMeans(k=4)
+km.fit(X)
+
+print(f"Inertia:     {km.inertia_:.2f}")
+print(f"Iterationen: {km.n_iter_}")
+print(f"Cluster-Größen: {[np.sum(km.labels_ == i) for i in range(km.k)]}")
+
+# Vergleich mit sklearn
+from sklearn.cluster import KMeans as SKLearnKMeans
+skm = SKLearnKMeans(n_clusters=4, random_state=42)
+skm.fit(X)
+print(f"\nsklearn Inertia: {skm.inertia_:.2f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Inertia:     362.47
+Iterationen: 2
+Cluster-Größen: [np.int64(75), np.int64(75), np.int64(75), np.int64(75)]
+
+sklearn Inertia: 362.47</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: k-Means Cluster mit Centroids</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, km)
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X[:, 0], X[:, 1], c=km.labels_, cmap='viridis', s=20, alpha=0.7)
+ax.scatter(km.centroids_[:, 0], km.centroids_[:, 1], c='black', marker='X', s=150, label='Centroids')
+ax.set_title(f"k-Means von Scratch (Inertia={km.inertia_:.2f}, Iter={km.n_iter_})")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — k-Means Cluster mit Centroids</div>
+            <p>
+              Die 300 Datenpunkte gruppieren sich in 4 farblich getrennte Cluster. Die schwarzen
+              "X"-Marker zeigen die finalen Centroids — jeder Centroid liegt im Schwerpunkt seiner
+              Punktwolke. Da die Blobs gut separiert sind, konvergiert der Algorithmus bereits nach
+              wenigen Iterationen zu einer stabilen, sinnvollen Aufteilung.
+            </p>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
+      </div>
+
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 k-means mit sklearn</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span>🐍 Python — KMeans sklearn API</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.cluster import KMeans
+from sklearn.datasets import make_blobs
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+import numpy as np
+
+X, _ = make_blobs(
+    n_samples=300,
+    centers=4,
+    cluster_std=0.8,
+    random_state=42
+)
+X = StandardScaler().fit_transform(X)  # IMMER skalieren!
+
+km = KMeans(
+    n_clusters=4,
+    init='k-means++',  # Standard, bessere Initialisierung
+    n_init=10,         # 10 verschiedene Starts, bestes Ergebnis
+    max_iter=300,
+    random_state=42
+)
+km.fit(X)
+
+print(f"Inertia (WCSS):    {km.inertia_:.4f}")
+print(f"Iterationen:       {km.n_iter_}")
+print(f"Centroids shape:   {km.cluster_centers_.shape}")
+
+# Silhouette Score: Qualitätsmaß für Clustering (-1 bis 1, höher=besser)
+score = silhouette_score(X, km.labels_)
+print(f"Silhouette Score:  {score:.4f}")
+
+# Neue Punkte zuweisen
+new_points = np.array([[0.5, 0.5], [-1.0, 2.0]])
+print(f"Neue Punkte → Cluster: {km.predict(new_points)}")
+
+# Abstände zu Centroids
+distances = km.transform(new_points)  # (n_points, k) Distanzmatrix
+print(f"Distanzen zu Centroids:\n{distances.round(3)}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Inertia (WCSS):    11.3170
+Iterationen:       2
+Centroids shape:   (4, 2)
+Silhouette Score:  0.8386
+Neue Punkte → Cluster: [0 3]
+Distanzen zu Centroids:
+[[0.605 2.365 1.222 1.549]
+ [1.527 3.579 3.32  1.296]]</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: k-Means (sklearn) mit neuen Punkten</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, km, new_points)
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X[:, 0], X[:, 1], c=km.labels_, cmap='viridis', s=20, alpha=0.7)
+ax.scatter(km.cluster_centers_[:, 0], km.cluster_centers_[:, 1], c='black', marker='X', s=150, label='Centroids')
+ax.scatter(new_points[:, 0], new_points[:, 1], c='red', marker='*', s=200, label='Neue Punkte')
+ax.set_title(f"k-Means (sklearn), Silhouette={score:.2f}")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="../Kapitel3/Quiz.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges</div><div class="nav-arrow-title">K3 · Quiz</div></div></a>
+        <a href="T02-elbow-methode.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">📐 Elbow-Methode</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K4 · T1 · k-means Algorithmus"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text);btn.textContent='Kopiert!';setTimeout(()=>btn.textContent='Kopieren',2000);}</script>
+</body>
+</html>

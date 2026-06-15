@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ROC &amp; AUC – K7 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s}
+    .mark-btn:hover{border-color:var(--color-success);color:var(--color-success)}
+    .stufe-footer{margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end}
+  </style>
+</head>
+<body>
+  <site-header active="k7" title="ROC &amp; AUC – K7 · PRM V5"></site-header>
+  <lern-pfad topic="k7/t02"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k7/t02"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K7 · Thema 2 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">📈 ROC &amp; AUC</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Die Receiver Operating Characteristic kurve und Area Under the Curve — threshold-unabhängige Modellbewertung.</p>
+      </section>
+
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header"><span class="stufe-label">Stufe 1</span><h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2></div>
+        <div class="stufe-body">
+          <h3>Warum ROC statt Accuracy?</h3>
+          <p>Accuracy und F1 hängen vom gewählten Klassifikations-Threshold ab. ROC/AUC misst die Modellgüte über <em>alle</em> möglichen Thresholds — threshold-unabhängig.</p>
+          <div class="info-box">
+            <strong>AUC-Interpretation:</strong> AUC = Wahrscheinlichkeit, dass ein zufällig gewählter positiver Punkt einen höheren Score bekommt als ein zufällig gewählter negativer. AUC=1.0: perfekt. AUC=0.5: zufällig.
+          </div>
+          <div class="info-box warning">
+            <strong>AUC ≠ alles:</strong> Bei starker Klassenunbalance kann PR-AUC (Precision-Recall-Kurve) informativer sein als ROC-AUC.
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button></div>
+      </div>
+
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header"><span class="stufe-label">Stufe 2</span><h2 class="stufe-title">🧠 ROC-Kurve: FPR vs. TPR</h2></div>
+        <div class="stufe-body">
+          <h3>Achsen der ROC-Kurve</h3>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            X-Achse: FPR = FP/(FP+TN) = False Positive Rate = 1 − Specificity<br>
+            Y-Achse: TPR = TP/(TP+FN) = True Positive Rate = Recall = Sensitivity
+          </div>
+          <h3>Wie entsteht die Kurve</h3>
+          <ol>
+            <li>Modell gibt Scores/Wahrscheinlichkeiten aus (nicht nur 0/1)</li>
+            <li>Für jeden möglichen Threshold t von 1 bis 0: Berechne (FPR, TPR)</li>
+            <li>Diese Punkte bilden die ROC-Kurve</li>
+          </ol>
+          <h3>Referenzpunkte</h3>
+          <table>
+            <thead><tr><th>Punkt</th><th>Bedeutung</th><th>AUC</th></tr></thead>
+            <tbody>
+              <tr><td>(0,0)</td><td>Threshold=1: alles negativ</td><td>—</td></tr>
+              <tr><td>(1,1)</td><td>Threshold=0: alles positiv</td><td>—</td></tr>
+              <tr><td>(0,1)</td><td>Perfekte Klassifikation</td><td>1.0</td></tr>
+              <tr><td>Diagonale</td><td>Zufälliges Modell</td><td>0.5</td></tr>
+            </tbody>
+          </table>
+          <h3>AUC Interpretation</h3>
+          <ul>
+            <li>AUC = 0.5: Zufällig (nutzlos)</li>
+            <li>AUC = 0.7–0.8: Akzeptabel</li>
+            <li>AUC = 0.8–0.9: Gut</li>
+            <li>AUC = 0.9–1.0: Ausgezeichnet</li>
+          </ul>
+          <h3>Multi-Class ROC-AUC</h3>
+          <p>ROC-AUC ist ursprünglich für <strong>binäre</strong> Klassifikation definiert (eine Kurve = ein Schwellenwert über eine Score-Spalte). Bei mehr als 2 Klassen gibt es zwei Strategien, eine ROC-Kurve pro Klassenpaar zu erzeugen und zu aggregieren:</p>
+          <table>
+            <thead><tr><th>Strategie</th><th>Idee</th><th># Kurven (k Klassen)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>One-vs-Rest (OvR)</strong></td><td>Für jede Klasse k: "Klasse k" vs. "alle anderen" — k binäre ROC-Kurven</td><td>k</td></tr>
+              <tr><td><strong>One-vs-One (OvO)</strong></td><td>Für jedes Klassenpaar (i,j): binäre ROC-Kurve nur mit Punkten dieser zwei Klassen</td><td>k·(k−1)/2</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            average='macro': ungewichteter Mittelwert über alle k AUCs<br>
+            average='weighted': gewichtet nach Klassenhäufigkeit (Support)
+          </div>
+          <div class="info-box">
+            In sklearn: <code>roc_auc_score(y_true, y_proba, multi_class='ovr', average='macro')</code>. <code>y_proba</code> ist hier die volle (n_samples × k)-Wahrscheinlichkeitsmatrix aus <code>predict_proba()</code>, nicht nur eine Spalte wie im binären Fall.
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button></div>
+      </div>
+
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header"><span class="stufe-label">Stufe 3</span><h2 class="stufe-title">⚙️ ROC vs. PR-Kurve</h2></div>
+        <div class="stufe-body">
+          <table>
+            <thead><tr><th></th><th>ROC-Kurve</th><th>PR-Kurve</th></tr></thead>
+            <tbody>
+              <tr><td>Achsen</td><td>FPR vs. TPR</td><td>Recall vs. Precision</td></tr>
+              <tr><td>Klassenunbalance</td><td>Optimistisch (TN beeinflusst FPR stark)</td><td>Realistischer</td></tr>
+              <tr><td>Wann nutzen</td><td>Ausgeglichene Klassen</td><td>Stark unbalanciert (Fraud, seltene Ereignisse)</td></tr>
+              <tr><td>Zufällig-Baseline</td><td>Diagonale (AUC=0.5)</td><td>Horizontale bei p/(p+n)</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box">
+            <strong>Empfehlung:</strong> Immer <em>beide</em> Kurven berichten — ROC-AUC für generellen Vergleich, PR-AUC für Anwendungen mit Klassenunbalance.
+          </div>
+
+          <div class="compare-grid">
+            <div class="compare-card compare-card-a">
+              <div class="compare-card-label">ROC-AUC</div>
+              <p>Misst FPR vs. TPR über alle Thresholds. Bei stark unbalancierten Daten
+              wirkt das Modell oft <strong>besser als es ist</strong>, da die große Zahl
+              echter Negativer die FPR niedrig hält — selbst wenn viele Vorhersagen
+              für die seltene Klasse falsch sind.</p>
+            </div>
+            <div class="compare-card-arrow">↔</div>
+            <div class="compare-card compare-card-b">
+              <div class="compare-card-label">PR-AUC (Average Precision)</div>
+              <p>Misst Precision vs. Recall — ignoriert TN komplett. Bei seltenen
+              positiven Klassen (Fraud, Krankheit) ist das die <strong>realistischere</strong>
+              Metrik, weil sie direkt zeigt, wie viele Alarme tatsächlich zutreffen.</p>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="algo">✓ Algorithmus klar</button></div>
+      </div>
+
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ ROC &amp; AUC von Scratch</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 1/2a — Funktionen: roc_curve_scratch &amp; auc_scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+
+def roc_curve_scratch(y_true, y_score):
+    """ROC-Kurve von Scratch.
+    y_true: binäre Labels (0/1)
+    y_score: kontinuierliche Scores (z.B. Wahrscheinlichkeiten)
+    Returns: fpr, tpr, thresholds
+    """
+    y_true  = np.array(y_true)
+    y_score = np.array(y_score)
+    n_pos = (y_true == 1).sum()
+    n_neg = (y_true == 0).sum()
+
+    # Alle möglichen Thresholds (absteigend sortiert)
+    thresholds = np.sort(y_score)[::-1]
+
+    tprs, fprs = [0.0], [0.0]  # Startpunkt (alles negativ)
+    for t in thresholds:
+        y_pred = (y_score >= t).astype(int)
+        tp = ((y_pred == 1) & (y_true == 1)).sum()
+        fp = ((y_pred == 1) & (y_true == 0)).sum()
+        tprs.append(tp / n_pos)
+        fprs.append(fp / n_neg)
+
+    tprs.append(1.0); fprs.append(1.0)  # Endpunkt (alles positiv)
+    return np.array(fprs), np.array(tprs), np.append(thresholds, thresholds[-1])
+
+
+def auc_scratch(fpr, tpr):
+    """Trapez-Integration für AUC."""
+    return np.trapz(tpr, fpr)
+</code></pre>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 1/2b — Test: AUC Scratch vs. sklearn</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.datasets import load_breast_cancer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_auc_score, roc_curve
+
+X, y = load_breast_cancer(return_X_y=True)
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_tr, y_tr)
+y_prob = rf.predict_proba(X_te)[:, 1]
+
+fpr_s, tpr_s, _ = roc_curve_scratch(y_te, y_prob)
+auc_s = auc_scratch(fpr_s, tpr_s)
+
+fpr_sk, tpr_sk, _ = roc_curve(y_te, y_prob)
+auc_sk = roc_auc_score(y_te, y_prob)
+
+print(f"AUC (Scratch): {auc_s:.4f}")
+print(f"AUC (sklearn): {auc_sk:.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>AUC (Scratch): 0.9953
+AUC (sklearn): 0.9953</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — ROC-Kurve mit AUC</div>
+            <p>
+              Die ROC-Kurve trägt die True Positive Rate (Y) gegen die False Positive Rate (X)
+              für jeden möglichen Threshold auf. Eine Kurve, die schnell steil nach oben geht
+              und nahe an die linke obere Ecke (0,1) kommt, zeigt ein sehr gutes Modell
+              (hier AUC ≈ 0.995). Die gestrichelte Diagonale ist die Baseline eines
+              zufälligen Klassifikators (AUC = 0.5).
+            </p>
+            <img src="../assets/img/inhalt/k7-t02-roc-curve.png" alt="ROC-Kurve eines Random Forest mit AUC=0.995, deutlich über der Diagonalen-Baseline">
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
+      </div>
+
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 ROC &amp; PR mit sklearn</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 1 — Daten vorbereiten &amp; skalieren</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_breast_cancer(return_X_y=True)
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+scaler = StandardScaler()
+X_tr_s = scaler.fit_transform(X_tr)
+X_te_s = scaler.transform(X_te)
+
+print(f"X_tr: {X_tr.shape}, X_te: {X_te.shape}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>X_tr: (455, 30), X_te: (114, 30)</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 2 — Modellvergleich: ROC-AUC &amp; PR-AUC</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.metrics import roc_auc_score, average_precision_score
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+
+models = {
+    'Random Forest': RandomForestClassifier(n_estimators=100, random_state=42),
+    'Gradient Boost': GradientBoostingClassifier(n_estimators=100, random_state=42),
+    'Logistic Reg':   LogisticRegression(max_iter=1000, random_state=42),
+}
+
+print(f"{'Modell':<20} | {'ROC-AUC':>8} | {'PR-AUC':>8}")
+print("-" * 42)
+for name, model in models.items():
+    Xtr = X_tr if 'Forest' in name or 'Boost' in name else X_tr_s
+    Xte = X_te  if 'Forest' in name or 'Boost' in name else X_te_s
+    model.fit(Xtr, y_tr)
+    y_prob = model.predict_proba(Xte)[:, 1]
+    roc = roc_auc_score(y_te, y_prob)
+    pr  = average_precision_score(y_te, y_prob)
+    print(f"{name:<20} | {roc:>8.4f} | {pr:>8.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Modell               |  ROC-AUC |   PR-AUC
+------------------------------------------
+Random Forest        |   0.9953 |   0.9970
+Gradient Boost       |   0.9951 |   0.9970
+Logistic Reg         |   0.9974 |   0.9984</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 3 — Optimaler Threshold per Youden-Index</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.metrics import roc_curve
+import numpy as np
+
+rf = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+rf.fit(X_tr, y_tr)
+y_prob = rf.predict_proba(X_te)[:, 1]
+fpr, tpr, thresholds = roc_curve(y_te, y_prob)
+
+j_scores = tpr - fpr
+best_threshold = thresholds[np.argmax(j_scores)]
+print(f"Optimaler Threshold (Youden): {best_threshold:.3f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Optimaler Threshold (Youden): 0.770</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Multi-Class ROC-AUC (OvR, OvO)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.datasets import load_iris
+
+Xi, yi = load_iris(return_X_y=True)
+Xi_tr, Xi_te, yi_tr, yi_te = train_test_split(
+    Xi,
+    yi,
+    test_size=0.3,
+    random_state=42,
+    stratify=yi
+)
+
+rf_i = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_i.fit(Xi_tr, yi_tr)
+y_proba = rf_i.predict_proba(Xi_te)   # Shape (n_samples, 3) - eine Spalte pro Klasse
+
+# One-vs-Rest, macro-gemittelt über alle 3 Klassen
+auc_ovr_macro = roc_auc_score(yi_te, y_proba, multi_class='ovr', average='macro')
+auc_ovr_weighted = roc_auc_score(yi_te, y_proba, multi_class='ovr', average='weighted')
+
+# One-vs-One: AUC über alle Klassenpaare gemittelt
+auc_ovo_macro = roc_auc_score(yi_te, y_proba, multi_class='ovo', average='macro')
+
+# Pro-Klasse AUC (jede Klasse vs. Rest)
+auc_per_class = roc_auc_score(yi_te, y_proba, multi_class='ovr', average=None)
+
+print(f"OvR macro AUC:    {auc_ovr_macro:.4f}")
+print(f"OvR weighted AUC: {auc_ovr_weighted:.4f}")
+print(f"OvO macro AUC:    {auc_ovo_macro:.4f}")
+print(f"Pro Klasse (OvR): {np.round(auc_per_class, 4)}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>OvR macro AUC:    0.9889
+OvR weighted AUC: 0.9889
+OvO macro AUC:    0.9889
+Pro Klasse (OvR): [1.     0.9811 0.9856]</pre>
+              </div>
+            </div>
+          </div>
+          <div class="info-box warning">
+            <strong>Prüfungsfalle:</strong> <code>roc_auc_score</code> braucht bei <code>multi_class='ovr'/'ovo'</code> die <em>vollständige</em> <code>predict_proba()</code>-Matrix (eine Spalte pro Klasse), nicht <code>predict()</code>-Labels und nicht nur eine Spalte wie bei binärer Klassifikation.
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T01-confusion-matrix.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges</div><div class="nav-arrow-title">🔢 Confusion Matrix</div></div></a>
+        <a href="T03-precision-recall.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes</div><div class="nav-arrow-title">⚖️ Precision &amp; Recall</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K7 · T2 · ROC &amp; AUC"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text);btn.textContent='Kopiert!';setTimeout(()=>btn.textContent='Kopieren',2000);}</script>
+</body>
+</html>

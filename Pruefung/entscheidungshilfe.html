@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Entscheidungshilfe · Welche Metrik/Methode wann? – PRM V5</title>
+  <meta name="description" content="Entscheidungshilfen für die Prüfung: Problem erkennen, richtige Metrik/Methode wählen, konkret umsetzen — für Klassifikation, Modellwahl, Scaling, Encoding und CV-Strategie."/>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-5) var(--space-4) 0;text-align:center}
+    .pruef-hero h1{font-family:var(--font-display);font-size:var(--text-xl);margin-bottom:var(--space-2)}
+    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:64ch;margin:0 auto}
+    .pruef-section{margin-bottom:var(--space-10)}
+    .pruef-section h2{
+      display:flex;align-items:center;gap:var(--space-3);
+      margin-bottom:var(--space-4);padding-bottom:var(--space-2);
+      border-bottom:2px solid var(--color-border);
+      scroll-margin-top:4.5rem;
+    }
+    .pruef-num{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:2rem;height:2rem;border-radius:var(--radius-md);
+      background:var(--color-primary-highlight);color:var(--color-primary);
+      font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+  </style>
+</head>
+<body>
+  <site-header active="pruefung" title="Entscheidungshilfe – PRM V5"></site-header>
+
+  <div class="pruef-layout">
+    <nav class="pruef-side">
+      <div class="pruef-side-group">
+        <div class="pruef-side-label">Während der Prüfung</div>
+        <a href="cheatsheet.html">📋 Cheat-Sheet</a>
+        <a href="entscheidungshilfe.html" class="active">🧭 Entscheidungshilfe</a>
+        <a href="numpy-referenz.html">🔢 NumPy</a>
+        <a href="sklearn-referenz.html">🚀 sklearn</a>
+        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
+        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
+        <a href="code-scratch-referenz.html">🛠️ Von Scratch</a>
+      </div>
+      <div class="pruef-side-group" id="section-nav">
+        <div class="pruef-side-label">Auf dieser Seite</div>
+        <a href="#metrik">1 · Metrik-Wahl</a>
+        <a href="#modell">2 · Modell-Wahl</a>
+        <a href="#scaling">3 · Scaling</a>
+        <a href="#encoding">4 · Encoding</a>
+        <a href="#cv">5 · CV-Strategie</a>
+      </div>
+    </nav>
+
+    <div class="pruef-hero">
+      <h1>🧭 Entscheidungshilfe</h1>
+      <p>Jede Karte folgt demselben Schema: <strong>Problem erkennen → woran erkenne ich es? → Lösung → wie setze ich sie um?</strong> So findest du in der Prüfung schnell die richtige Methode UND den Weg dorthin.</p>
+    </div>
+
+    <main id="main-content" class="pruef-main">
+
+      <!-- ═══ 1 · METRIK-WAHL ═══ -->
+      <section class="pruef-section" id="metrik">
+        <h2><span class="pruef-num">1</span> Welche Metrik bei Klassifikation?</h2>
+
+        <div class="diag-card warn">
+          <div class="diag-head">⚠️ Problem: Klassen sind unbalanciert</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body"><code>np.bincount(y)</code> bzw. <code>y.value_counts()</code> zeigt eine starke Schiefe, z.B. 950 vs. 50.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>Precision, Recall, F1</strong> statt Accuracy — bzw. <strong>ROC-AUC / PR-AUC</strong>, wenn Wahrscheinlichkeiten vorliegen.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>classification_report(y_true, y_pred)</code> für Precision/Recall/F1 pro Klasse.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Bei 95:5 erreicht ein Modell, das nur die Mehrheitsklasse vorhersagt, 95% Accuracy — ohne irgendetwas gelernt zu haben.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">⚙️ Problem: FP und FN sind unterschiedlich teuer</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Frag dich: Was kostet ein <strong>falscher Alarm</strong> (FP) im Vergleich zu einer <strong>verpassten Erkennung</strong> (FN)?</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">FP teuer → <strong>Precision</strong> maximieren (z.B. Spam-Filter). FN teuer → <strong>Recall</strong> maximieren (z.B. Krankheitserkennung). Beides wichtig → <strong>F1</strong> oder <strong>F_β</strong>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>precision_score</code>, <code>recall_score</code>, <code>fbeta_score(y_true, y_pred, beta=2)</code> — β&gt;1 gewichtet Recall stärker.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">F1 ist das harmonische Mittel von Precision &amp; Recall — F_β erlaubt eine Gewichtung je nach Kostenverhältnis.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🔢 Problem: Multiklass-Klassifikation</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body"><code>len(np.unique(y)) &gt; 2</code> — mehr als zwei Zielklassen.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>Macro-F1</strong>, wenn jede Klasse gleich wichtig ist. <strong>Weighted-F1</strong>, wenn die Klassenhäufigkeit berücksichtigt werden soll.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>f1_score(y_true, y_pred, average='macro')</code> bzw. <code>average='weighted'</code>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Macro = ungewichteter Durchschnitt pro Klasse (kleine Klassen zählen genauso). Weighted gewichtet nach Support (Anzahl Samples je Klasse).</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🎲 Problem: Modell liefert Wahrscheinlichkeiten</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Modell hat <code>predict_proba()</code>, z.B. LogisticRegression, RandomForest.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>ROC-AUC</strong> — bewertet die Trennschärfe unabhängig vom gewählten Schwellenwert.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>roc_auc_score(y_true, model.predict_proba(X)[:,1])</code></div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Bei starkem Klassenungleichgewicht zusätzlich <strong>PR-AUC</strong> betrachten — ROC-AUC kann dann zu optimistisch wirken.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">📈 Problem: Es ist eigentlich Regression, nicht Klassifikation</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">y ist kontinuierlich (z.B. Preis, Temperatur) statt einer Kategorie.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>MSE/RMSE</strong> (sensitiv ggü. Ausreißern), <strong>MAE</strong> (robuster), <strong>R²</strong> (erklärte Varianz, 0–1).</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>mean_squared_error</code>, <code>mean_absolute_error</code>, <code>r2_score</code> aus <code>sklearn.metrics</code>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">MSE quadriert Fehler → große Ausreißer dominieren. MAE behandelt alle Fehler linear.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 2 · MODELL-WAHL ═══ -->
+      <section class="pruef-section" id="modell">
+        <h2><span class="pruef-num">2</span> Welches Modell für welches Problem?</h2>
+
+        <div class="diag-card">
+          <div class="diag-head">📏 Problem: Daten scheinen linear trennbar</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Scatterplot zeigt eine gerade Trennlinie zwischen den Klassen, oder ein lineares Modell erreicht bereits gute Werte.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>Logistische Regression</strong> oder <strong>lineare SVM</strong> (<code>kernel='linear'</code>).</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>LogisticRegression()</code> bzw. <code>SVC(kernel='linear')</code> — beide brauchen skalierte Features.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Einfach, interpretierbar, wenig Overfitting-Risiko bei klaren linearen Mustern.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🌀 Problem: Daten sind nicht linear trennbar</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Lineares Modell unterperformt deutlich, Scatterplot zeigt verschachtelte/gekrümmte Muster.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>SVM mit RBF-Kernel</strong> oder <strong>Random Forest</strong>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>SVC(kernel='rbf', C=..., gamma=...)</code> per GridSearchCV tunen, oder <code>RandomForestClassifier(n_estimators=200)</code>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Kernel-Trick projiziert in höherdimensionalen Raum; achsenparallele Splits modellieren beliebig komplexe Grenzen.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🧮 Problem: Viele Features, wenig Trainingsdaten</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body"><code>X.shape[1]</code> ist groß relativ zu <code>X.shape[0]</code> — Risiko für Overfitting steigt.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">Lineares Modell mit <strong>Lasso (L1)</strong> oder SVM mit Regularisierung.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>Lasso(alpha=...)</code> — Koeffizienten, die exakt 0 werden, markieren unwichtige Features.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">L1-Regularisierung führt automatische Feature-Selektion durch und reduziert Overfitting.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🔍 Problem: Modell muss erklärbar sein</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Aufgabenstellung fordert nachvollziehbare Regeln/Koeffizienten (z.B. "warum wurde abgelehnt?").</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">Einzelner <strong>Entscheidungsbaum</strong> oder <strong>lineares Modell</strong> — nicht Random Forest.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>DecisionTreeClassifier(max_depth=3..5)</code> + <code>plot_tree()</code>, oder Koeffizienten von <code>LogisticRegression.coef_</code> auslesen.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Random Forest ist ein Ensemble vieler Bäume — Einzelentscheidungen sind nicht mehr direkt nachvollziehbar (Black Box).</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">⚪🌫️🔁 Problem: Daten ohne Labels (Clustering)</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Kein y vorhanden — Ziel ist es, Gruppen in den Daten zu finden.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>k-Means</strong> (sphärische, ähnlich große Cluster) · <strong>DBSCAN</strong> (unregelmäßige Formen, Ausreißer) · <strong>GMM</strong> (überlappende Cluster, weiche Zuordnung).</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>KMeans(n_clusters=k)</code> mit Elbow/Silhouette · <code>DBSCAN(eps=..., min_samples=...)</code> · <code>GaussianMixture(n_components=k)</code>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">k-Means braucht ein vorgegebenes k und harte Zuordnung. DBSCAN braucht kein k, markiert Noise als -1. GMM liefert Wahrscheinlichkeiten statt harter Labels.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🖼️ Problem: Sehr hochdimensionale Daten (Text, Bilder)</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body"><code>X.shape[1]</code> ist sehr groß (z.B. &gt;100 Features), Distanzen zwischen Punkten wirken alle ähnlich.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>SVM mit Kernel</strong>, ggf. vorher Dimensionsreduktion mit <strong>PCA</strong>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>PCA(n_components=0.95)</code> (95% Varianz erhalten) → dann <code>SVC()</code>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">"Fluch der Dimensionalität": Distanzen verlieren in hohen Dimensionen ihre Aussagekraft. PCA reduziert Rauschen &amp; Rechenaufwand.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 3 · SCALING ═══ -->
+      <section class="pruef-section" id="scaling">
+        <h2><span class="pruef-num">3</span> Ist Feature Scaling nötig?</h2>
+
+        <div class="diag-card warn">
+          <div class="diag-head">⚠️ Problem: Features haben sehr unterschiedliche Skalen</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body"><code>X.describe()</code> zeigt z.B. ein Feature 0–1 und ein anderes 0–100000.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">Bei <strong>distanz-/gradientenbasierten</strong> Modellen (k-NN, k-Means, SVM, Ridge/Lasso, Neuronale Netze, PCA) → <strong>Scaling nötig</strong>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>StandardScaler().fit(X_train)</code>, dann <code>transform(X_train)</code> &amp; <code>transform(X_test)</code>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Ohne Scaling dominiert das Feature mit der größten Skala Distanzen, Margins oder den Gradienten.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card good">
+          <div class="diag-head">✅ Ausnahme: Baumbasierte Modelle &amp; Naive Bayes</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Modell ist <code>DecisionTree</code>, <code>RandomForest</code>, <code>GradientBoosting</code> oder <code>GaussianNB</code>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">Scaling ist <strong>nicht nötig</strong> — kann eingespart werden.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body">Rohdaten direkt verwenden (nach Encoding kategorialer Features).</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Baum-Splits basieren auf Schwellenwerten pro Feature, nicht auf Distanzen. Naive Bayes nutzt Wahrscheinlichkeitsverteilungen pro Feature.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card warn">
+          <div class="diag-head">⚠️ Klassiker-Fehler: Data Leakage beim Scaling</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body"><code>scaler.fit(X)</code> wird auf dem <strong>gesamten</strong> Datensatz aufgerufen, vor dem Split.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">Scaler nur auf <strong>X_train</strong> fitten, dann auf X_train &amp; X_test nur <code>transform</code>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>scaler.fit(X_train)</code> → <code>scaler.transform(X_train)</code> und <code>scaler.transform(X_test)</code>.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Sonst fließen Informationen aus dem Test-Set (Mittelwert/Std) in das Training ein → zu optimistische Evaluation.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 4 · ENCODING ═══ -->
+      <section class="pruef-section" id="encoding">
+        <h2><span class="pruef-num">4</span> Welches Encoding für kategoriale Features?</h2>
+
+        <div class="diag-card">
+          <div class="diag-head">📶 Problem: Kategorie mit natürlicher Reihenfolge</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Werte wie "klein", "mittel", "groß" — die Reihenfolge trägt Information.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>Ordinal-Encoding</strong> — Reihenfolge als Zahlen abbilden.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>OrdinalEncoder(categories=[['klein','mittel','groß']])</code> → 0,1,2</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">One-Hot würde die Ordnungsinformation verlieren; Label-Encoding ohne explizite Reihenfolge wäre willkürlich.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🎨 Problem: Kategorie ohne Reihenfolge, wenige Werte</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Werte wie "rot", "blau", "grün" — keine natürliche Rangfolge, wenige eindeutige Werte.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>One-Hot-Encoding</strong> — jede Kategorie wird eine eigene Binärspalte.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>OneHotEncoder(sparse_output=False, handle_unknown='ignore')</code></div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body"><code>handle_unknown='ignore'</code> verhindert Fehler, wenn im Test-Set eine im Training unbekannte Kategorie auftaucht.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card warn">
+          <div class="diag-head">🌐 Problem: Kategorie mit sehr vielen Werten</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">z.B. Postleitzahlen oder IDs mit hunderten eindeutigen Werten — One-Hot würde hunderte Spalten erzeugen.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>Frequency-</strong> oder <strong>Target-Encoding</strong> statt One-Hot.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body">Häufigkeit bzw. mittleres Ziel pro Kategorie als neuen numerischen Wert einsetzen (auf Trainingsdaten berechnen!).</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">One-Hot würde zu "Dimensions-Explosion" und sehr dünn besetzten (sparsamen) Matrizen führen.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══ 5 · CV-STRATEGIE ═══ -->
+      <section class="pruef-section" id="cv">
+        <h2><span class="pruef-num">5</span> Welche CV-Strategie?</h2>
+
+        <div class="diag-card">
+          <div class="diag-head">🧩 Problem: Standard-Klassifikationsproblem</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Klassifikation mit ausreichend Daten, keine Zeitabhängigkeit zwischen den Samples.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>Stratified K-Fold</strong> (k=5 oder 10).</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>cross_val_score(model, X, y, cv=StratifiedKFold(n_splits=5))</code></div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Erhält die Klassenverteilung in jedem Fold — wichtig bei Klassenungleichgewicht.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🔬 Problem: Sehr kleiner Datensatz</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Wenige Dutzend Samples — ein 5-Fold-Split würde Folds mit zu wenigen Beispielen erzeugen.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>LOOCV</strong> (Leave-One-Out): jedes Sample einmal als Test-Set.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>cross_val_score(model, X, y, cv=LeaveOneOut())</code></div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Maximiert die Trainingsdaten pro Fold, ist aber rechenintensiv (n Modelle) und hat hohe Varianz.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card warn">
+          <div class="diag-head">⏱️ Problem: Zeitreihendaten</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Samples haben eine zeitliche Reihenfolge (z.B. tägliche Messwerte) — die Reihenfolge ist relevant.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>TimeSeriesSplit</strong> — trainiert immer auf der Vergangenheit, testet auf der Zukunft.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>cross_val_score(model, X, y, cv=TimeSeriesSplit(n_splits=5))</code></div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Normales K-Fold würde mit zufälligen Splits "die Zukunft" zur Vorhersage der Vergangenheit nutzen → unrealistisch optimistisch.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🪆 Problem: Hyperparameter tunen UND Performance fair schätzen</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Aufgabenstellung verlangt sowohl GridSearchCV als auch eine ehrliche Generalisierungsschätzung.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body"><strong>Nested CV</strong>: äußere Schleife schätzt Performance, innere Schleife (GridSearchCV) tunt Hyperparameter.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>cross_val_score(GridSearchCV(model, param_grid, cv=3), X, y, cv=5)</code></div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Tuning auf denselben Daten, mit denen man danach evaluiert, führt zu optimistisch verzerrten Ergebnissen.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <site-footer caption="PRM · Während der Prüfung · Entscheidungshilfe"></site-footer>
+
+  <script>
+    const sideLinks = document.querySelectorAll('#section-nav a');
+    const sections = document.querySelectorAll('.pruef-section');
+    const setActive = () => {
+      let current = sections[0]?.id;
+      const probe = window.scrollY + 140;
+      sections.forEach(sec => {
+        if (sec.offsetTop <= probe) current = sec.id;
+      });
+      sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    };
+    document.addEventListener('scroll', setActive, { passive: true });
+    setActive();
+  </script>
+</body>
+</html>

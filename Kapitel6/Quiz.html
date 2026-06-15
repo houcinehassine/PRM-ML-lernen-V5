@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz K6 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <site-header active="k6" title="Quiz K6 · GMM &amp; EM – PRM V5"></site-header>
+  <div class="layout">
+    <site-sidebar active="k6/quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K6 · Quiz · 20 Fragen</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🧠 Quiz: GMM &amp; EM-Algorithmus</h1>
+        <p style="color:var(--color-text-muted)">Klicke auf eine Frage um die Antwort aufzudecken.</p>
+      </section>
+
+      <section id="gauverteilung">
+        <h2>Gaußverteilung</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q1</span> Was sind die Parameter der univariaten Gaußverteilung?</summary><div class="frage-antwort">μ (Erwartungswert / Mittelpunkt der Glockenkurve) und σ² (Varianz / Breite). Vollständig durch diese zwei Parameter bestimmt — kein anderes Wahrscheinlichkeitsmodell.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q2</span> Was ist die multivariate Gaußverteilung N(x; μ, Σ)?</summary><div class="frage-antwort">Verallgemeinerung auf D Dimensionen. μ ∈ ℝᴰ = Mittelwert-Vektor, Σ ∈ ℝᴰˣᴰ = Kovarianz-Matrix (symmetrisch, positiv-definit). Exponent enthält Mahalanobis-Distanz: (x−μ)ᵀ Σ⁻¹ (x−μ).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q3</span> Was ist der Unterschied zwischen covariance_type='full' und 'spherical'?</summary><div class="frage-antwort">Full: beliebige Ellipse (beliebig rotiert) — maximale Flexibilität, D(D+1)/2 Parameter. Spherical: Kugel — alle Dimensionen gleiche Varianz, nur 1 Parameter. Spherical GMM ähnelt k-Means.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q4</span> Was ist die Mahalanobis-Distanz?</summary><div class="frage-antwort">d_M(x) = √((x−μ)ᵀ Σ⁻¹ (x−μ)) — berücksichtigt Korrelation und Skalierung der Features. Punkte gleicher Mahalanobis-Distanz liegen auf einer Ellipse (nicht Kreis wie Euklidisch). Entspricht der Euklidischen Distanz wenn Σ=I.</div></details>
+      </section>
+
+      <section id="em-algorithmus">
+        <h2>EM-Algorithmus</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q5</span> Was ist das "Henne-Ei-Problem" bei GMM?</summary><div class="frage-antwort">Um Parameter (μ, Σ, π) zu schätzen, müsste man wissen, welcher Punkt zu welcher Komponente gehört. Aber um die Zugehörigkeiten zu bestimmen, braucht man die Parameter. EM löst das durch abwechselnde Schätzung beider.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q6</span> Was garantiert EM mathematisch?</summary><div class="frage-antwort">Jede EM-Iteration erhöht oder hält gleich die Log-Likelihood log p(X|θ). EM konvergiert monoton — aber zum nächsten lokalen Maximum, nicht unbedingt zum globalen. Deshalb: mehrere zufällige Starts (n_init).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q7</span> Was ist ELBO (Evidence Lower BOund)?</summary><div class="frage-antwort">Eine untere Schranke der Log-Likelihood: log p(X|θ) ≥ ELBO. EM maximiert abwechselnd: E-Schritt maximiert ELBO über q(z) (Responsibilities), M-Schritt maximiert über θ. Dadurch steigt log p(X|θ) monoton.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q8</span> Warum braucht man n_init > 1 bei GMM?</summary><div class="frage-antwort">EM konvergiert zu einem lokalen Maximum — bei schlechten Startpunkten kann das sehr schlechte Lösung sein. n_init=10 startet EM 10-mal mit verschiedenen zufälligen Initialwerten und wählt die Lösung mit höchster Log-Likelihood.</div></details>
+      </section>
+
+      <section id="e-step-m-step">
+        <h2>E-Step &amp; M-Step</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q9</span> Was berechnet der E-Schritt?</summary><div class="frage-antwort">Responsibilities rᵢₖ = P(zᵢ=k | xᵢ, θ) — die posterior Wahrscheinlichkeit, dass Punkt i aus Komponente k stammt. Berechnet mit Bayes: rᵢₖ = πₖN(xᵢ|μₖ,Σₖ) / Σⱼ πⱼN(xᵢ|μⱼ,Σⱼ).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q10</span> Was berechnet der M-Schritt?</summary><div class="frage-antwort">Neue Parameter aus gewichteten Statistiken: Nₖ = Σᵢ rᵢₖ (effektive Punktanzahl), πₖ* = Nₖ/N, μₖ* = gewichteter Mittelwert, Σₖ* = gewichtete Kovarianz. Analytische geschlossene Form — kein iterativer Optimierer nötig!</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q11</span> Was ist der Log-Sum-Exp Trick und wann braucht man ihn?</summary><div class="frage-antwort">Im E-Schritt werden Gaußdichten berechnet die extrem klein werden können (numerischer Underflow). Log-Sum-Exp rechnet im Log-Raum: log Σₖ exp(aₖ) = max(aₖ) + log Σₖ exp(aₖ - max(aₖ)). Das vermeidet Underflow.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q12</span> Was ist das Singularitätsproblem und wie löst man es?</summary><div class="frage-antwort">Wenn eine Komponente auf einen einzelnen Punkt "kollabiert" (Nₖ→1), wird die geschätzte Kovarianz Σₖ singulär (Determinante=0 → nicht invertierbar). Lösung: Regularisierung Σₖ += ε·I (reg_covar in sklearn, Standard: 1e-6).</div></details>
+      </section>
+
+      <section id="gaussianmixture-sklearn">
+        <h2>GaussianMixture sklearn</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q13</span> Was ist BIC und wofür nutzt man es bei GMM?</summary><div class="frage-antwort">Bayesian Information Criterion: BIC = -2·logL + p·log(n). p = Anzahl Parameter, n = Datenpunkte. Kleineres BIC = besser. Nutzt man um K (Anzahl Komponenten) zu wählen: K von 1 bis Kmax testen, K mit minimalem BIC wählen.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q14</span> Wie unterscheidet sich GMM von k-Means?</summary><div class="frage-antwort">GMM: weiche Zuweisungen (Wahrscheinlichkeiten), variable Cluster-Formen (Kovarianz-Matrix), probabilistisches Modell. k-Means: harte Zuweisungen (0 oder 1), nur sphärische Cluster, geometrischer Algorithmus. GMM ist k-Means mit weichen Zuweisungen und Formen-Flexibilität.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q15</span> Was gibt gmm.predict_proba(X) zurück?</summary><div class="frage-antwort">Matrix (n_samples, K): rᵢₖ = P(Komponente k | xᵢ). Jede Zeile summiert zu 1. Das ist der E-Schritt des gelernten Modells — die weichen Cluster-Zugehörigkeiten.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q16</span> Wofür nutzt man gmm.score_samples(X)?</summary><div class="frage-antwort">Gibt log p(xᵢ) für jeden Punkt zurück — die log-Wahrscheinlichkeitsdichte unter dem gelernten GMM. Punkte mit niedrigem score_samples sind "unwahrscheinlich" under dem Modell → nützlich für Anomalie-Detektion.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q17</span> Was ist der Vorteil von GMM gegenüber DBSCAN für Anomalie-Detektion?</summary><div class="frage-antwort">GMM gibt Wahrscheinlichkeitsdichten aus → schwellenwertbasierte Anomalie-Detektion möglich. DBSCAN markiert nur Noise-Punkte binär. GMM kann außerdem interpolieren (neue Punkte bewerten) während DBSCAN nicht generalisiert.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q18</span> Prüfungsfrage: Wann bevorzugt man covariance_type='diag' statt 'full'?</summary><div class="frage-antwort">Wenn Features nicht (oder kaum) korreliert sind — 'diag' setzt Off-Diagonal-Kovarianz=0. Vorteil: Deutlich weniger Parameter (D statt D(D+1)/2) → weniger Overfitting, schneller. Sinnvoll bei vielen Features (hohe Dimensionen).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q19</span> Was macht gmm.sample(n)?</summary><div class="frage-antwort">Generiert n neue Datenpunkte aus dem gelernten GMM: (1) Wähle zufällig eine Komponente k mit Wahrscheinlichkeit πₖ, (2) sample xᵢ ~ N(μₖ, Σₖ). Gibt (X_new, labels_new) zurück. Macht GMM zu einem generativen Modell.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q20</span> Was ist der Unterschied zwischen BIC und AIC?</summary><div class="frage-antwort">AIC = -2logL + 2p (weniger Bestrafung für Parameter) → tendiert zu komplexeren Modellen. BIC = -2logL + p·log(n) (stärker für große n) → tendiert zu einfacheren Modellen. Für Auswahl des "wahren" Modells ist BIC besser; für Vorhersage oft AIC.</div></details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="T04-gaussianmixture-sklearn.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Letztes Thema</div><div class="nav-arrow-title">🚀 GaussianMixture</div></div></a>
+        <a href="Uebung.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">✏️ Übungsaufgaben</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K6 · Quiz · PRM V5"></site-footer>
+</body>
+</html>

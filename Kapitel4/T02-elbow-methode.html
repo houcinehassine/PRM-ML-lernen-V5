@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Elbow-Methode – K4 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn { display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s; }
+    .mark-btn:hover { border-color:var(--color-success);color:var(--color-success); }
+    .stufe-footer { margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end; }
+  </style>
+</head>
+<body>
+  <site-header active="k4" title="Elbow-Methode – K4 · PRM V5"></site-header>
+  <lern-pfad topic="k4/t02"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k4/t02"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K4 · Thema 2 von 5</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">📐 Die Elbow-Methode</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Das größte Problem bei k-means: Wie wählt man k? Die Elbow-Methode und der Silhouette Score geben Antworten.</p>
+      </section>
+
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header"><span class="stufe-label">Stufe 1</span><h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2></div>
+        <div class="stufe-body">
+          <h3>Das k-Problem</h3>
+          <p>k-means braucht k als Input — aber wir wissen oft nicht vorher, wie viele Cluster in den Daten stecken. Mit k=1 gibt es null Fehler am Training; mit k=n ist jeder Punkt sein eigener Cluster (WCSS=0).</p>
+          <div class="info-box warning">
+            <strong>Ziel:</strong> Das "richtige" k finden — klein genug um sinnvoll zu sein, groß genug um die Struktur zu erfassen.
+          </div>
+          <p>Zwei Methoden helfen: die <strong>Elbow-Methode</strong> (WCSS-Kurve) und der <strong>Silhouette Score</strong> (Kohäsion vs. Separation).</p>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button></div>
+      </div>
+
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header"><span class="stufe-label">Stufe 2</span><h2 class="stufe-title">🧠 Elbow-Methode und Silhouette Score</h2></div>
+        <div class="stufe-body">
+          <h3>Elbow-Methode</h3>
+          <p>Plotte WCSS gegen k = 1, 2, ..., K. Die Kurve sinkt zunächst stark, dann flacher. Der "Ellbogen" — der Punkt, an dem das Absinken abflacht — deutet auf das optimale k hin.</p>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            k=1: WCSS sehr hoch<br>
+            k=2: WCSS stark gesunken ↓↓<br>
+            k=3: noch gesunken ↓↓<br>
+            k=4: wenig gesunken ↓  ← Elbow!<br>
+            k=5: kaum gesunken →<br>
+            k=6: kaum gesunken →
+          </div>
+          <h3>Silhouette Score</h3>
+          <p>Für jeden Punkt i:</p>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            a(i) = mittlere Distanz zu Punkten im selben Cluster<br>
+            b(i) = mittlere Distanz zum nächsten anderen Cluster<br>
+            s(i) = (b(i) − a(i)) / max(a(i), b(i))<br>
+            Silhouette = Mittelwert aller s(i) ∈ [-1, 1]
+          </div>
+          <table>
+            <thead><tr><th>Score</th><th>Bedeutung</th></tr></thead>
+            <tbody>
+              <tr><td>~ +1</td><td>Punkt liegt tief im richtigen Cluster, weit weg von anderen</td></tr>
+              <tr><td>~ 0</td><td>Punkt liegt auf der Grenze zwischen zwei Clustern</td></tr>
+              <tr><td>~ −1</td><td>Punkt könnte zum falschen Cluster gehören</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button></div>
+      </div>
+
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header"><span class="stufe-label">Stufe 3</span><h2 class="stufe-title">⚙️ k wählen — systematisch</h2></div>
+        <div class="stufe-body">
+          <div class="algo-steps">
+            <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>k-means für k = 2 bis K_max trainieren</strong><p>Für jeden k: WCSS (km.inertia_) und Silhouette Score speichern.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>Elbow visuell suchen</strong><p>WCSS gegen k plotten. Wo flacht die Kurve ab? Das ist der Elbow.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Silhouette Score maximieren</strong><p>Das k mit dem höchsten Silhouette Score wählen.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">4</div><div class="algo-step-body"><strong>Domänen-Wissen einbeziehen</strong><p>Beide Methoden sind Heuristiken. Wenn du weißt, dass es 4 Kundensegmente geben soll — nutze k=4.</p></div></div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="algo">✓ Methodik klar</button></div>
+      </div>
+
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ Von Scratch: Elbow &amp; Silhouette</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span>🐍 1/2a — Funktion: silhouette_score_scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+
+def silhouette_score_scratch(X, labels):
+    """Silhouette Score von Scratch."""
+    n = len(X)
+    k_vals = np.unique(labels)
+    scores = []
+
+    for i in range(n):
+        ci = labels[i]
+        # a(i): mittlere Distanz zu gleicher Klasse
+        same = X[labels == ci]
+        if len(same) > 1:
+            a = np.mean(np.sqrt(np.sum((same - X[i])**2, axis=1)))
+        else:
+            a = 0.0
+
+        # b(i): minimale mittlere Distanz zu anderen Klassen
+        b_vals = []
+        for cj in k_vals:
+            if cj == ci:
+                continue
+            other = X[labels == cj]
+            b_vals.append(np.mean(np.sqrt(np.sum((other - X[i])**2, axis=1))))
+        b = min(b_vals) if b_vals else 0.0
+
+        if max(a, b) > 0:
+            scores.append((b - a) / max(a, b))
+        else:
+            scores.append(0.0)
+
+    return np.mean(scores)</code></pre>
+          </div>
+
+          <p>Test mit k-means auf Blob-Daten (k=4):</p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span>🐍 1/2b — Test: silhouette_score_scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.datasets import make_blobs
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+X, _ = make_blobs(
+    n_samples=300,
+    centers=4,
+    cluster_std=0.8,
+    random_state=42
+)
+X = StandardScaler().fit_transform(X)
+
+km = KMeans(n_clusters=4, n_init=10, random_state=42)
+km.fit(X)
+print(f"Silhouette Score (k=4): {silhouette_score_scratch(X, km.labels_):.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Silhouette Score (k=4): 0.8408</pre>
+              </div>
+            </div>
+          </div>
+
+          <p>Jetzt die Elbow-Methode: für mehrere k trainieren, WCSS und Silhouette Score sammeln und den Elbow automatisch finden:</p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span>🐍 2/2a — Funktion: find_optimal_k</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">def find_optimal_k(X, k_range=range(2, 11), n_init=10):
+    """Elbow-Analyse und Silhouette-Scores."""
+    wcss = []
+    sil_scores = []
+
+    for k in k_range:
+        km = KMeans(n_clusters=k, n_init=n_init, random_state=42)
+        km.fit(X)
+        wcss.append(km.inertia_)
+        sil = silhouette_score_scratch(X, km.labels_)
+        sil_scores.append(sil)
+
+    # Elbow automatisch finden (max. zweite Ableitung)
+    wcss_arr = np.array(wcss)
+    diffs = np.diff(wcss_arr)          # erste Ableitung
+    diffs2 = np.diff(diffs)            # zweite Ableitung
+    elbow_idx = np.argmax(diffs2) + 2  # +2 wegen zwei Diff-Ops und 0-Indexing
+
+    print(f"{'k':>4} | {'WCSS':>12} | {'Silhouette':>12} | {'Elbow?':>8}")
+    print("-" * 45)
+    for i, k in enumerate(k_range):
+        elbow_marker = "← ELBOW" if k == elbow_idx else ""
+        print(f"{k:>4} | {wcss[i]:>12.2f} | {sil_scores[i]:>12.4f} | {elbow_marker}")
+
+    best_k_sil = list(k_range)[np.argmax(sil_scores)]
+    print(f"\nElbow bei k={elbow_idx}")
+    print(f"Bester Silhouette Score bei k={best_k_sil}")
+    return elbow_idx, best_k_sil
+
+
+# Test
+from sklearn.datasets import make_blobs
+from sklearn.preprocessing import StandardScaler
+
+X, _ = make_blobs(n_samples=300, centers=4, cluster_std=0.8, random_state=42)
+X = StandardScaler().fit_transform(X)
+
+elbow_k, best_k = find_optimal_k(X)</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>   k |         WCSS |   Silhouette |   Elbow?
+---------------------------------------------
+   2 |       312.73 |       0.5721 | ← ELBOW
+   3 |        66.70 |       0.7661 |
+   4 |        11.32 |       0.8408 |
+   5 |        10.13 |       0.7142 |
+   6 |         9.00 |       0.5867 |
+   7 |         7.89 |       0.4702 |
+   8 |         7.03 |       0.3539 |
+   9 |         6.36 |       0.3703 |
+  10 |         5.72 |       0.3886 |
+
+Elbow bei k=2
+Bester Silhouette Score bei k=4</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Elbow-Kurve &amp; Silhouette Score</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, KMeans, silhouette_score_scratch, elbow_k, best_k)
+import matplotlib.pyplot as plt
+import numpy as np
+
+k_range = range(2, 11)
+wcss, sil_scores = [], []
+for k in k_range:
+    km_k = KMeans(n_clusters=k, n_init=10, random_state=42)
+    km_k.fit(X)
+    wcss.append(km_k.inertia_)
+    sil_scores.append(silhouette_score_scratch(X, km_k.labels_))
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6))
+axes[0].plot(list(k_range), wcss, 'o-')
+axes[0].axvline(elbow_k, color='r', linestyle='--', label=f'Elbow k={elbow_k}')
+axes[0].set_xlabel("k"); axes[0].set_ylabel("WCSS")
+axes[0].set_title("Elbow-Methode"); axes[0].legend()
+
+axes[1].plot(list(k_range), sil_scores, 'o-', color='green')
+axes[1].axvline(best_k, color='r', linestyle='--', label=f'Best k={best_k}')
+axes[1].set_xlabel("k"); axes[1].set_ylabel("Silhouette")
+axes[1].set_title("Silhouette Score"); axes[1].legend()
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
+      </div>
+
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 k-Auswahl mit sklearn</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell">
+            <div class="code-cell-header"><span>Python · Elbow &amp; Silhouette mit sklearn</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, silhouette_samples
+from sklearn.datasets import make_blobs
+from sklearn.preprocessing import StandardScaler
+import numpy as np
+
+X, _ = make_blobs(n_samples=400, centers=4, cluster_std=0.9, random_state=42)
+X = StandardScaler().fit_transform(X)
+
+# Systematische k-Analyse
+results = {}
+for k in range(2, 11):
+    km = KMeans(n_clusters=k, n_init=10, random_state=42)
+    labels = km.fit_predict(X)
+    results[k] = {
+        'inertia':   km.inertia_,
+        'silhouette': silhouette_score(X, labels),
+    }
+
+print(f"{'k':>4} | {'Inertia':>10} | {'Silhouette':>12}")
+print("-" * 32)
+for k, vals in results.items():
+    print(f"{k:>4} | {vals['inertia']:>10.2f} | {vals['silhouette']:>12.4f}")
+
+# Optimales k wählen und finales Modell trainieren
+best_k = max(results, key=lambda k: results[k]['silhouette'])
+print(f"\nOptimales k (Silhouette): {best_k}")
+
+km_final = KMeans(n_clusters=best_k, n_init=10, random_state=42)
+km_final.fit(X)
+print(f"Finales Modell: Inertia={km_final.inertia_:.2f}")
+
+# Per-Sample Silhouette Scores
+sample_silhouettes = silhouette_samples(X, km_final.labels_)
+for k in range(best_k):
+    ks = sample_silhouettes[km_final.labels_ == k]
+    print(f"Cluster {k}: {len(ks)} Punkte, Silhouette Mean={ks.mean():.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>   k |    Inertia |   Silhouette
+--------------------------------
+   2 |     418.94 |       0.5641
+   3 |      92.86 |       0.7536
+   4 |      18.84 |       0.8202
+   5 |      16.88 |       0.6872
+   6 |      14.96 |       0.5642
+   7 |      13.17 |       0.4437
+   8 |      11.63 |       0.3407
+   9 |      10.63 |       0.3544
+  10 |       9.59 |       0.3546
+
+Optimales k (Silhouette): 4
+Finales Modell: Inertia=18.84
+Cluster 0: 100 Punkte, Silhouette Mean=0.8473
+Cluster 1: 100 Punkte, Silhouette Mean=0.7693
+Cluster 2: 100 Punkte, Silhouette Mean=0.8777
+Cluster 3: 100 Punkte, Silhouette Mean=0.7865</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: k-Auswahl &amp; finales Clustering</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (results, km_final, X, best_k)
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6))
+ks = list(results.keys())
+axes[0].plot(ks, [results[k]['silhouette'] for k in ks], 'o-')
+axes[0].axvline(best_k, color='r', linestyle='--', label=f'Best k={best_k}')
+axes[0].set_xlabel("k"); axes[0].set_ylabel("Silhouette")
+axes[0].set_title("Silhouette vs. k"); axes[0].legend()
+
+axes[1].scatter(X[:, 0], X[:, 1], c=km_final.labels_, cmap='viridis', s=20, alpha=0.7)
+axes[1].scatter(km_final.cluster_centers_[:, 0], km_final.cluster_centers_[:, 1], c='black', marker='X', s=150)
+axes[1].set_title(f"Finales Clustering (k={best_k})")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T01-k-means-algorithmus.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">🔵 k-means Algorithmus</div></div></a>
+        <a href="T03-dbscan.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">🌊 DBSCAN</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K4 · T2 · Elbow-Methode"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text);btn.textContent='Kopiert!';setTimeout(()=>btn.textContent='Kopieren',2000);}</script>
+</body>
+</html>

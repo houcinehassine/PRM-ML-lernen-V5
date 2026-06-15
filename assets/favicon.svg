@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#1a2e32"/>
+  <!-- Netzwerk-Icon (passend zum Header-Logo) -->
+  <circle cx="8"  cy="16" r="3" fill="none" stroke="#3d9aa8" stroke-width="2"/>
+  <circle cx="24" cy="10" r="3" fill="none" stroke="#3d9aa8" stroke-width="2"/>
+  <circle cx="24" cy="22" r="3" fill="none" stroke="#3d9aa8" stroke-width="2"/>
+  <line x1="10.6" y1="14.5" x2="21.4" y2="11.5" stroke="#3d9aa8" stroke-width="1.6"/>
+  <line x1="10.6" y1="17.5" x2="21.4" y2="20.5" stroke="#3d9aa8" stroke-width="1.6"/>
+</svg>

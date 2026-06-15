@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Soft Margin & C – K3 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .35rem .9rem; border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      font-size: var(--text-xs); font-weight: 700; cursor: pointer;
+      color: var(--btn-color, var(--color-text-faint));
+      transition: all .15s;
+    }
+    .mark-btn:hover { border-color: var(--color-success); color: var(--color-success); }
+    .stufe-footer {
+      margin-top: var(--space-6); padding-top: var(--space-4);
+      border-top: 1px solid var(--color-border);
+      display: flex; justify-content: flex-end;
+    }
+    .c-comparison {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4); margin: var(--space-5) 0;
+    }
+    .c-card {
+      border-radius: var(--radius-lg); padding: var(--space-4);
+      text-align: center; border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .c-card .c-val { font-size: 1.5rem; font-weight: 800; font-family: var(--font-mono); }
+    .c-card p { font-size: var(--text-xs); color: var(--color-text-muted); margin: var(--space-2) 0 0; }
+    @media (max-width: 640px) { .c-comparison { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <site-header active="k3" title="Soft Margin &amp; C – K3 · PRM V5"></site-header>
+  <lern-pfad topic="k3/t02"></lern-pfad>
+
+  <div class="layout">
+    <site-sidebar active="k3/t02"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K3 · Thema 2 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🔧 Soft Margin &amp; C</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">
+          Was passiert wenn Daten nicht linear trennbar sind? Wie erlaubt man dem SVM-Modell Fehler — kontrolliert durch den Parameter C?
+        </p>
+      </section>
+
+      <!-- STUFE 1 -->
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 1</span>
+          <h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Das Problem der Hard-Margin SVM</h3>
+          <p>Die Hard-Margin SVM funktioniert nur für <em>perfekt linear trennbare</em> Daten. Aber reale Daten haben fast immer:</p>
+          <ul>
+            <li><strong>Ausreißer</strong> — einzelne falsch platzierte Punkte</li>
+            <li><strong>Überlappende Klassen</strong> — keine perfekte Trennlinie existiert</li>
+            <li><strong>Rauschen</strong> — zufällige Fehlmessungen</li>
+          </ul>
+          <div class="info-box warning">
+            <strong>Lösung:</strong> Soft-Margin SVM — erlaube einige Fehler (Margin-Verletzungen), aber bestrafe sie mit dem Parameter C.
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button>
+        </div>
+      </div>
+
+      <!-- STUFE 2 -->
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 2</span>
+          <h2 class="stufe-title">🧠 Slack-Variablen und der C-Parameter</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Slack-Variablen ξᵢ</h3>
+          <p>Für jeden Punkt wird eine Slack-Variable ξᵢ ≥ 0 eingeführt:</p>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            ξᵢ = 0      → Punkt korrekt, außerhalb Margin<br>
+            0 &lt; ξᵢ ≤ 1  → Punkt korrekt, aber INNERHALB Margin<br>
+            ξᵢ &gt; 1      → Punkt FALSCH klassifiziert
+          </div>
+
+          <h3>Das Soft-Margin Optimierungsproblem</h3>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            <strong>Minimiere:</strong>   ½ · ||w||² + C · Σ ξᵢ<br>
+            <strong>unter:</strong>       yᵢ · (wᵀxᵢ + b) ≥ 1 − ξᵢ<br>
+            <strong>und:</strong>         ξᵢ ≥ 0  für alle i
+          </div>
+
+          <h3>Was C steuert</h3>
+          <div class="c-comparison">
+            <div class="c-card">
+              <div class="c-val" style="color:#e74c3c">C = 0.01</div>
+              <p><strong>Kleines C</strong><br>Viele Fehler erlaubt → Breiter Margin → High Bias, Low Variance → Underfitting möglich</p>
+            </div>
+            <div class="c-card" style="border-color:var(--color-success)">
+              <div class="c-val" style="color:var(--color-success)">C = 1.0</div>
+              <p><strong>Mittleres C</strong><br>Balance zwischen Margin-Breite und Fehlerstrafe → guter Startpunkt</p>
+            </div>
+            <div class="c-card">
+              <div class="c-val" style="color:#3498db">C = 1000</div>
+              <p><strong>Großes C</strong><br>Wenige Fehler erlaubt → Schmaler Margin → Low Bias, High Variance → Overfitting möglich</p>
+            </div>
+          </div>
+
+          <h3>C als Bias-Variance Regler</h3>
+          <table>
+            <thead><tr><th>C-Wert</th><th>Margin</th><th>Fehlertoleranz</th><th>Modellkomplexität</th></tr></thead>
+            <tbody>
+              <tr><td>Klein (0.001)</td><td>Breit</td><td>Hoch</td><td>Niedrig → Underfitting</td></tr>
+              <tr><td>Mittel (1.0)</td><td>Medium</td><td>Medium</td><td>Ausgewogen</td></tr>
+              <tr><td>Groß (1000)</td><td>Schmal</td><td>Niedrig</td><td>Hoch → Overfitting</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box">
+            <strong>Wichtig:</strong> C in sklearn ist der <em>Kehrwert</em> der Regularisierungsstärke. C=0.01 bedeutet starke Regularisierung (wie alpha=100 bei Ridge). Je kleiner C, desto mehr Regularisierung.
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button>
+        </div>
+      </div>
+
+      <!-- STUFE 3 -->
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 3</span>
+          <h2 class="stufe-title">⚙️ Hinge Loss — die Verlustfunktion der SVM</h2>
+        </div>
+        <div class="stufe-body">
+          <p>Das Soft-Margin-Problem kann als Verlustfunktions-Minimierung umgeschrieben werden:</p>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            Hinge Loss: L(yᵢ, ŷᵢ) = max(0, 1 − yᵢ · (wᵀxᵢ + b))<br><br>
+            Gesamtverlust: (1/C) · ½||w||² + Σ max(0, 1 − yᵢfᵢ)
+          </div>
+          <div class="algo-steps">
+            <div class="algo-step">
+              <div class="algo-step-num">1</div>
+              <div class="algo-step-body">
+                <strong>Korrekt &amp; außerhalb Margin: fᵢ ≥ 1</strong>
+                <p>max(0, 1-1) = 0 → kein Verlust</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">2</div>
+              <div class="algo-step-body">
+                <strong>Korrekt aber im Margin: 0 &lt; fᵢ &lt; 1</strong>
+                <p>max(0, 1-0.7) = 0.3 → kleiner Verlust</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">3</div>
+              <div class="algo-step-body">
+                <strong>Falsch klassifiziert: fᵢ &lt; 0</strong>
+                <p>max(0, 1-(-0.5)) = 1.5 → großer Verlust</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="algo">✓ Hinge Loss verstanden</button>
+        </div>
+      </div>
+
+      <!-- STUFE 4 -->
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 4</span>
+          <h2 class="stufe-title">🛠️ Von Scratch: Soft-Margin SVM mit Hinge Loss</h2>
+        </div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 4/5a — Klasse: SoftMarginSVM</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import numpy as np
+
+class SoftMarginSVM:
+    """
+    Soft-Margin SVM via Subgradient Descent mit Hinge Loss.
+    Primal-Form: min ½||w||² + C·Σmax(0, 1 - yᵢ(wᵀxᵢ+b))
+    """
+
+    def __init__(self, C=1.0, lr=0.001, n_iter=1000):
+        self.C = C
+        self.lr = lr
+        self.n_iter = n_iter
+
+    def fit(self, X, y):
+        y_ = np.where(y <= 0, -1, 1)
+        n, d = X.shape
+        self.w = np.zeros(d)
+        self.b = 0.0
+        self.losses = []
+
+        for epoch in range(self.n_iter):
+            total_loss = 0
+            for i in range(n):
+                margin = y_[i] * (np.dot(self.w, X[i]) + self.b)
+                hinge  = max(0, 1 - margin)
+                total_loss += 0.5 * np.dot(self.w, self.w) + self.C * hinge
+
+                if hinge > 0:
+                    # Subgradient bei Verletzung
+                    self.w = self.w - self.lr * (self.w - self.C * y_[i] * X[i])
+                    self.b = self.b + self.lr * self.C * y_[i]
+                else:
+                    # Nur Regularisierung
+                    self.w = self.w - self.lr * self.w
+
+            if epoch % 200 == 0:
+                self.losses.append(total_loss / n)
+
+    def predict(self, X):
+        return np.sign(np.dot(X, self.w) + self.b).astype(int)
+
+    def score(self, X, y):
+        y_ = np.where(y <= 0, -1, 1)
+        return np.mean(self.predict(X) == y_)</code></pre>
+          </div>
+
+          <p>Test: Vergleich verschiedener C-Werte auf demselben Datensatz:</p>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 4/5b — Test: SoftMarginSVM für verschiedene C</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+X, y = make_classification(
+    n_samples=300,
+    n_features=2,
+    n_redundant=0,
+    class_sep=0.8,
+    random_state=42
+)
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.3,
+    random_state=42
+)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+print(f"{'C':>8} | {'Train':>8} | {'Test':>8} | {'||w||':>8}")
+print("-" * 40)
+for C in [0.01, 0.1, 1.0, 10.0, 100.0]:
+    svm = SoftMarginSVM(C=C, lr=0.0001, n_iter=2000)
+    svm.fit(X_train_s, y_train)
+    tr = svm.score(X_train_s, y_train)
+    te = svm.score(X_test_s, y_test)
+    nw = np.linalg.norm(svm.w)
+    print(f"{C:>8} | {tr:>8.2%} | {te:>8.2%} | {nw:>8.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>       C |    Train |     Test |    ||w||
+----------------------------------------
+    0.01 |   68.10% |   68.89% |   0.0076
+     0.1 |   68.10% |   68.89% |   0.0757
+     1.0 |   89.05% |   87.78% |   0.6033
+    10.0 |   89.05% |   87.78% |   1.3659
+   100.0 |   90.48% |   88.89% |   2.2651</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Entscheidungsgrenze für kleines vs. großes C</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (SoftMarginSVM, X_train_s, y_train)
+import matplotlib.pyplot as plt
+
+xx, yy = np.meshgrid(
+    np.linspace(X_train_s[:, 0].min() - 1, X_train_s[:, 0].max() + 1, 200),
+    np.linspace(X_train_s[:, 1].min() - 1, X_train_s[:, 1].max() + 1, 200)
+)
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 3.6), sharey=True)
+for ax, C in zip(axes, [0.01, 100.0]):
+    svm_c = SoftMarginSVM(C=C, lr=0.0001, n_iter=2000)
+    svm_c.fit(X_train_s, y_train)
+    Z = xx * svm_c.w[0] + yy * svm_c.w[1] + svm_c.b
+    ax.contourf(xx, yy, Z, levels=[-1e6, 0, 1e6], colors=['#f4cccc', '#cce5ff'], alpha=0.5)
+    ax.contour(xx, yy, Z, levels=[0], colors='k')
+    ax.scatter(X_train_s[:, 0], X_train_s[:, 1], c=y_train, cmap='coolwarm', s=15, edgecolors='k', linewidths=0.3)
+    ax.set_title(f"C={C} (||w||={np.linalg.norm(svm_c.w):.3f})")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Entscheidungsgrenze für kleines vs. großes C</div>
+            <p>
+              Bei kleinem C ist die Grenze fast eine gerade
+              Linie, die viele Punkte falsch einsortiert (||w|| ≈ 0.008 — fast keine Trennung).
+              Bei großem C schmiegt sich die Grenze enger an die Trainingsdaten an (||w|| ≈ 2.27),
+              was die Trainings-Accuracy erhöht, aber das Risiko von Overfitting steigert.
+            </p>
+          </div>
+
+          <div class="compare-grid">
+            <div class="compare-card compare-card-a">
+              <div class="compare-card-label">Kleines C (z.B. 0.01)</div>
+              <p>Viele Margin-Verletzungen erlaubt. Breiter Margin, glattere Entscheidungsgrenze.
+              Höhere Bias, niedrigere Variance — Gefahr von Underfitting.</p>
+            </div>
+            <div class="compare-card-arrow">↔</div>
+            <div class="compare-card compare-card-b">
+              <div class="compare-card-label">Großes C (z.B. 100)</div>
+              <p>Wenige Margin-Verletzungen erlaubt. Schmaler Margin, Entscheidungsgrenze passt
+              sich stark an Trainingsdaten an. Niedrigere Bias, höhere Variance — Gefahr von Overfitting.</p>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button>
+        </div>
+      </div>
+
+      <!-- STUFE 5 -->
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 5</span>
+          <h2 class="stufe-title">🚀 C-Parameter mit sklearn und GridSearch</h2>
+        </div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 1 — Pipeline &amp; GridSearchCV ausführen</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.datasets import load_breast_cancer
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+import numpy as np
+
+X, y = load_breast_cancer(return_X_y=True)
+
+pipe = Pipeline([
+    ('scaler', StandardScaler()),
+    ('svm',    SVC(kernel='linear'))
+])
+
+# C über mehrere Größenordnungen suchen (logarithmisch!)
+param_grid = {'svm__C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+grid = GridSearchCV(
+    pipe,
+    param_grid,
+    cv=cv,
+    scoring='accuracy',
+    return_train_score=True
+)
+grid.fit(X, y)
+
+print(f"Bestes C: {grid.best_params_['svm__C']}")
+print(f"Beste CV Accuracy: {grid.best_score_:.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Bestes C: 0.1
+Beste CV Accuracy: 0.9754</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 2 — Bias-Variance-Tradeoff über alle C-Werte</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">print(f"{'C':>8} | {'Train Acc':>10} | {'Val Acc':>10} | Diagnose")
+print("-" * 50)
+for i, C in enumerate(param_grid['svm__C']):
+    tr = grid.cv_results_['mean_train_score'][i]
+    va = grid.cv_results_['mean_test_score'][i]
+    gap = tr - va
+    diag = "⚠️ Overfitting" if gap > 0.03 else ("📉 Underfitting" if va < 0.9 else "✅")
+    print(f"{C:>8} | {tr:>10.4f} | {va:>10.4f} | {diag}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>       C |  Train Acc |    Val Acc | Diagnose
+--------------------------------------------------
+   0.001 |     0.9407 |     0.9385 | ✅
+    0.01 |     0.9728 |     0.9666 | ✅
+     0.1 |     0.9851 |     0.9754 | ✅
+       1 |     0.9877 |     0.9737 | ✅
+      10 |     0.9925 |     0.9631 | ✅
+     100 |     0.9960 |     0.9526 | ⚠️ Overfitting
+    1000 |     0.9996 |     0.9526 | ⚠️ Overfitting</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 3 — Support Vectors des besten Modells</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">best_svm = grid.best_estimator_.named_steps['svm']
+print(f"Support Vectors (Klasse 0, 1): {best_svm.n_support_}")
+print(f"Gesamt: {sum(best_svm.n_support_)}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Support Vectors (Klasse 0, 1): [29 31]
+Gesamt: 60</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Bias-Variance-Tradeoff über C</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (param_grid, grid)
+import matplotlib.pyplot as plt
+
+Cs = param_grid['svm__C']
+train_scores = grid.cv_results_['mean_train_score']
+val_scores   = grid.cv_results_['mean_test_score']
+
+fig, ax = plt.subplots(figsize=(5.5, 3.4))
+ax.plot(Cs, train_scores, 'o-', color='#3a7ca5', label='Train Acc')
+ax.plot(Cs, val_scores, 'o-', color='#2e8b57', label='Val Acc (CV)')
+ax.set_xscale('log')
+ax.set_xlabel("C (log-Skala)")
+ax.set_ylabel("Accuracy")
+ax.set_title("Bias-Variance-Tradeoff über C")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Bias-Variance-Tradeoff über C</div>
+            <p>
+              Die Train-Kurve steigt mit wachsendem C kontinuierlich, während die
+              Val-Kurve bei C≈0.1 ihr Maximum (0.9754) erreicht und danach wieder fällt —
+              ab C=100 öffnet sich eine Lücke zu den Train-Scores (Overfitting). Der
+              <strong>Sweet Spot</strong> liegt also nicht beim höchsten C, sondern dort,
+              wo die Val-Kurve maximal ist.
+            </p>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button>
+        </div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T01-hyperebene-margin.html" class="nav-arrow">
+          <div class="nav-arrow-icon">←</div>
+          <div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">📐 Hyperebene &amp; Margin</div></div>
+        </a>
+        <a href="T03-kernel-trick.html" class="nav-arrow next">
+          <div class="nav-arrow-icon">→</div>
+          <div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">🌀 Kernel-Trick</div></div>
+        </a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K3 · T2 · Soft Margin &amp; C"></site-footer>
+
+  <script>
+    function copyCode(btn) {
+      const cell = btn.closest('.code-cell');
+      const code = cell.querySelector('code').textContent;
+      const out = cell.querySelector('.code-cell-output-body pre');
+      const text = out ? code + '\n\n# Ausgabe:\n' + out.textContent : code;
+      navigator.clipboard.writeText(text);
+      btn.textContent = 'Kopiert!';
+      setTimeout(() => btn.textContent = 'Kopieren', 2000);
+    }
+  </script>
+</body>
+</html>

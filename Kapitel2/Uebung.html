@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Übungsaufgaben K2 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .uebung{
+      border:1px solid var(--color-border);border-radius:var(--radius-xl);
+      background:var(--color-surface);box-shadow:var(--shadow-sm);
+      padding:var(--space-5);margin-bottom:var(--space-6);scroll-margin-top:90px;
+    }
+    .uebung-head{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-2)}
+    .uebung-num{
+      width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+      background:var(--color-primary);color:#fff;font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    .uebung-head h2{margin:0;font-size:var(--text-lg)}
+    .uebung-diff{margin-left:auto;font-size:var(--text-xs);font-weight:700;letter-spacing:.05em;
+      padding:.15rem .6rem;border-radius:var(--radius-full);
+      background:var(--color-surface-2);color:var(--color-text-muted)}
+    .uebung-diff.d1{color:#15803d;background:color-mix(in oklab,#16a34a 12%,var(--color-surface-2))}
+    .uebung-diff.d2{color:#b45309;background:color-mix(in oklab,#d97706 12%,var(--color-surface-2))}
+    .uebung-diff.d3{color:#b91c1c;background:color-mix(in oklab,#dc2626 12%,var(--color-surface-2))}
+    .uebung-aufgabe{font-size:var(--text-sm);line-height:1.7;margin-bottom:var(--space-3)}
+    .uebung-aufgabe ul{margin:var(--space-2) 0 0;padding-left:1.4em}
+    .uebung-aufgabe li{margin-bottom:.3em}
+
+    /* ─── Musterlösung (einklappbar) ─────────────────────── */
+    details.loesung{
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      background:var(--color-surface-2);margin-top:var(--space-3);overflow:hidden;
+    }
+    details.loesung summary{
+      cursor:pointer;padding:var(--space-3) var(--space-4);font-weight:700;font-size:var(--text-sm);
+      display:flex;align-items:center;gap:var(--space-3);list-style:none;user-select:none;transition:background .15s;
+      color:var(--color-primary);
+    }
+    details.loesung summary::-webkit-details-marker{display:none}
+    details.loesung summary::before{content:'▶';font-size:.7rem;transition:transform .2s;flex-shrink:0}
+    details.loesung[open] summary::before{transform:rotate(90deg)}
+    details.loesung summary:hover{background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))}
+    details.loesung[open]{border-color:color-mix(in oklab,var(--color-primary) 30%,var(--color-border))}
+    .loesung-body{padding:0 var(--space-4) var(--space-4)}
+    .loesung-body p{font-size:var(--text-sm);line-height:1.7}
+    .loesung-body .code-cell{margin-top:var(--space-3)}
+
+    /* ─── Freier Code-Bereich: live im Browser ausführen (Pyodide) ─── */
+    .playground{
+      margin-top:var(--space-4);padding-top:var(--space-4);
+      border-top:1px dashed var(--color-border);
+    }
+    .playground-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);display:flex;align-items:center;gap:var(--space-2);
+    }
+    .code-exercise{margin-top:var(--space-2)}
+    .code-input{
+      width:100%;min-height:160px;box-sizing:border-box;
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      padding:var(--space-4);border-radius:var(--radius-lg);
+      border:1px solid var(--color-border);background:var(--color-surface-offset);
+      color:var(--color-text);resize:vertical;tab-size:4;white-space:pre;
+    }
+    .code-input:focus{outline:2px solid var(--color-primary);outline-offset:-1px}
+    .code-exercise-toolbar{display:flex;align-items:center;gap:var(--space-3);margin-top:var(--space-2);flex-wrap:wrap}
+    .run-btn{
+      background:var(--color-primary);color:#fff;border:none;
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-btn:hover{filter:brightness(1.07)}
+    .run-btn:disabled{opacity:.6;cursor:wait}
+    .reset-btn{
+      background:var(--color-surface-2);color:var(--color-text-muted);
+      border:1px solid var(--color-border);
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-status{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .code-output{
+      margin-top:var(--space-2);min-height:2.6em;
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      border-radius:var(--radius-lg);padding:var(--space-4);
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      color:var(--color-text);white-space:pre-wrap;word-break:break-word;
+    }
+    .code-output.has-error{
+      color:#b91c1c;border-color:color-mix(in oklab,#dc2626 30%,var(--color-border));
+      background:color-mix(in oklab,#dc2626 6%,var(--color-surface-2));
+    }
+    .erwartete-ausgabe{margin-top:var(--space-3)}
+
+    /* ─── Plots: live (Pyodide) & statisch (vorgerendert) ─── */
+    .code-output-plot{margin-top:var(--space-2)}
+    .code-output-plot-img,
+    .erwartete-ausgabe img,
+    .loesung-body img{
+      max-width:100%;height:auto;display:block;margin-top:var(--space-2);
+      border-radius:var(--radius-lg);border:1px solid var(--color-border);
+    }
+    .loesung-extra{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border)}
+    .loesung-extra-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k2" title="Übungsaufgaben K2 · ML Grundlagen – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="k2/uebung"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">K2 · Übungsaufgaben · 6 Aufgaben</span>
+            <h1>Selbst <span class="key" style="--key-color:var(--color-primary)">programmieren</span></h1>
+            <p>
+              Lies die Aufgabenstellung und vergleiche dein Ziel mit der <strong>„Erwarteten Ausgabe“</strong>.
+              Schreibe deine Lösung dann selbst im <strong>freien Code-Bereich</strong>,
+              der per Klick auf <strong>„▶ Code ausführen“</strong> echtes Python (Pyodide, inkl. numpy/pandas/scikit-learn)
+              im Browser ausführt. Erst danach die Musterlösung aufklappen.
+              Alle Aufgaben arbeiten mit dem <code>iris</code>-Datensatz (150 Samples, 4 Features, 3 Klassen).
+            </p>
+            <div class="pill-row">
+              <span class="pill">Erwartete Ausgabe</span>
+              <span class="pill">Freier Bereich · live ausführen</span>
+              <span class="pill">Musterlösung einklappbar</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">So funktioniert's</h2>
+            <p>
+              1. Lies die Aufgabenstellung &amp; die „Erwartete Ausgabe“.<br>
+              2. Schreibe deine Lösung in den <strong>freien Code-Bereich</strong> (Setup ist schon vorhanden).<br>
+              3. Klicke auf <strong>„▶ Code ausführen“</strong> — beim ersten Mal lädt Pyodide (10-20 Sek.).<br>
+              4. Vergleiche deine Ausgabe mit der „Erwarteten Ausgabe“.<br>
+              5. Klicke auf <strong>„💡 Musterlösung anzeigen“</strong> nur wenn du nicht weiterkommst.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 1 ═══════════════ -->
+      <section id="uebung-1" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">1</span>
+          <h2>🌳 Overfitting & Underfitting erkennen</h2>
+          <span class="uebung-diff d1">Leicht</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Trainiere zwei <code>DecisionTreeClassifier</code> mit unterschiedlicher <code>max_depth</code> und vergleiche Train- und Test-Accuracy.</p>
+          <ul>
+            <li>Trainiere einen Baum mit <code>max_depth=1</code> und einen mit <code>max_depth=None</code> (random_state=42).</li>
+            <li>Gib für beide jeweils Train- und Test-Accuracy aus (gerundet auf 3 Nachkommastellen).</li>
+            <li>Welcher Baum overfittet, welcher underfittet?</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>max_depth=1: train=0.667 test=0.667
+max_depth=None: train=1.000 test=0.933</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>max_depth=1</code> kann die Daten kaum trennen — <strong>Underfitting</strong> (Train- und Test-Accuracy
+              sind beide niedrig und fast gleich, hohe Bias). <code>max_depth=None</code> lässt den Baum bis zur
+              Reinheit wachsen — Train-Accuracy = 1.0, aber Test-Accuracy ist niedriger: <strong>Overfitting</strong>
+              (hohe Varianz, das Modell hat Rauschen mitgelernt).
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.tree import DecisionTreeClassifier
+
+for depth in [1, None]:
+    tree = DecisionTreeClassifier(max_depth=depth, random_state=42)
+    tree.fit(X_train, y_train)
+    print(f"max_depth={depth}: train={tree.score(X_train,y_train):.3f} "
+          f"test={tree.score(X_test,y_test):.3f}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>max_depth=1: train=0.667 test=0.667
+max_depth=None: train=1.000 test=0.933</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 2 ═══════════════ -->
+      <section id="uebung-2" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">2</span>
+          <h2>⚖️ Bias-Variance Tradeoff mit k-NN</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Untersuche den Bias-Variance Tradeoff am Beispiel von <code>KNeighborsClassifier</code> mit unterschiedlichem <code>k</code>.</p>
+          <ul>
+            <li>Trainiere KNN-Modelle mit <code>k=1</code> und <code>k=50</code>.</li>
+            <li>Gib für beide jeweils Train- und Test-Accuracy aus (gerundet auf 3 Nachkommastellen).</li>
+            <li>Ordne die beiden Modelle den Begriffen „hohe Varianz“ und „hohe Bias“ zu.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>k=1: train=1.000 test=0.967
+k=50: train=0.900 test=0.900</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>k=1</code> merkt sich jeden einzelnen Trainingspunkt (Train-Accuracy = 1.0) — das ist
+              <strong>hohe Varianz</strong> (sehr flexibel, reagiert stark auf einzelne Punkte).
+              <code>k=50</code> mittelt über sehr viele Nachbarn und glättet die Entscheidungsgrenze stark —
+              das ist <strong>hohe Bias</strong> (Train- und Test-Accuracy sinken gemeinsam ab, das Modell ist zu starr).
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.neighbors import KNeighborsClassifier
+
+for k in [1, 50]:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    knn.fit(X_train, y_train)
+    print(f"k={k}: train={knn.score(X_train,y_train):.3f} "
+          f"test={knn.score(X_test,y_test):.3f}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>k=1: train=1.000 test=0.967
+k=50: train=0.900 test=0.900</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 3 ═══════════════ -->
+      <section id="uebung-3" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">3</span>
+          <h2>🔄 Cross-Validation mit cross_val_score</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Bewerte eine <code>LogisticRegression</code> mit 5-facher Cross-Validation auf dem <strong>gesamten</strong> Datensatz.</p>
+          <ul>
+            <li>Nutze <code>cross_val_score</code> mit <code>cv=5</code> auf <code>X, y</code> (nicht nur X_train!).</li>
+            <li>Gib die 5 Scores gerundet auf 3 Nachkommastellen aus.</li>
+            <li>Gib Mittelwert und Standardabweichung der Scores aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Scores: [0.967 1.    0.933 0.967 1.   ]
+Mean: 0.973 Std: 0.025</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>cross_val_score</code> teilt <code>X, y</code> automatisch in 5 Folds, trainiert 5 separate Modelle
+              und gibt 5 Test-Scores zurück. Der Mittelwert ist eine deutlich robustere Schätzung der Modellgüte als
+              ein einziger Train-Test-Split — die Standardabweichung zeigt, wie stark das Ergebnis vom konkreten Split abhängt.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
+
+clf = LogisticRegression(max_iter=200)
+scores = cross_val_score(clf, X, y, cv=5)
+
+print("Scores:", np.round(scores, 3))
+print("Mean:", round(scores.mean(), 3), "Std:", round(scores.std(), 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Scores: [0.967 1.    0.933 0.967 1.   ]
+Mean: 0.973 Std: 0.025</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 4 ═══════════════ -->
+      <section id="uebung-4" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">4</span>
+          <h2>📈 Learning Curve per Hand</h2>
+          <span class="uebung-diff d3">Schwer</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Untersuche, wie sich Train- und Test-Accuracy eines <code>DecisionTreeClassifier(max_depth=3)</code> mit wachsender Trainingsmenge verändern.</p>
+          <ul>
+            <li>Trainiere für <code>n in [10, 30, 60, 120]</code> jeweils auf den ersten <code>n</code> Zeilen von <code>X_train, y_train</code>.</li>
+            <li>Gib für jedes <code>n</code> Train-Accuracy (auf den <code>n</code> Zeilen) und Test-Accuracy (auf <code>X_test</code>) aus.</li>
+            <li>Beschreibe, wie sich die Lücke zwischen Train- und Test-Accuracy mit wachsendem <code>n</code> verändert.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>n=10: train=1.000 test=0.633
+n=30: train=1.000 test=0.967
+n=60: train=0.983 test=0.967
+n=120: train=0.983 test=0.967</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="12">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+from sklearn.tree import DecisionTreeClassifier
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Bei sehr wenigen Trainingsdaten (<code>n=10</code>) merkt sich der Baum diese perfekt (Train=1.0),
+              generalisiert aber kaum (Test=0.633) — große Lücke = <strong>Overfitting</strong>. Mit mehr Daten
+              schrumpft die Lücke zwischen Train- und Test-Accuracy, weil das Modell die tatsächliche Struktur
+              statt einzelner Punkte lernt. Ab <code>n=60</code> ändert sich kaum noch etwas — das Modell hat
+              seine Kapazitätsgrenze (<code>max_depth=3</code>) erreicht.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.tree import DecisionTreeClassifier
+
+for n in [10, 30, 60, 120]:
+    Xs, ys = X_train[:n], y_train[:n]
+    tree = DecisionTreeClassifier(max_depth=3, random_state=42)
+    tree.fit(Xs, ys)
+    print(f"n={n}: train={tree.score(Xs,ys):.3f} test={tree.score(X_test,y_test):.3f}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>n=10: train=1.000 test=0.633
+n=30: train=1.000 test=0.967
+n=60: train=0.983 test=0.967
+n=120: train=0.983 test=0.967</pre>
+                  
+                </div>
+              </div>
+            </div>
+        <div class="loesung-extra">
+          <div class="loesung-extra-label">📊 Erweiterung: Visualisierung</div>
+          <p>
+              Die <strong>Learning Curve</strong> macht die Tabelle aus der Lösung sofort sichtbar: die
+              blaue Train-Kurve startet bei 1.0 und sinkt leicht, die orange Test-Kurve startet niedrig
+              und steigt stark an — beide Kurven nähern sich mit wachsendem <code>n</code> an. Die
+              Lücke zwischen ihnen ist ein direktes visuelles Maß für Overfitting.
+          </p>
+          <div class="code-cell">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Python — Visualisierung</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import matplotlib.pyplot as plt
+
+ns = [10, 30, 60, 120]
+train_acc, test_acc = [], []
+for n in ns:
+    Xs, ys = X_train[:n], y_train[:n]
+    tree = DecisionTreeClassifier(max_depth=3, random_state=42)
+    tree.fit(Xs, ys)
+    train_acc.append(tree.score(Xs, ys))
+    test_acc.append(tree.score(X_test, y_test))
+
+plt.plot(ns, train_acc, marker='o', label='Train-Accuracy')
+plt.plot(ns, test_acc, marker='o', label='Test-Accuracy')
+plt.xlabel("Trainingsgröße n"); plt.ylabel("Accuracy")
+plt.title("Learning Curve"); plt.legend()
+plt.show()</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <img src="../assets/img/uebung/k2-ex4-learning-curve.png" alt="Learning Curve: Train- und Test-Accuracy steigen/fallen mit wachsendem n und nähern sich an">
+              </div>
+            </div>
+          </div>
+        </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 5 ═══════════════ -->
+      <section id="uebung-5" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">5</span>
+          <h2>✂️ KFold-Splits selbst erzeugen</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Erzeuge mit <code>KFold</code> die Indizes für 5 Folds und gib die Größen der Train-/Test-Splits aus.</p>
+          <ul>
+            <li>Erstelle <code>KFold(n_splits=5, shuffle=True, random_state=42)</code>.</li>
+            <li>Iteriere mit <code>kf.split(X)</code> über alle Folds.</li>
+            <li>Gib für jeden Fold die Anzahl der Train- und Test-Indizes aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Fold 1: train=120 test=30
+Fold 2: train=120 test=30
+Fold 3: train=120 test=30
+Fold 4: train=120 test=30
+Fold 5: train=120 test=30</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+from sklearn.model_selection import KFold
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>KFold(n_splits=5)</code> teilt die 150 Samples in 5 gleich große Teile (je 30). Bei jeder Iteration
+              dient <strong>ein</strong> Teil (30 Samples) als Test-Set und die <strong>restlichen vier</strong> (120 Samples)
+              als Training — über alle 5 Folds hinweg ist also jedes Sample genau einmal im Test-Set. <code>shuffle=True</code>
+              sorgt dafür, dass die Reihenfolge der Daten keine Rolle spielt.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.model_selection import KFold
+
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+for i, (train_idx, test_idx) in enumerate(kf.split(X)):
+    print(f"Fold {i+1}: train={len(train_idx)} test={len(test_idx)}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Fold 1: train=120 test=30
+Fold 2: train=120 test=30
+Fold 3: train=120 test=30
+Fold 4: train=120 test=30
+Fold 5: train=120 test=30</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 6 ═══════════════ -->
+      <section id="uebung-6" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">6</span>
+          <h2>📊 Entscheidungsgrenzen visualisieren: Under- vs. Overfitting</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Zeichne die Entscheidungsgrenzen von zwei <code>DecisionTreeClassifier</code> mit <code>max_depth=1</code> und <code>max_depth=None</code> auf den Features <code>petal_length</code>/<code>petal_width</code> (Spalten 2 und 3).</p>
+          <ul>
+            <li>Erzeuge mit <code>X2 = X[:, 2:4]</code> ein 2D-Feature-Set und splitte es (stratify, random_state=42).</li>
+            <li>Erzeuge mit <code>np.meshgrid</code> ein Gitter über den Wertebereich beider Features.</li>
+            <li>Trainiere beide Bäume, sage für jeden Gitterpunkt die Klasse vorher (<code>predict</code>) und zeichne das Ergebnis mit <code>plt.contourf</code> sowie die Trainingspunkte mit <code>plt.scatter</code>.</li>
+            <li>Erstelle zwei Subplots (<code>plt.subplots(1, 2, ...)</code>), einen pro <code>max_depth</code>.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Zwei Subplots: links eine grobe, gerade Trennlinie (max_depth=1,
+Underfitting), rechts viele kleine, eckige Regionen, die einzelne
+Punkte exakt umschließen (max_depth=None, Overfitting).</pre>
+            <img src="../assets/img/uebung/k2-ex6-decision-boundaries.png" alt="Entscheidungsgrenzen: links grobe Trennung bei max_depth=1, rechts stark zerklüftete Grenzen bei max_depth=None">
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="14">import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+X, y = load_iris(return_X_y=True)
+X2 = X[:, 2:4]
+X2_train, X2_test, y2_train, y2_test = train_test_split(
+    X2, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Mit <code>max_depth=1</code> kann der Baum nur <strong>einen</strong> Split machen — die
+              Entscheidungsgrenze besteht aus genau zwei großen, geraden Regionen (<strong>Underfitting</strong>,
+              hohe Bias). Mit <code>max_depth=None</code> wächst der Baum, bis jedes Blatt rein ist — die
+              Entscheidungsgrenze zerfällt in viele kleine, eckige Inseln, die einzelne (auch fehlplatzierte)
+              Trainingspunkte exakt einschließen (<strong>Overfitting</strong>, hohe Varianz). Diese Visualisierung
+              macht den Bias-Variance-Tradeoff aus Aufgabe 1 unmittelbar greifbar.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">import matplotlib.pyplot as plt
+
+xx, yy = np.meshgrid(
+    np.linspace(X2[:,0].min()-0.5, X2[:,0].max()+0.5, 200),
+    np.linspace(X2[:,1].min()-0.5, X2[:,1].max()+0.5, 200)
+)
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 3.5))
+for ax, depth, title in zip(axes, [1, None],
+                             ["max_depth=1 (Underfitting)", "max_depth=None (Overfitting)"]):
+    tree = DecisionTreeClassifier(max_depth=depth, random_state=42)
+    tree.fit(X2_train, y2_train)
+    Z = tree.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+    ax.contourf(xx, yy, Z, alpha=0.3, cmap='viridis')
+    ax.scatter(X2_train[:,0], X2_train[:,1], c=y2_train, cmap='viridis', edgecolor='k', s=20)
+    ax.set_title(title)
+    ax.set_xlabel("petal_length"); ax.set_ylabel("petal_width")
+plt.show()</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre></pre>
+                  <img src="../assets/img/uebung/k2-ex6-decision-boundaries.png" alt="Entscheidungsgrenzen: links grobe Trennung bei max_depth=1, rechts stark zerklüftete Grenzen bei max_depth=None">
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="Quiz.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Zurück</div><div class="nav-arrow-title">🧠 Quiz</div></div></a>
+        <a href="../Kapitel3/Kapitel3.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">3 · SVM</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K2 · Übungsaufgaben · PRM V5"></site-footer>
+</body>
+</html>

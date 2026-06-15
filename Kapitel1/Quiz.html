@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz K1 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <site-header active="k1" title="Quiz K1 · Data Preparation – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="k1/quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K1 · Quiz · 20 Fragen</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🧠 Quiz: Data Preparation</h1>
+        <p style="color:var(--color-text-muted)">Klicke auf eine Frage um die Antwort aufzudecken. Beantworte sie erst selbst!</p>
+      </section>
+
+      <section id="train-test-split">
+        <h2>train_test_split</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q1</span> Was ist der Zweck von train_test_split?</summary>
+          <div class="frage-antwort">Der Datensatz wird in Training- und Test-Set aufgeteilt, damit das Modell auf Daten bewertet wird, die es <strong>nie zuvor gesehen hat</strong>. Würden dieselben Daten zum Training und zur Evaluation genutzt, würde man Auswendiglernen statt Generalisierung messen.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q2</span> Was bewirkt <code>stratify=y</code>?</summary>
+          <div class="frage-antwort">Die Klassenverteilung aus dem Originaldatensatz wird im Train- und Test-Set erhalten. Wichtig bei unbalancierten Datensätzen — ohne <code>stratify</code> könnte eine seltene Klasse zufällig im Test-Set fehlen.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q3</span> Warum muss der Scaler NACH dem Split gefittet werden?</summary>
+          <div class="frage-antwort">Wird der Scaler auf dem ganzen Datensatz gefittet (inkl. Testdaten), enthält er statistische Information aus den Testdaten (min, max, μ, σ). Dann "kennt" das Modell die Testdaten indirekt → <strong>Data Leakage</strong>. Scaler immer nur auf X_train fitten.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q4</span> Was passiert intern bei train_test_split?</summary>
+          <div class="frage-antwort">
+            1. Index-Array [0, ..., N-1] erstellen<br>
+            2. Indizes zufällig mischen (shuffle)<br>
+            3. n_test = int(N × test_size) berechnen<br>
+            4. Erste n_test Indizes → Test, Rest → Training<br>
+            5. X und y mit diesen Indizes slicen
+          </div>
+        </details>
+      </section>
+
+      <section id="normalisierung-scaling">
+        <h2>Normalisierung &amp; Scaling</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q5</span> Schreibe die Min-Max-Formel auf.</summary>
+          <div class="frage-antwort"><code>x' = (x - x_min) / (x_max - x_min)</code><br>Resultat liegt in [0, 1]. x_min und x_max werden aus den <strong>Trainingsdaten</strong> berechnet.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q6</span> Schreibe die Z-Score (Standardisierungs) Formel auf.</summary>
+          <div class="frage-antwort"><code>x' = (x - μ) / σ</code><br>μ = Mittelwert, σ = Standardabweichung (beides aus Trainingsdaten). Resultat hat Mittelwert 0 und Std 1.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q7</span> Wann ist RobustScaler besser als StandardScaler?</summary>
+          <div class="frage-antwort">Bei <strong>Ausreißern</strong>. RobustScaler nutzt Median und IQR statt Mean und Std — diese sind robust gegenüber Extremwerten. StandardScaler wird durch Ausreißer stark beeinflusst und quetscht alle normalen Werte zusammen.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q8</span> Welche Algorithmen benötigen Feature Scaling?</summary>
+          <div class="frage-antwort">✅ Benötigen Scaling: <strong>k-NN, SVM, Logistische Regression, Neuronale Netze, Gradient Descent-basierte Methoden</strong><br>❌ Brauchen kein Scaling: <strong>Entscheidungsbäume, Random Forest, Gradient Boosting</strong> (baumbasiert, splitten nach Schwellenwerten)</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q9</span> Berechne: Feature = [10, 20, 30]. MinMax-Normalisierung von 20?</summary>
+          <div class="frage-antwort">min=10, max=30<br>x' = (20 - 10) / (30 - 10) = 10/20 = <strong>0.5</strong></div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q10</span> Du hast einen Testpunkt x=35, dein Train-MinMax: min=10, max=30. Was ist x'?</summary>
+          <div class="frage-antwort">x' = (35 - 10) / (30 - 10) = 25/20 = <strong>1.25</strong><br>Der Wert liegt außerhalb [0,1] — das ist möglich und korrekt! Testdaten können außerhalb des Trainingsbereichs liegen. Kein Fehler.</div>
+        </details>
+      </section>
+
+      <section id="encoding">
+        <h2>Encoding</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q11</span> Was ist das Problem mit Label-Encoding für nominale Kategorien?</summary>
+          <div class="frage-antwort">Label-Encoding weist Zahlen zu (rot=0, blau=1, grün=2). Der Algorithmus interpretiert das als Ordnung: grün &gt; blau &gt; rot — die gar nicht existiert. Nur für <strong>ordinale</strong> Kategorien (klein &lt; mittel &lt; groß) korrekt.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q12</span> Was ist die Dummy-Variable-Trap?</summary>
+          <div class="frage-antwort">Bei One-Hot-Encoding von K Kategorien entstehen K Spalten. Die letzte Spalte ist immer durch die anderen bestimmbar (wenn alle anderen 0 sind, muss sie 1 sein → Multikollinearität). Lösung: <code>drop='first'</code> → nur K-1 Spalten.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q13</span> Für welche Variable nutzt man LabelEncoder in sklearn?</summary>
+          <div class="frage-antwort">Nur für die <strong>Zielvariable y</strong>. Für Feature-Spalten X nutzt man <code>OneHotEncoder</code> (nominal) oder <code>OrdinalEncoder</code> (ordinal).</div>
+        </details>
+      </section>
+
+      <section id="feature-selection">
+        <h2>Feature Selection</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q14</span> Was macht VarianceThreshold?</summary>
+          <div class="frage-antwort">Entfernt Features, deren Varianz unter einem Schwellenwert liegt. Fast konstante Features (Var ≈ 0) liefern keine Information für das Modell.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q15</span> Nenne die drei Kategorien von Feature-Selection-Methoden.</summary>
+          <div class="frage-antwort">
+            <strong>Filter:</strong> Statistisches Maß unabhängig vom Modell (VarianceThreshold, SelectKBest)<br>
+            <strong>Wrapper:</strong> Modell wird mit verschiedenen Subsets trainiert (RFE)<br>
+            <strong>Embedded:</strong> Selection während des Trainings (Lasso/L1, Feature Importance)
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q16</span> Was misst <code>f_classif</code> in SelectKBest?</summary>
+          <div class="frage-antwort">Den <strong>ANOVA F-Wert</strong> — wie stark ein Feature zwischen den Klassen unterscheidet (lineare Abhängigkeit). Hoher F-Wert = Feature trennt Klassen gut.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q17</span> Nenne 3 Gründe warum zu viele Features schaden.</summary>
+          <div class="frage-antwort">
+            1. <strong>Overfitting</strong>: Modell lernt Rauschen<br>
+            2. <strong>Fluch der Dimensionalität</strong>: Abstände verlieren Bedeutung in hohen Dimensionen<br>
+            3. <strong>Rechenzeit</strong>: Mehr Berechnungen<br>
+            (+ Interpretierbarkeit, Speicher)
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q18</span> Prüfungsfrage: Was ist "Data Leakage" und wie entsteht es?</summary>
+          <div class="frage-antwort">Data Leakage bedeutet, dass Information aus dem Test-Set in das Training "einsickert". Entsteht durch: Scaler auf ganzen Datensatz fitten, Feature Selection auf ganzen Datensatz, Target-basierte Features ohne CV. <strong>Folge:</strong> Validierungsmetriken sind zu optimistisch — das Modell versagt in der Produktion.</div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q19</span> Erkläre den Unterschied: <code>fit_transform(X_train)</code> vs. <code>transform(X_test)</code></summary>
+          <div class="frage-antwort">
+            <code>fit_transform(X_train)</code>: Berechnet Parameter (μ, σ oder min, max) aus X_train UND transformiert.<br>
+            <code>transform(X_test)</code>: Nutzt die bereits gelernten Parameter und transformiert nur — OHNE neue Parameter zu berechnen.<br>
+            So stellt man sicher, dass beide Sets mit denselben Parametern transformiert werden.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q20</span> Welcher Vorteil hat eine sklearn Pipeline für Feature Selection + Training?</summary>
+          <div class="frage-antwort">Die Pipeline handhabt fit/transform automatisch korrekt: Bei <code>pipe.fit(X_train)</code> werden alle Schritte sequenziell auf Train-Daten gefittet. Bei <code>pipe.predict(X_test)</code> oder <code>pipe.score(X_test)</code> wird nur transform() aufgerufen. <strong>Data Leakage ist strukturell ausgeschlossen.</strong></div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="T05-feature-selection.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Letztes Thema</div><div class="nav-arrow-title">🔍 Feature Selection</div></div></a>
+        <a href="Uebung.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">✏️ Übungsaufgaben</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K1 · Quiz · PRM V5"></site-footer>
+</body>
+</html>

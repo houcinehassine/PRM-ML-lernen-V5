@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Übungsaufgaben K7 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .uebung{
+      border:1px solid var(--color-border);border-radius:var(--radius-xl);
+      background:var(--color-surface);box-shadow:var(--shadow-sm);
+      padding:var(--space-5);margin-bottom:var(--space-6);scroll-margin-top:90px;
+    }
+    .uebung-head{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-2)}
+    .uebung-num{
+      width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+      background:var(--color-primary);color:#fff;font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    .uebung-head h2{margin:0;font-size:var(--text-lg)}
+    .uebung-diff{margin-left:auto;font-size:var(--text-xs);font-weight:700;letter-spacing:.05em;
+      padding:.15rem .6rem;border-radius:var(--radius-full);
+      background:var(--color-surface-2);color:var(--color-text-muted)}
+    .uebung-diff.d1{color:#15803d;background:color-mix(in oklab,#16a34a 12%,var(--color-surface-2))}
+    .uebung-diff.d2{color:#b45309;background:color-mix(in oklab,#d97706 12%,var(--color-surface-2))}
+    .uebung-diff.d3{color:#b91c1c;background:color-mix(in oklab,#dc2626 12%,var(--color-surface-2))}
+    .uebung-aufgabe{font-size:var(--text-sm);line-height:1.7;margin-bottom:var(--space-3)}
+    .uebung-aufgabe ul{margin:var(--space-2) 0 0;padding-left:1.4em}
+    .uebung-aufgabe li{margin-bottom:.3em}
+
+    /* ─── Musterlösung (einklappbar) ─────────────────────── */
+    details.loesung{
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      background:var(--color-surface-2);margin-top:var(--space-3);overflow:hidden;
+    }
+    details.loesung summary{
+      cursor:pointer;padding:var(--space-3) var(--space-4);font-weight:700;font-size:var(--text-sm);
+      display:flex;align-items:center;gap:var(--space-3);list-style:none;user-select:none;transition:background .15s;
+      color:var(--color-primary);
+    }
+    details.loesung summary::-webkit-details-marker{display:none}
+    details.loesung summary::before{content:'▶';font-size:.7rem;transition:transform .2s;flex-shrink:0}
+    details.loesung[open] summary::before{transform:rotate(90deg)}
+    details.loesung summary:hover{background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))}
+    details.loesung[open]{border-color:color-mix(in oklab,var(--color-primary) 30%,var(--color-border))}
+    .loesung-body{padding:0 var(--space-4) var(--space-4)}
+    .loesung-body p{font-size:var(--text-sm);line-height:1.7}
+    .loesung-body .code-cell{margin-top:var(--space-3)}
+
+    /* ─── Freier Code-Bereich: live im Browser ausführen (Pyodide) ─── */
+    .playground{
+      margin-top:var(--space-4);padding-top:var(--space-4);
+      border-top:1px dashed var(--color-border);
+    }
+    .playground-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);display:flex;align-items:center;gap:var(--space-2);
+    }
+    .code-exercise{margin-top:var(--space-2)}
+    .code-input{
+      width:100%;min-height:160px;box-sizing:border-box;
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      padding:var(--space-4);border-radius:var(--radius-lg);
+      border:1px solid var(--color-border);background:var(--color-surface-offset);
+      color:var(--color-text);resize:vertical;tab-size:4;white-space:pre;
+    }
+    .code-input:focus{outline:2px solid var(--color-primary);outline-offset:-1px}
+    .code-exercise-toolbar{display:flex;align-items:center;gap:var(--space-3);margin-top:var(--space-2);flex-wrap:wrap}
+    .run-btn{
+      background:var(--color-primary);color:#fff;border:none;
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-btn:hover{filter:brightness(1.07)}
+    .run-btn:disabled{opacity:.6;cursor:wait}
+    .reset-btn{
+      background:var(--color-surface-2);color:var(--color-text-muted);
+      border:1px solid var(--color-border);
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-status{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .code-output{
+      margin-top:var(--space-2);min-height:2.6em;
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      border-radius:var(--radius-lg);padding:var(--space-4);
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      color:var(--color-text);white-space:pre-wrap;word-break:break-word;
+    }
+    .code-output.has-error{
+      color:#b91c1c;border-color:color-mix(in oklab,#dc2626 30%,var(--color-border));
+      background:color-mix(in oklab,#dc2626 6%,var(--color-surface-2));
+    }
+    .erwartete-ausgabe{margin-top:var(--space-3)}
+
+    /* ─── Plots: live (Pyodide) & statisch (vorgerendert) ─── */
+    .code-output-plot{margin-top:var(--space-2)}
+    .code-output-plot-img,
+    .erwartete-ausgabe img,
+    .loesung-body img{
+      max-width:100%;height:auto;display:block;margin-top:var(--space-2);
+      border-radius:var(--radius-lg);border:1px solid var(--color-border);
+    }
+    .loesung-extra{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border)}
+    .loesung-extra-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k7" title="Übungsaufgaben K7 · Evaluation – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="k7/uebung"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">K7 · Übungsaufgaben · 6 Aufgaben</span>
+            <h1>Selbst <span class="key" style="--key-color:var(--color-primary)">programmieren</span></h1>
+            <p>
+              Lies die Aufgabenstellung und vergleiche dein Ziel mit der <strong>„Erwarteten Ausgabe“</strong>.
+              Schreibe deine Lösung dann selbst im <strong>freien Code-Bereich</strong>,
+              der per Klick auf <strong>„▶ Code ausführen“</strong> echtes Python (Pyodide, inkl. numpy/pandas/scikit-learn)
+              im Browser ausführt. Erst danach die Musterlösung aufklappen.
+              Alle Aufgaben nutzen eine <code>LogisticRegression</code> auf dem <code>iris</code>-Datensatz.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Erwartete Ausgabe</span>
+              <span class="pill">Freier Bereich · live ausführen</span>
+              <span class="pill">Musterlösung einklappbar</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">So funktioniert's</h2>
+            <p>
+              1. Lies die Aufgabenstellung &amp; die „Erwartete Ausgabe“.<br>
+              2. Schreibe deine Lösung in den <strong>freien Code-Bereich</strong> (Setup ist schon vorhanden).<br>
+              3. Klicke auf <strong>„▶ Code ausführen“</strong> — beim ersten Mal lädt Pyodide (10-20 Sek.).<br>
+              4. Vergleiche deine Ausgabe mit der „Erwarteten Ausgabe“.<br>
+              5. Klicke auf <strong>„💡 Musterlösung anzeigen“</strong> nur wenn du nicht weiterkommst.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 1 ═══════════════ -->
+      <section id="uebung-1" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">1</span>
+          <h2>🔢 Confusion Matrix berechnen</h2>
+          <span class="uebung-diff d1">Leicht</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Berechne die Confusion Matrix für die Vorhersagen einer <code>LogisticRegression</code> auf dem Iris-Testset.</p>
+          <ul>
+            <li>Nutze <code>confusion_matrix(y_test, y_pred)</code> aus <code>sklearn.metrics</code>.</li>
+            <li>Gib die Matrix aus.</li>
+            <li>Welche Klasse(n) werden perfekt erkannt, wo gibt es Verwechslungen?</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>[[10  0  0]
+ [ 0  9  1]
+ [ 0  0 10]]</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+clf = LogisticRegression(max_iter=200)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+from sklearn.metrics import confusion_matrix
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Zeile <code>i</code> = wahre Klasse <code>i</code>, Spalte <code>j</code> = vorhergesagte Klasse
+              <code>j</code>. Die Diagonale enthält die korrekten Vorhersagen. Klasse 0 (Setosa) und Klasse 2
+              (Virginica) werden mit 10/10 perfekt erkannt. Bei Klasse 1 (Versicolor) wird <strong>1 von 10</strong>
+              Samples fälschlich als Klasse 2 vorhergesagt (Eintrag <code>cm[1,2]=1</code>) — diese beiden Arten
+              sind sich am ähnlichsten.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(y_test, y_pred)
+print(cm)</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>[[10  0  0]
+ [ 0  9  1]
+ [ 0  0 10]]</pre>
+                  
+                </div>
+              </div>
+            </div>
+        <div class="loesung-extra">
+          <div class="loesung-extra-label">📊 Erweiterung: Visualisierung</div>
+          <p>
+              Eine Heatmap macht die Confusion Matrix auf einen Blick lesbar: die helle Diagonale zeigt
+              die korrekten Vorhersagen (10, 9, 10), das einzige dunklere Off-Diagonal-Feld bei Zeile 1 /
+              Spalte 2 ist genau der eine Versicolor-Punkt, der fälschlich als Virginica vorhergesagt wurde.
+              Bei größeren Klassenzahlen ist eine solche Heatmap deutlich übersichtlicher als eine reine
+              Zahlenmatrix.
+          </p>
+          <div class="code-cell">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Python — Visualisierung</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import matplotlib.pyplot as plt
+
+cm = confusion_matrix(y_test, y_pred)
+
+fig, ax = plt.subplots(figsize=(4.5, 4))
+im = ax.imshow(cm, cmap='Blues')
+for i in range(3):
+    for j in range(3):
+        ax.text(j, i, cm[i, j], ha='center', va='center',
+                color='white' if cm[i, j] > cm.max()/2 else 'black')
+ax.set_xticks([0,1,2]); ax.set_yticks([0,1,2])
+ax.set_xlabel("Vorhergesagt"); ax.set_ylabel("Wahr")
+ax.set_title("Confusion Matrix")
+fig.colorbar(im)
+plt.show()</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <img src="../assets/img/uebung/k7-ex1-confusion-matrix.png" alt="Heatmap der Confusion Matrix: Diagonale dunkel/hell mit 10,9,10, ein Fehler bei Zeile 1/Spalte 2">
+              </div>
+            </div>
+          </div>
+        </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 2 ═══════════════ -->
+      <section id="uebung-2" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">2</span>
+          <h2>📈 ROC-Kurve & AUC (binär)</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Berechne ROC-Kurve und AUC für die binäre Frage „ist es Klasse 0 (Setosa) oder nicht?“.</p>
+          <ul>
+            <li>Erzeuge <code>y_test_bin = (y_test == 0).astype(int)</code>.</li>
+            <li>Hole die Wahrscheinlichkeiten für Klasse 0 mit <code>clf.predict_proba(X_test)[:, 0]</code>.</li>
+            <li>Berechne <code>roc_auc_score</code> (3 Nachkommastellen) sowie <code>fpr, tpr</code> mit <code>roc_curve</code> (jeweils 3 Nachkommastellen).</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>AUC: 1.0
+FPR: [0. 0. 0. 1.]
+TPR: [0.  0.1 1.  1. ]</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+clf = LogisticRegression(max_iter=200)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+from sklearn.metrics import roc_auc_score, roc_curve
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Die <strong>ROC-Kurve</strong> trägt für verschiedene Entscheidungsschwellen die
+              True-Positive-Rate (TPR, y-Achse) gegen die False-Positive-Rate (FPR, x-Achse) auf. Eine
+              <strong>AUC von 1.0</strong> bedeutet: es gibt eine Schwelle, bei der <strong>alle</strong> Setosa-Punkte
+              höhere Wahrscheinlichkeit bekommen als <strong>alle</strong> Nicht-Setosa-Punkte — perfekte Trennung.
+              Geometrisch verläuft die Kurve direkt über die linke obere Ecke (FPR=0, TPR=1), bevor sie zum Punkt
+              (1,1) springt.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.metrics import roc_auc_score, roc_curve
+
+y_test_bin = (y_test == 0).astype(int)
+y_score = clf.predict_proba(X_test)[:, 0]
+
+auc = roc_auc_score(y_test_bin, y_score)
+print("AUC:", round(auc, 3))
+
+fpr, tpr, thresholds = roc_curve(y_test_bin, y_score)
+print("FPR:", np.round(fpr, 3))
+print("TPR:", np.round(tpr, 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>AUC: 1.0
+FPR: [0. 0. 0. 1.]
+TPR: [0.  0.1 1.  1. ]</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 3 ═══════════════ -->
+      <section id="uebung-3" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">3</span>
+          <h2>⚖️ Precision, Recall & F1-Score</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Berechne Precision, Recall und F1-Score — einmal pro Klasse und einmal als Makro-Durchschnitt.</p>
+          <ul>
+            <li>Berechne <code>precision_score</code>, <code>recall_score</code>, <code>f1_score</code> mit <code>average='macro'</code> (3 Nachkommastellen).</li>
+            <li>Berechne dieselben Metriken mit <code>average=None</code>, um die Werte je Klasse zu erhalten (3 Nachkommastellen).</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Precision (macro): 0.97
+Recall (macro): 0.967
+F1 (macro): 0.967
+Precision per class: [1.    1.    0.909]
+Recall per class: [1.  0.9 1. ]</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+clf = LogisticRegression(max_iter=200)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <strong>Precision</strong> = „von allen als Klasse X vorhergesagten, wie viele waren wirklich X?“,
+              <strong>Recall</strong> = „von allen wirklich X, wie viele wurden auch als X erkannt?“. Klasse 2
+              hat Precision 0.909, weil sie 1 Sample fälschlich von Klasse 1 „bekommt“ (10 Vorhersagen für Klasse 2,
+              aber nur 9 davon korrekt → 10/11 ≈ 0.909). Klasse 1 hat Recall 0.9, weil 1 von 10
+              echten Klasse-1-Samples als Klasse 2 vorhergesagt wurde. <code>average='macro'</code> bildet
+              einfach den ungewichteten Mittelwert über die 3 Klassen.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.metrics import precision_score, recall_score, f1_score
+
+print("Precision (macro):", round(precision_score(y_test, y_pred, average='macro'), 3))
+print("Recall (macro):", round(recall_score(y_test, y_pred, average='macro'), 3))
+print("F1 (macro):", round(f1_score(y_test, y_pred, average='macro'), 3))
+
+print("Precision per class:", np.round(precision_score(y_test, y_pred, average=None), 3))
+print("Recall per class:", np.round(recall_score(y_test, y_pred, average=None), 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Precision (macro): 0.97
+Recall (macro): 0.967
+F1 (macro): 0.967
+Precision per class: [1.    1.    0.909]
+Recall per class: [1.  0.9 1. ]</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 4 ═══════════════ -->
+      <section id="uebung-4" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">4</span>
+          <h2>🔄 Cross-Validation: Schwankung über Folds</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Bewerte die <code>LogisticRegression</code> mit 5-facher Cross-Validation und analysiere die Schwankung.</p>
+          <ul>
+            <li>Nutze <code>cross_val_score(clf, X, y, cv=5, scoring='accuracy')</code> auf dem <strong>gesamten</strong> Datensatz <code>X, y</code>.</li>
+            <li>Gib die 5 Scores, ihren Mittelwert und ihre Standardabweichung aus (jeweils 3 Nachkommastellen).</li>
+            <li>Vergleiche die Standardabweichung mit der Schwankung, die ein einzelner Train-Test-Split verursachen könnte.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Scores: [0.967 1.    0.933 0.967 1.   ]
+Mean: 0.973
+Std: 0.025</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+clf = LogisticRegression(max_iter=200)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+from sklearn.model_selection import cross_val_score
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Die einzelnen Fold-Scores schwanken zwischen <strong>0.933</strong> und <strong>1.0</strong> —
+              ein Unterschied von 6.7 Prozentpunkten allein durch die Wahl, welche 30 Samples im Test-Set landen!
+              Ein einzelner Train-Test-Split (wie in den vorigen Aufgaben mit <code>test_size=0.2</code>) liefert
+              also nur <strong>eine</strong> Stichprobe aus dieser Verteilung — der Mittelwert über 5 Folds
+              (0.973) und die Standardabweichung (0.025) geben ein realistischeres Bild der erwarteten
+              Modellgüte <em>und</em> deren Unsicherheit.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.model_selection import cross_val_score
+
+scores = cross_val_score(clf, X, y, cv=5, scoring='accuracy')
+print("Scores:", np.round(scores, 3))
+print("Mean:", round(scores.mean(), 3))
+print("Std:", round(scores.std(), 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Scores: [0.967 1.    0.933 0.967 1.   ]
+Mean: 0.973
+Std: 0.025</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 5 ═══════════════ -->
+      <section id="uebung-5" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">5</span>
+          <h2>🔍 Fehleranalyse: welche Samples werden falsch klassifiziert?</h2>
+          <span class="uebung-diff d3">Schwer</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Finde die konkreten Testpunkte, die von der <code>LogisticRegression</code> falsch klassifiziert werden.</p>
+          <ul>
+            <li>Vergleiche <code>y_test</code> und <code>y_pred</code> elementweise und finde die Indizes, an denen sie sich unterscheiden (<code>np.where</code>).</li>
+            <li>Gib diese Indizes sowie die wahren und vorhergesagten Labels an diesen Stellen aus.</li>
+            <li>Gib aus, wie viele von 30 Testpunkten falsch klassifiziert wurden.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Falsch klassifizierte Indizes: [25]
+Wahre Labels: [1]
+Vorhergesagte Labels: [2]
+Anzahl Fehler: 1 von 30</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="8">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+clf = LogisticRegression(max_iter=200)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>np.where(y_test != y_pred)</code> liefert genau die Indizes, an denen sich Wahrheit und
+              Vorhersage unterscheiden — hier ist es <strong>ein einziger</strong> Testpunkt (Index 25), der
+              eigentlich Klasse 1 (Versicolor) ist, aber als Klasse 2 (Virginica) vorhergesagt wurde. Das passt
+              genau zu dem Eintrag <code>cm[1,2]=1</code> aus der Confusion Matrix in Aufgabe 1 — diese Art der
+              Fehleranalyse hilft, gezielt einzelne „schwierige“ Beispiele genauer zu untersuchen (z.B. liegt der
+              Punkt nahe an der Entscheidungsgrenze zwischen zwei Arten).
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">wrong = np.where(y_test != y_pred)[0]
+
+print("Falsch klassifizierte Indizes:", wrong)
+print("Wahre Labels:", y_test[wrong])
+print("Vorhergesagte Labels:", y_pred[wrong])
+print("Anzahl Fehler:", len(wrong), "von", len(y_test))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Falsch klassifizierte Indizes: [25]
+Wahre Labels: [1]
+Vorhergesagte Labels: [2]
+Anzahl Fehler: 1 von 30</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 6 ═══════════════ -->
+      <section id="uebung-6" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">6</span>
+          <h2>📈 ROC-Kurve plotten</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Zeichne die ROC-Kurve aus Aufgabe 2 (Setosa vs. Rest) als Plot.</p>
+          <ul>
+            <li>Berechne wie in Aufgabe 2 <code>y_test_bin</code>, <code>y_score</code> und <code>fpr, tpr</code> mit <code>roc_curve</code>.</li>
+            <li>Plotte <code>fpr</code> gegen <code>tpr</code> mit Markern.</li>
+            <li>Zeichne zusätzlich eine gestrichelte Diagonale von (0,0) nach (1,1) als „Zufalls“-Referenzlinie.</li>
+            <li>Beschrifte die Achsen mit „False Positive Rate“ / „True Positive Rate“ und füge eine Legende hinzu.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Eine Kurve, die von (0,0) direkt zu (0,1) und dann zu (1,1) verläuft
+(perfekte Trennung, AUC=1.0), plus eine gestrichelte Diagonale als
+Referenz für ein zufälliges Modell.</pre>
+            <img src="../assets/img/uebung/k7-ex6-roc.png" alt="ROC-Kurve verläuft über die linke obere Ecke (AUC=1.0), gestrichelte Diagonale als Zufalls-Referenz">
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+clf = LogisticRegression(max_iter=200)
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+from sklearn.metrics import roc_curve
+import matplotlib.pyplot as plt
+
+y_test_bin = (y_test == 0).astype(int)
+y_score = clf.predict_proba(X_test)[:, 0]
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Die ROC-Kurve verläuft hier direkt über die <strong>linke obere Ecke</strong> (FPR=0, TPR=1) —
+              das ist die geometrische Entsprechung von <strong>AUC=1.0</strong> aus Aufgabe 2: es gibt eine
+              Schwelle, bei der alle Setosa-Punkte eine höhere TPR erreichen, ohne dass irgendein
+              Nicht-Setosa-Punkt fälschlich positiv klassifiziert wird (FPR=0). Die gestrichelte Diagonale
+              zeigt, wie ein Modell aussehen würde, das nur rät — je weiter die echte Kurve oben links davon
+              liegt, desto besser das Modell.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">import matplotlib.pyplot as plt
+
+fpr, tpr, _ = roc_curve(y_test_bin, y_score)
+
+plt.plot(fpr, tpr, marker='o', label='ROC (Klasse 0 vs. Rest)')
+plt.plot([0, 1], [0, 1], '--', color='gray', label='Zufall')
+plt.xlabel("False Positive Rate"); plt.ylabel("True Positive Rate")
+plt.title("ROC-Kurve (AUC = 1.0)")
+plt.legend()
+plt.show()</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre></pre>
+                  <img src="../assets/img/uebung/k7-ex6-roc.png" alt="ROC-Kurve verläuft über die linke obere Ecke (AUC=1.0), gestrichelte Diagonale als Zufalls-Referenz">
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="Quiz.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Zurück</div><div class="nav-arrow-title">🧠 Quiz</div></div></a>
+        <a href="../index.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">PRM V5 Übersicht</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K7 · Übungsaufgaben · PRM V5"></site-footer>
+</body>
+</html>

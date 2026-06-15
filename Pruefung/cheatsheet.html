@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cheat-Sheet · Formelsammlung – PRM V5</title>
+  <meta name="description" content="Kompakte Formelsammlung aller 7 Kapitel: Gini, Entropie, ROC/AUC, Bootstrap-CI, GMM-Update-Regeln und mehr – für die Prüfungsvorbereitung."/>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .cheat-toc{
+      position:sticky;top:68px;z-index:40;
+      display:flex;gap:.4rem;flex-wrap:wrap;
+      padding:var(--space-3) var(--space-4);
+      background:color-mix(in oklab,var(--color-bg) 90%,transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--color-border);
+      margin-bottom:var(--space-6);
+    }
+    .cheat-toc a.active{color:var(--color-primary);border-color:var(--color-primary);background:var(--color-primary-highlight)}
+    .cheat-toc a{
+      padding:.3rem .8rem;border-radius:var(--radius-full);
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);
+      text-decoration:none;transition:all .15s;
+    }
+    .cheat-toc a:hover{color:var(--color-primary);border-color:var(--color-primary)}
+    .cheat-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-6) var(--space-4) 0;text-align:center}
+    .cheat-hero h1{font-family:var(--font-display);font-size:var(--text-xl);margin-bottom:var(--space-2)}
+    .cheat-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:60ch;margin:0 auto}
+    .cheat-section{max-width:880px;margin:0 auto var(--space-10);padding:0 var(--space-4)}
+    .cheat-section h2{
+      display:flex;align-items:center;gap:var(--space-3);
+      margin-bottom:var(--space-4);padding-bottom:var(--space-2);
+      border-bottom:2px solid var(--color-border);
+      scroll-margin-top:5rem;
+    }
+    .cheat-num{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:2rem;height:2rem;border-radius:var(--radius-md);
+      background:var(--color-primary-highlight);color:var(--color-primary);
+      font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    /* Kapitelfarben — gleiche Reihenfolge wie Lernpfad-Stufenfarben + Zusatzfarben */
+    .cheat-section:nth-of-type(1) .cheat-num{background:color-mix(in oklab,var(--color-ziel) 18%,var(--color-surface-2));color:var(--color-ziel)}
+    .cheat-section:nth-of-type(1) h2{border-bottom-color:color-mix(in oklab,var(--color-ziel) 35%,var(--color-border))}
+    .cheat-section:nth-of-type(2) .cheat-num{background:color-mix(in oklab,var(--color-theorie) 18%,var(--color-surface-2));color:var(--color-theorie)}
+    .cheat-section:nth-of-type(2) h2{border-bottom-color:color-mix(in oklab,var(--color-theorie) 35%,var(--color-border))}
+    .cheat-section:nth-of-type(3) .cheat-num{background:color-mix(in oklab,var(--color-algo) 18%,var(--color-surface-2));color:var(--color-algo)}
+    .cheat-section:nth-of-type(3) h2{border-bottom-color:color-mix(in oklab,var(--color-algo) 35%,var(--color-border))}
+    .cheat-section:nth-of-type(4) .cheat-num{background:color-mix(in oklab,var(--color-scratch) 18%,var(--color-surface-2));color:var(--color-scratch)}
+    .cheat-section:nth-of-type(4) h2{border-bottom-color:color-mix(in oklab,var(--color-scratch) 35%,var(--color-border))}
+    .cheat-section:nth-of-type(5) .cheat-num{background:color-mix(in oklab,var(--color-sklearn) 18%,var(--color-surface-2));color:var(--color-sklearn)}
+    .cheat-section:nth-of-type(5) h2{border-bottom-color:color-mix(in oklab,var(--color-sklearn) 35%,var(--color-border))}
+    .cheat-section:nth-of-type(6) .cheat-num{background:color-mix(in oklab,var(--color-purple) 18%,var(--color-surface-2));color:var(--color-purple)}
+    .cheat-section:nth-of-type(6) h2{border-bottom-color:color-mix(in oklab,var(--color-purple) 35%,var(--color-border))}
+    .cheat-section:nth-of-type(7) .cheat-num{background:color-mix(in oklab,var(--color-warning) 18%,var(--color-surface-2));color:var(--color-warning)}
+    .cheat-section:nth-of-type(7) h2{border-bottom-color:color-mix(in oklab,var(--color-warning) 35%,var(--color-border))}
+    .cheat-topic{margin-bottom:var(--space-6)}
+    .cheat-topic h3{
+      display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;
+      font-size:var(--text-base);margin-bottom:var(--space-2);
+    }
+    .cheat-link{
+      font-size:var(--text-xs);font-weight:700;text-decoration:underline;
+      color:var(--color-text-faint);
+    }
+    .cheat-topic .info-box{margin-bottom:var(--space-2)}
+    .cheat-topic .info-box:last-child{margin-bottom:0}
+    .cheat-topic table{margin-bottom:var(--space-2)}
+    .cheat-toc a:nth-child(1){border-color:color-mix(in oklab,var(--color-ziel) 40%,var(--color-border))}
+    .cheat-toc a:nth-child(2){border-color:color-mix(in oklab,var(--color-theorie) 40%,var(--color-border))}
+    .cheat-toc a:nth-child(3){border-color:color-mix(in oklab,var(--color-algo) 40%,var(--color-border))}
+    .cheat-toc a:nth-child(4){border-color:color-mix(in oklab,var(--color-scratch) 40%,var(--color-border))}
+    .cheat-toc a:nth-child(5){border-color:color-mix(in oklab,var(--color-sklearn) 40%,var(--color-border))}
+    .cheat-toc a:nth-child(6){border-color:color-mix(in oklab,var(--color-purple) 40%,var(--color-border))}
+    .cheat-toc a:nth-child(7){border-color:color-mix(in oklab,var(--color-warning) 40%,var(--color-border))}
+    .cheat-back-top{
+      display:inline-flex;align-items:center;gap:.3rem;
+      font-size:var(--text-xs);font-weight:700;color:var(--color-text-faint);
+      text-decoration:none;margin-top:var(--space-2);
+    }
+    .cheat-back-top:hover{color:var(--color-primary)}
+    /* ─ In-Page-Filter ─ */
+    .cheat-filter-wrap{max-width:880px;margin:0 auto var(--space-4);padding:0 var(--space-4)}
+    .cheat-filter{
+      width:100%;box-sizing:border-box;
+      padding:.6rem var(--space-4);border-radius:var(--radius-full);
+      border:1px solid var(--color-border);background:var(--color-surface);
+      font-size:var(--text-sm);color:var(--color-text);
+    }
+    .cheat-filter:focus{outline:none;border-color:var(--color-primary)}
+    .cheat-filter-count{
+      font-size:var(--text-xs);color:var(--color-text-faint);
+      margin-top:var(--space-2);text-align:center;
+    }
+    .cheat-topic.is-hidden,.cheat-section.is-hidden{display:none}
+    /* ─ Confusion-Matrix-Rechner ─ */
+    .cheat-calc{
+      margin-top:var(--space-3);padding:var(--space-3) var(--space-4);
+      border:1px solid var(--color-border);border-radius:var(--radius-md);
+      background:var(--color-surface);
+    }
+    .cheat-calc h4{margin:0 0 var(--space-2);font-size:var(--text-sm)}
+    .cheat-calc-inputs{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-3)}
+    .cheat-calc-inputs label{
+      display:flex;flex-direction:column;gap:.25rem;
+      font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);
+    }
+    .cheat-calc-inputs input{
+      width:5.5rem;padding:.35rem .5rem;border-radius:var(--radius-sm);
+      border:1px solid var(--color-border);background:var(--color-bg);
+      font-size:var(--text-sm);color:var(--color-text);
+    }
+    .cheat-calc-results{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
+      gap:var(--space-2);font-family:var(--font-mono);font-size:var(--text-sm);
+    }
+    .cheat-calc-results div{
+      padding:.4rem .6rem;border-radius:var(--radius-sm);
+      background:var(--color-surface-2);text-align:center;
+    }
+    .cheat-calc-results strong{display:block;font-size:var(--text-base);color:var(--color-primary)}
+    @media (max-width:700px){
+      .cheat-toc{
+        top:0;overflow-x:auto;flex-wrap:nowrap;
+        -webkit-overflow-scrolling:touch;
+      }
+      .cheat-toc a{flex-shrink:0}
+    }
+    @media print{
+      site-header,site-footer,.cheat-toc,.cheat-back-top{display:none !important}
+      .cheat-section{page-break-inside:auto}
+      .cheat-topic{page-break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  <site-header active="pruefung" title="Cheat-Sheet · Formelsammlung – PRM V5"></site-header>
+
+  <div class="pruef-layout">
+    <nav class="pruef-side">
+      <div class="pruef-side-group">
+        <div class="pruef-side-label">Während der Prüfung</div>
+        <a href="cheatsheet.html" class="active">📋 Cheat-Sheet</a>
+        <a href="entscheidungshilfe.html">🧭 Entscheidungshilfe</a>
+        <a href="numpy-referenz.html">🔢 NumPy</a>
+        <a href="sklearn-referenz.html">🚀 sklearn</a>
+        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
+        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
+        <a href="code-scratch-referenz.html">🛠️ Von Scratch</a>
+      </div>
+      <div class="pruef-side-group" id="section-nav">
+        <div class="pruef-side-label">Auf dieser Seite</div>
+        <a href="#k1">1 · Data Prep</a>
+        <a href="#k2">2 · ML Grundlagen</a>
+        <a href="#k3">3 · SVM</a>
+        <a href="#k4">4 · Clustering &amp; PCA</a>
+        <a href="#k5">5 · Random Forest</a>
+        <a href="#k6">6 · GMM</a>
+        <a href="#k7">7 · Evaluation</a>
+      </div>
+    </nav>
+
+  <main id="main-content" class="pruef-main">
+
+    <div class="cheat-hero">
+      <h1>📋 Cheat-Sheet · Formelsammlung</h1>
+      <p>Alle wichtigen Formeln, Definitionen und Algorithmus-Schritte aus K1–K7 auf einen Blick — für die Prüfungsvorbereitung. Mit <kbd>Strg+K</kbd> kannst du zusätzlich die Volltextsuche nutzen.</p>
+    </div>
+
+    <div class="cheat-filter-wrap">
+      <input type="search" class="cheat-filter" id="cheat-filter" placeholder="🔍 Formeln filtern (z.B. 'Gini', 'Kernel', 'AUC')…" autocomplete="off">
+      <div class="cheat-filter-count" id="cheat-filter-count"></div>
+    </div>
+
+    <nav class="cheat-toc" id="cheat-toc" aria-label="Kapitel-Sprungnavigation">
+      <a href="#k1">1 · Data Prep</a>
+      <a href="#k2">2 · ML Grundlagen</a>
+      <a href="#k3">3 · SVM</a>
+      <a href="#k4">4 · Clustering &amp; PCA</a>
+      <a href="#k5">5 · Random Forest</a>
+      <a href="#k6">6 · GMM</a>
+      <a href="#k7">7 · Evaluation</a>
+    </nav>
+
+    <!-- ═══════ K1 · DATA PREP ═══════ -->
+    <section class="cheat-section" id="k1">
+      <h2><span class="cheat-num">1</span> Data Preparation</h2>
+
+      <div class="cheat-topic">
+        <h3>train_test_split <a class="cheat-link" href="../Kapitel1/T01-train-test-split.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          n_test = int(N × test_size)<br>
+          stratify=y → Klassenverteilung in Train &amp; Test erhalten
+        </div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Normalisierung <a class="cheat-link" href="../Kapitel1/T02-normalisierung.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          Min-Max:&nbsp; x' = (x − x_min) / (x_max − x_min) &nbsp;→ [0,1]<br>
+          Z-Score:&nbsp; x' = (x − μ) / σ &nbsp;→ μ≈0, σ≈1
+        </div>
+        <div class="info-box warning">⚠️ Scaler nur auf <strong>X_train</strong> fitten, dann <code>transform()</code> auf X_train &amp; X_test anwenden — niemals <code>fit_transform</code> auf Testdaten!</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Encoding <a class="cheat-link" href="../Kapitel1/T03-encoding.html">→ Thema</a></h3>
+        <table>
+          <thead><tr><th>Methode</th><th>Für</th><th>Beispiel</th></tr></thead>
+          <tbody>
+            <tr><td>Label-Encoding</td><td>nur Ziel <strong>y</strong></td><td>A→0, B→1, C→2</td></tr>
+            <tr><td>Ordinal-Encoding</td><td>ordinale Features X</td><td>klein→0, mittel→1, groß→2</td></tr>
+            <tr><td>One-Hot-Encoding</td><td>nominale Features X</td><td>rot=[1,0,0], blau=[0,1,0]</td></tr>
+          </tbody>
+        </table>
+        <div class="info-box">Dummy-Variable-Trap: bei K Kategorien nur K−1 Spalten nötig → <code>drop='first'</code></div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Feature Scaling <a class="cheat-link" href="../Kapitel1/T04-feature-scaling.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          RobustScaler:&nbsp; x' = (x − Median) / IQR &nbsp;(IQR = Q3−Q1)<br>
+          Log:&nbsp; x' = log(x + 1) &nbsp;(rechtsschiefe Daten)<br>
+          Box-Cox:&nbsp; x' = (x^λ − 1)/λ &nbsp;(nur x&gt;0) &nbsp;·&nbsp; Yeo-Johnson: alle x
+        </div>
+        <div class="info-box">✅ Scaling nötig: k-NN, SVM, Log. Regression, NN, PCA, k-Means<br>❌ Nicht nötig: Entscheidungsbäume, Random Forest, Gradient Boosting</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Feature Selection <a class="cheat-link" href="../Kapitel1/T05-feature-selection.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          VarianceThreshold:&nbsp; Var(Xⱼ) = (1/N) Σ(xᵢ − μⱼ)²<br>
+          ANOVA F-Wert:&nbsp; F = (SSB/(K−1)) / (SSW/(N−K))
+        </div>
+        <div class="info-box">
+          <strong>Filter</strong> (VarianceThreshold, SelectKBest) · <strong>Wrapper</strong> (RFE) · <strong>Embedded</strong> (Lasso/L1, Feature Importance)<br>
+          Fluch der Dimensionalität: bei d=100 sind alle Punkte fast gleich weit entfernt (d_min ≈ 0.98).
+        </div>
+      </div>
+      <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
+    </section>
+
+    <!-- ═══════ K2 · ML GRUNDLAGEN ═══════ -->
+    <section class="cheat-section" id="k2">
+      <h2><span class="cheat-num">2</span> ML Grundlagen</h2>
+
+      <div class="cheat-topic">
+        <h3>Was ist ML? <a class="cheat-link" href="../Kapitel2/T01-was-ist-ml.html">→ Thema</a></h3>
+        <div class="info-box">
+          <strong>Supervised</strong> (gelabelte Daten) · <strong>Unsupervised</strong> (keine Labels) · <strong>Reinforcement</strong> (Belohnung)
+        </div>
+        <div class="info-box" style="font-family:var(--font-mono)">MSE = (1/n) · Σ (y_pred − y_true)²</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Overfitting &amp; Underfitting <a class="cheat-link" href="../Kapitel2/T02-overfitting-underfitting.html">→ Thema</a></h3>
+        <table>
+          <thead><tr><th>Symptom</th><th>Diagnose</th><th>Lösung</th></tr></thead>
+          <tbody>
+            <tr><td>Train ≈ Test (beide niedrig)</td><td>Underfitting / High Bias</td><td>Komplexeres Modell, mehr Features, weniger Regularisierung</td></tr>
+            <tr><td>Train hoch, Test niedrig</td><td>Overfitting / High Variance</td><td>Regularisierung, mehr Daten, Ensemble</td></tr>
+          </tbody>
+        </table>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          Ridge (L2):&nbsp; Loss = MSE + α·Σwⱼ²<br>
+          Lasso (L1):&nbsp; Loss = MSE + α·Σ|wⱼ|
+        </div>
+        <div class="info-box">L2 (Ridge): straft Gewichte² → schrumpft alle Gewichte gleichmäßig · L1 (Lasso): straft |Gewichte| → setzt viele Gewichte exakt auf 0 (Feature Selection) · Bei Bäumen: <code>max_depth</code>, <code>min_samples_leaf</code></div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Bias-Variance Tradeoff <a class="cheat-link" href="../Kapitel2/T03-bias-variance-tradeoff.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">E[(y − ŷ)²] = Bias² + Variance + Irreducible Noise</div>
+        <table>
+          <thead><tr><th>Komponente</th><th>Bedeutung</th><th>Reduzierbar?</th></tr></thead>
+          <tbody>
+            <tr><td>Bias²</td><td>Modell zu simpel (systematischer Fehler)</td><td>Ja – komplexeres Modell</td></tr>
+            <tr><td>Variance</td><td>Sensitivität ggü. Trainingsdaten</td><td>Ja – Regularisierung, mehr Daten</td></tr>
+            <tr><td>Noise</td><td>Zufälliges Rauschen</td><td>Nein</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Cross-Validation <a class="cheat-link" href="../Kapitel2/T04-cross-validation.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">CV-Score = μ(Score₁..Scoreₖ), CV-Std = σ(Score₁..Scoreₖ)</div>
+        <div class="info-box">
+          <strong>K-Fold</strong> (Standard, k=5/10) · <strong>Stratified K-Fold</strong> (Klassifikation) · <strong>LOOCV</strong> (n Folds) · <strong>Repeated K-Fold</strong> · <strong>TimeSeriesSplit</strong> (Zeitreihen)<br>
+          Nested CV: äußere Loop = Performance schätzen, innere Loop (GridSearchCV) = Hyperparameter tunen.
+        </div>
+      </div>
+      <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
+    </section>
+
+    <!-- ═══════ K3 · SVM ═══════ -->
+    <section class="cheat-section" id="k3">
+      <h2><span class="cheat-num">3</span> Support Vector Machines</h2>
+
+      <div class="cheat-topic">
+        <h3>Hyperebene &amp; Margin <a class="cheat-link" href="../Kapitel3/T01-hyperebene-margin.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          Hyperebene:&nbsp; wᵀx + b = 0<br>
+          Margin-Breite:&nbsp; 2 / ‖w‖ &nbsp;→ maximieren = ‖w‖ minimieren<br>
+          Hard-Margin:&nbsp; min ½‖w‖² &nbsp;unter&nbsp; yᵢ(wᵀxᵢ+b) ≥ 1<br>
+          Decision Function:&nbsp; f(x) = sign(Σ αᵢ yᵢ ⟨xᵢ,x⟩ + b)
+        </div>
+        <div class="info-box">Support Vectors: Punkte mit αᵢ&gt;0, liegen auf dem Margin-Rand — nur sie bestimmen die Hyperebene.</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Soft Margin &amp; C <a class="cheat-link" href="../Kapitel3/T02-soft-margin-c.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          min ½‖w‖² + C·Σξᵢ &nbsp;unter&nbsp; yᵢ(wᵀxᵢ+b) ≥ 1−ξᵢ, ξᵢ≥0<br>
+          Hinge Loss:&nbsp; L = max(0, 1 − yᵢ(wᵀxᵢ+b))
+        </div>
+        <table>
+          <thead><tr><th>C</th><th>Effekt</th><th>Bias/Variance</th></tr></thead>
+          <tbody>
+            <tr><td>klein (0.01)</td><td>viele Fehler erlaubt, breiter Margin</td><td>High Bias</td></tr>
+            <tr><td>groß (1000)</td><td>wenige Fehler, schmaler Margin</td><td>High Variance</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Kernel-Trick <a class="cheat-link" href="../Kapitel3/T03-kernel-trick.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">K(xᵢ,xⱼ) = ⟨φ(xᵢ), φ(xⱼ)⟩</div>
+        <table>
+          <thead><tr><th>Kernel</th><th>Formel</th><th>Parameter</th></tr></thead>
+          <tbody>
+            <tr><td>Linear</td><td>K(x,z) = xᵀz</td><td>—</td></tr>
+            <tr><td>Polynomial</td><td>K(x,z) = (γxᵀz + r)ᵈ</td><td>degree, gamma, coef0</td></tr>
+            <tr><td>RBF/Gauß</td><td>K(x,z) = exp(−γ‖x−z‖²)</td><td>gamma</td></tr>
+            <tr><td>Sigmoid</td><td>K(x,z) = tanh(γxᵀz + r)</td><td>gamma, coef0</td></tr>
+          </tbody>
+        </table>
+        <div class="info-box">γ klein → glatte Grenze (Underfitting) · γ groß → komplexe Grenze (Overfitting)</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>SVC mit sklearn <a class="cheat-link" href="../Kapitel3/T04-svc-sklearn.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">f(x) = sign(Σᵢ αᵢ·yᵢ·K(xᵢ,x) + b)</div>
+      </div>
+      <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
+    </section>
+
+    <!-- ═══════ K4 · CLUSTERING ═══════ -->
+    <section class="cheat-section" id="k4">
+      <h2><span class="cheat-num">4</span> Clustering &amp; PCA</h2>
+
+      <div class="cheat-topic">
+        <h3>k-Means Algorithmus <a class="cheat-link" href="../Kapitel4/T01-k-means-algorithmus.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          Inertia (WCSS):&nbsp; Σₖ Σᵢ∈Cₖ ‖xᵢ − μₖ‖²<br>
+          Assignment:&nbsp; cᵢ = argminₖ ‖xᵢ − μₖ‖²<br>
+          Update:&nbsp; μₖ = (1/|Cₖ|) · Σᵢ∈Cₖ xᵢ
+        </div>
+        <div class="info-box">
+          <strong>Lloyd's Algorithmus:</strong> 1) Centroids initialisieren (k-means++) → 2) Assignment → 3) Update → 4) wiederholen bis Konvergenz.<br>
+          Voraussetzung: sphärische Cluster · Zeitkomplexität O(n·k·t·d)
+        </div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Elbow-Methode <a class="cheat-link" href="../Kapitel4/T02-elbow-methode.html">→ Thema</a></h3>
+        <div class="info-box">Inertia(k) plotten → "Ellbogen" (stärkster Knick) = optimales k.</div>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          Silhouette: s(i) = (b(i)−a(i)) / max(a(i),b(i)) &nbsp;∈ [-1,1], höher = besser<br>
+          Davies-Bouldin: Ø Verhältnis (Intra-Cluster-Streuung) / (Inter-Cluster-Distanz), niedriger = besser<br>
+          Dunn-Index: D = min(Inter-Cluster-Distanz) / max(Intra-Cluster-Distanz), höher = besser
+        </div>
+        <div class="info-box">Alle drei sind <strong>interne</strong> Validierungsmaße (ohne Ground-Truth-Labels). sklearn: <code>silhouette_score</code>, <code>davies_bouldin_score</code> — Dunn-Index ist nicht in sklearn enthalten, muss ggf. selbst implementiert werden.</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>DBSCAN <a class="cheat-link" href="../Kapitel4/T03-dbscan.html">→ Thema</a></h3>
+        <div class="info-box">
+          Parameter: <strong>eps</strong> (Radius), <strong>min_samples</strong> (Mindestpunkte)<br>
+          <strong>Core</strong>: ≥min_samples im eps-Radius · <strong>Border</strong>: im eps-Radius eines Core-Punkts · <strong>Noise</strong>: weder noch.<br>
+          Vorteile: kein k nötig, beliebige Cluster-Formen, erkennt Ausreißer automatisch.
+        </div>
+        <table>
+          <thead><tr><th>Algorithmus</th><th>k vorgeben?</th><th>wann nutzen</th></tr></thead>
+          <tbody>
+            <tr><td>AgglomerativeClustering</td><td>Ja (oder Dendrogramm)</td><td>Hierarchie gewünscht</td></tr>
+            <tr><td>SpectralClustering</td><td>Ja</td><td>nicht-konvexe Cluster (Monde, Ringe)</td></tr>
+            <tr><td>MeanShift</td><td>Nein (bandwidth)</td><td>k unbekannt, dichte-basiert</td></tr>
+            <tr><td>OPTICS</td><td>Nein</td><td>variable Dichte</td></tr>
+            <tr><td>Birch</td><td>Optional</td><td>sehr große Datenmengen</td></tr>
+            <tr><td>KMedoids (k-Median)</td><td>Ja</td><td>robust gg. Ausreißer (Medoid statt Mittelwert)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>KMeans mit sklearn <a class="cheat-link" href="../Kapitel4/T04-kmeans-sklearn.html">→ Thema</a></h3>
+        <div class="info-box">k-means++ Init: erster Centroid zufällig, jeder weitere proportional zu Abstand² vom nächsten bestehenden Centroid — verhindert Zusammenfallen.</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>PCA &amp; Dimensionsreduktion <a class="cheat-link" href="../Kapitel4/T05-pca.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          Kovarianzmatrix:&nbsp; Σ = (1/(n−1)) · Xᶜᵀ · Xᶜ<br>
+          Eigenzerlegung:&nbsp; Σ · v = λ · v &nbsp;(v = Hauptkomponente, λ = erklärte Varianz)<br>
+          Erklärte Varianz (Anteil)ᵢ:&nbsp; λᵢ / Σⱼ λⱼ
+        </div>
+        <div class="info-box">PCA ist <strong>unüberwacht</strong> und varianz-basiert → immer <code>StandardScaler</code> vorher anwenden. <strong>Scree-Plot:</strong> erklärte Varianz pro Komponente absteigend auftragen — der "Ellbogen" zeigt ein sinnvolles k (analog zur Elbow-Methode).</div>
+      </div>
+      <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
+    </section>
+
+    <!-- ═══════ K5 · RANDOM FOREST ═══════ -->
+    <section class="cheat-section" id="k5">
+      <h2><span class="cheat-num">5</span> Tree-Based Models</h2>
+
+      <div class="cheat-topic">
+        <h3>Entscheidungsbaum <a class="cheat-link" href="../Kapitel5/T01-entscheidungsbaum.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          Entropie:&nbsp; H(S) = − Σ pᵢ · log₂(pᵢ)<br>
+          Gini:&nbsp; G(S) = 1 − Σ pᵢ² &nbsp;(binär: 2·p·(1−p))<br>
+          Information Gain:&nbsp; IG = H(parent) − Σ (|Sₗ|/|S|·H(Sₗ) + |Sᵣ|/|S|·H(Sᵣ))
+        </div>
+        <div class="info-box">Gini=0 → reine Klasse · Gini=0.5 → 50/50. Stopping: <code>max_depth</code>, <code>min_samples_split</code>, <code>min_samples_leaf</code>.</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Bagging <a class="cheat-link" href="../Kapitel5/T02-bagging.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          σ²_bag = σ²/B &nbsp;(unkorreliert)<br>
+          σ²_bag = σ²·(ρ + (1−ρ)/B) &nbsp;(mit Korrelation ρ)
+        </div>
+        <div class="info-box">Für b=1..B: Bootstrap-Stichprobe ziehen → Modell trainieren → Vorhersagen mitteln (bzw. Mehrheitsvotum).</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Random Forest <a class="cheat-link" href="../Kapitel5/T03-random-forest.html">→ Thema</a></h3>
+        <div class="info-box">
+          Zusätzlich zu Bagging: pro Split nur <strong>m = √d</strong> zufällige Features → reduziert Korrelation zwischen Bäumen, stärkere Varianzreduktion.<br>
+          OOB-Error: jeder Baum sieht ~63.2% der Daten, die übrigen ~36.8% (OOB) dienen zur Evaluation ohne Test-Set.
+        </div>
+        <table>
+          <thead><tr><th>Hyperparameter</th><th>Bedeutung</th><th>Tuning-Effekt</th></tr></thead>
+          <tbody>
+            <tr><td><code>n_estimators</code></td><td>Anzahl Bäume</td><td>↑ stabiler, aber langsamer — kaum Overfitting-Risiko</td></tr>
+            <tr><td><code>max_depth</code></td><td>Max. Tiefe pro Baum</td><td>↓ reduziert Overfitting</td></tr>
+            <tr><td><code>max_features</code></td><td>Features pro Split (m)</td><td>↓ mehr Diversität, weniger Korrelation</td></tr>
+            <tr><td><code>min_samples_leaf</code></td><td>Min. Samples pro Blatt</td><td>↑ glattere Entscheidungsgrenzen</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Feature Importance <a class="cheat-link" href="../Kapitel5/T04-feature-importance.html">→ Thema</a></h3>
+        <div class="info-box">
+          <strong>Gini-Importance:</strong> Σ (Anteil Samples am Split) × (Impurity-Reduktion)<br>
+          <strong>Permutation Importance:</strong> Feature zufällig permutieren → Fehleranstieg = Importance
+        </div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Boosting &amp; Regression-Bäume <a class="cheat-link" href="../Kapitel5/T05-boosting.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          AdaBoost: εₘ = Σᵢ wᵢ·𝟙(yᵢ≠ŷᵢ) / Σᵢ wᵢ &nbsp;→&nbsp; αₘ = ln((1−εₘ)/εₘ)<br>
+          Gradient Boosting: F₀ = ȳ &nbsp;→&nbsp; rᵢ = yᵢ − Fₘ₋₁(xᵢ) &nbsp;→&nbsp; Fₘ = Fₘ₋₁ + ν·hₘ(x)
+        </div>
+        <div class="info-box">
+          Bagging/RF: parallel, tiefe Bäume, reduziert <strong>Variance</strong>. Boosting: sequentiell, flache Bäume (max_depth 1-5, "weak learners"), reduziert <strong>Bias</strong>. <code>learning_rate</code> (ν) ↓ + <code>n_estimators</code> ↑ = Shrinkage. <code>staged_predict()</code> für Learning-Curve/Early-Stopping. Regression-Baum: <code>criterion='squared_error'</code>, Blatt sagt Mittelwert voraus.
+        </div>
+      </div>
+      <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
+    </section>
+
+    <!-- ═══════ K6 · GMM ═══════ -->
+    <section class="cheat-section" id="k6">
+      <h2><span class="cheat-num">6</span> Gaussian Mixture Models</h2>
+
+      <div class="cheat-topic">
+        <h3>Gaußverteilung <a class="cheat-link" href="../Kapitel6/T01-gaussverteilung.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          Univariat:&nbsp; p(x|μ,σ²) = 1/√(2πσ²) · exp(−(x−μ)²/(2σ²))<br>
+          Multivariat:&nbsp; p(x|μ,Σ) = 1/√((2π)ᵏ|Σ|) · exp(−½(x−μ)ᵀΣ⁻¹(x−μ))
+        </div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>EM-Algorithmus <a class="cheat-link" href="../Kapitel6/T02-em-algorithmus.html">→ Thema</a></h3>
+        <div class="info-box">
+          <strong>E-Schritt:</strong> Responsibilities berechnen — wie wahrscheinlich gehört Punkt i zu Komponente k?<br>
+          <strong>M-Schritt:</strong> Parameter (π, μ, Σ) basierend auf Responsibilities aktualisieren.<br>
+          Wiederholen bis Konvergenz — Log-Likelihood steigt monoton (ggf. lokales Maximum).
+        </div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>E-Step &amp; M-Step <a class="cheat-link" href="../Kapitel6/T03-e-step-m-step.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          E-Step:&nbsp; rᵢₖ = πₖ·N(xᵢ|μₖ,Σₖ) / Σⱼ πⱼ·N(xᵢ|μⱼ,Σⱼ) &nbsp;(Σₖ rᵢₖ = 1)<br><br>
+          M-Step:&nbsp; Nₖ = Σᵢ rᵢₖ<br>
+          &nbsp;&nbsp;πₖ = Nₖ/N<br>
+          &nbsp;&nbsp;μₖ = (1/Nₖ)·Σᵢ rᵢₖ·xᵢ<br>
+          &nbsp;&nbsp;Σₖ = (1/Nₖ)·Σᵢ rᵢₖ·(xᵢ−μₖ)(xᵢ−μₖ)ᵀ
+        </div>
+        <div class="info-box">Soft Clustering: jeder Punkt hat eine Wahrscheinlichkeit pro Komponente (statt harter Zuweisung wie bei k-means).</div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>GaussianMixture mit sklearn <a class="cheat-link" href="../Kapitel6/T04-gaussianmixture-sklearn.html">→ Thema</a></h3>
+        <div class="info-box">
+          <code>covariance_type</code>: 'full' · 'tied' · 'diag' · 'spherical'<br>
+          <strong>BIC/AIC:</strong> kleiner = besser (Modellwahl) · <strong>Log-Likelihood:</strong> höher = besser<br>
+          <code>score(X)</code> → log p(X) für Density Estimation.
+        </div>
+      </div>
+      <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
+    </section>
+
+    <!-- ═══════ K7 · EVALUATION ═══════ -->
+    <section class="cheat-section" id="k7">
+      <h2><span class="cheat-num">7</span> Evaluation</h2>
+
+      <div class="cheat-topic">
+        <h3>Confusion Matrix <a class="cheat-link" href="../Kapitel7/T01-confusion-matrix.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          Accuracy = (TP+TN)/(TP+TN+FP+FN)<br>
+          Precision = TP/(TP+FP) &nbsp;·&nbsp; Recall = TP/(TP+FN) &nbsp;·&nbsp; Specificity = TN/(TN+FP)<br>
+          F1 = 2·(P·R)/(P+R) &nbsp;·&nbsp; F_β = (1+β²)·P·R / (β²·P+R)
+        </div>
+        <div class="info-box">Eselsbrücke: Precision = "Wenn ich Alarm schlage, habe ich recht" (FP vermeiden) · Recall = "Wenn Gefahr da ist, erkenne ich sie" (FN vermeiden).</div>
+        <div class="info-box">
+          <strong>Multiklass-Averaging:</strong> Macro = ungewichteter Mittelwert über alle Klassen (jede Klasse zählt gleich) · Weighted = nach Klassenhäufigkeit gewichtet · Micro = global über alle TP/FP/FN gepoolt (= Accuracy bei Single-Label).
+        </div>
+        <div class="cheat-calc">
+          <h4>🧮 Live-Rechner: TP/FP/FN/TN eintragen</h4>
+          <div class="cheat-calc-inputs">
+            <label>TP <input type="number" id="calc-tp" value="0" min="0" inputmode="numeric"></label>
+            <label>FP <input type="number" id="calc-fp" value="0" min="0" inputmode="numeric"></label>
+            <label>FN <input type="number" id="calc-fn" value="0" min="0" inputmode="numeric"></label>
+            <label>TN <input type="number" id="calc-tn" value="0" min="0" inputmode="numeric"></label>
+          </div>
+          <div class="cheat-calc-results" id="calc-results">
+            <div><strong id="calc-acc">–</strong>Accuracy</div>
+            <div><strong id="calc-prec">–</strong>Precision</div>
+            <div><strong id="calc-rec">–</strong>Recall</div>
+            <div><strong id="calc-spec">–</strong>Specificity</div>
+            <div><strong id="calc-f1">–</strong>F1-Score</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>ROC &amp; AUC <a class="cheat-link" href="../Kapitel7/T02-roc-auc.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          FPR = FP/(FP+TN) &nbsp;(x-Achse) &nbsp;·&nbsp; TPR = Recall = TP/(TP+FN) &nbsp;(y-Achse)<br>
+          AUC = 1.0 perfekt · AUC = 0.5 zufällig · AUC &lt; 0.5 schlechter als Zufall
+        </div>
+        <div class="info-box">AUC = Wahrscheinlichkeit, dass ein zufälliger positiver Punkt höher bewertet wird als ein zufälliger negativer.</div>
+        <div class="info-box">
+          <strong>Multi-Class:</strong> <code>roc_auc_score(y_true, y_proba, multi_class='ovr'|'ovo', average='macro'|'weighted')</code> — <code>y_proba</code> = volle <code>predict_proba()</code>-Matrix (eine Spalte pro Klasse). OvR: k Kurven ("Klasse vs. Rest"). OvO: k·(k−1)/2 Kurven (Klassenpaare).
+        </div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>Precision-Recall-Tradeoff <a class="cheat-link" href="../Kapitel7/T03-precision-recall.html">→ Thema</a></h3>
+        <div class="info-box">
+          <strong>High Precision wichtig:</strong> FP teuer (z.B. Spam-Filter)<br>
+          <strong>High Recall wichtig:</strong> FN teuer (z.B. Krankheitserkennung)<br>
+          PR-Kurve: Recall (x) vs. Precision (y) — mehr Recall → meist weniger Precision.
+        </div>
+      </div>
+
+      <div class="cheat-topic">
+        <h3>CV &amp; Fehleranalyse <a class="cheat-link" href="../Kapitel7/T04-cross-validation-eval.html">→ Thema</a></h3>
+        <div class="info-box" style="font-family:var(--font-mono)">
+          CV Score = μ ± σ &nbsp;·&nbsp; Konfidenzintervall ≈ μ ± 2σ/√K<br>
+          Bootstrap-CI: Resampling mit Zurücklegen → [2.5%, 97.5%]-Perzentil = 95%-CI
+        </div>
+        <div class="info-box warning">Data Leakage: Scaler/Feature Selection auf gesamtem Datensatz fitten, Hyperparameter-Tuning auf Test-Set, mehrfache Test-Set-Evaluation.</div>
+        <div class="info-box">Nested CV: äußere Schleife = Performance schätzen, innere Schleife (GridSearchCV) = Hyperparameter tunen. Learning Curves: Lücke Train/Val groß → Overfitting; beide niedrig → Underfitting.</div>
+      </div>
+      <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
+    </section>
+
+  </main>
+  </div>
+
+  <site-footer caption="PRM · Cheat-Sheet · Formelsammlung"></site-footer>
+
+  <script>
+    const tocLinks = document.querySelectorAll('.cheat-toc a, #section-nav a');
+    const sections = document.querySelectorAll('.cheat-section');
+    const setActive = () => {
+      let current = sections[0]?.id;
+      const probe = window.scrollY + 100;
+      sections.forEach(sec => {
+        if (sec.offsetTop <= probe) current = sec.id;
+      });
+      tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    };
+    document.addEventListener('scroll', setActive, { passive: true });
+    setActive();
+
+    /* ─ In-Page-Filter ─ */
+    const filterInput = document.getElementById('cheat-filter');
+    const filterCount = document.getElementById('cheat-filter-count');
+    const topics = document.querySelectorAll('.cheat-topic');
+    filterInput.addEventListener('input', () => {
+      const q = filterInput.value.trim().toLowerCase();
+      let visible = 0;
+      sections.forEach(sec => {
+        let sectionHits = 0;
+        sec.querySelectorAll('.cheat-topic').forEach(topic => {
+          const match = !q || topic.textContent.toLowerCase().includes(q);
+          topic.classList.toggle('is-hidden', !match);
+          if (match) { sectionHits++; visible++; }
+        });
+        sec.classList.toggle('is-hidden', sectionHits === 0);
+      });
+      filterCount.textContent = q ? `${visible} Treffer` : '';
+    });
+
+    /* ─ Confusion-Matrix-Rechner ─ */
+    const calcInputs = ['calc-tp','calc-fp','calc-fn','calc-tn'].map(id => document.getElementById(id));
+    const fmt = v => Number.isFinite(v) ? v.toFixed(3) : '–';
+    const div = (a, b) => b === 0 ? NaN : a / b;
+    const updateCalc = () => {
+      const [tp, fp, fn, tn] = calcInputs.map(el => parseFloat(el.value) || 0);
+      const p = div(tp, tp+fp), r = div(tp, tp+fn);
+      document.getElementById('calc-acc').textContent  = fmt(div(tp+tn, tp+tn+fp+fn));
+      document.getElementById('calc-prec').textContent = fmt(p);
+      document.getElementById('calc-rec').textContent  = fmt(r);
+      document.getElementById('calc-spec').textContent = fmt(div(tn, tn+fp));
+      document.getElementById('calc-f1').textContent   = fmt(div(2*p*r, p+r));
+    };
+    calcInputs.forEach(el => el.addEventListener('input', updateCalc));
+    updateCalc();
+  </script>
+</body>
+</html>

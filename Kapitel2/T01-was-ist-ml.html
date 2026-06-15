@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Was ist ML? – K2 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .35rem .9rem; border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      font-size: var(--text-xs); font-weight: 700; cursor: pointer;
+      color: var(--btn-color, var(--color-text-faint));
+      transition: all .15s;
+    }
+    .mark-btn:hover { border-color: var(--color-success); color: var(--color-success); }
+    .stufe-footer {
+      margin-top: var(--space-6); padding-top: var(--space-4);
+      border-top: 1px solid var(--color-border);
+      display: flex; justify-content: flex-end;
+    }
+    .ml-types-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4); margin: var(--space-5) 0;
+    }
+    .ml-type-card {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      background: var(--color-surface-2);
+    }
+    .ml-type-card h4 { margin: 0 0 var(--space-2); font-size: var(--text-sm); }
+    .ml-type-card p { margin: 0; font-size: var(--text-xs); color: var(--color-text-muted); }
+    @media (max-width: 640px) { .ml-types-grid { grid-template-columns: 1fr; } }
+    .workflow-steps {
+      display: flex; flex-direction: column; gap: var(--space-3);
+      margin: var(--space-5) 0;
+    }
+    .workflow-step {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+    }
+    .workflow-step-num {
+      min-width: 28px; height: 28px; border-radius: 50%;
+      background: var(--color-primary); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: var(--text-xs);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k2" title="Was ist ML? – K2 · PRM V5"></site-header>
+  <lern-pfad topic="k2/t01"></lern-pfad>
+
+  <div class="layout">
+    <site-sidebar active="k2/t01"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K2 · Thema 1 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🤖 Was ist Maschinelles Lernen?</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">
+          Was unterscheidet ML von klassischer Programmierung? Wie "lernt" ein Algorithmus — und welche drei Hauptparadigmen gibt es?
+        </p>
+      </section>
+
+      <!-- STUFE 1: Ziel & Kontext -->
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 1</span>
+          <h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Das klassische Programmier-Paradigma</h3>
+          <p>In klassischer Programmierung schreibt ein Mensch explizite Regeln:</p>
+          <div class="info-box" style="font-family:var(--font-mono);font-size:var(--text-sm)">
+            <strong>Eingabe + Regeln → Ausgabe</strong><br><br>
+            if (email enthält "Gewinn") → Spam<br>
+            if (email enthält "Gratis") → Spam<br>
+            ...tausende Regeln manuell schreiben
+          </div>
+          <p>Das skaliert nicht. Spam-Filter müssten ständig manuell aktualisiert werden. Sprache, Bilder, medizinische Diagnosen — viele Probleme haben keine manuell formulierbaren Regeln.</p>
+          <h3>Das ML-Paradigma</h3>
+          <div class="info-box" style="border-left-color:var(--color-ziel)">
+            <strong>Eingabe + Ausgabe → Der Algorithmus lernt die Regeln selbst</strong><br><br>
+            Zeig dem Algorithmus 10.000 E-Mails mit Spam/Kein-Spam Labels → Er findet die Muster selbst.
+          </div>
+          <p>ML dreht das Programmier-Paradigma um: Statt Regeln zu schreiben, zeigst du <em>Beispiele</em> und der Algorithmus generalisiert.</p>
+          <div class="info-box warning">
+            <strong>Kernfrage:</strong> Welche Probleme eignen sich für ML — und welche nicht?
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button>
+        </div>
+      </div>
+
+      <!-- STUFE 2: Theorie -->
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 2</span>
+          <h2 class="stufe-title">🧠 Theorie &amp; Intuition</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Die drei Lernparadigmen</h3>
+          <div class="ml-types-grid">
+            <div class="ml-type-card">
+              <h4>👨‍🏫 Supervised Learning</h4>
+              <p>Gelabelte Daten: jedes Beispiel hat ein bekanntes Ergebnis. Das Modell lernt Eingabe→Ausgabe zu mappen.</p>
+              <p style="margin-top:var(--space-2);color:var(--color-primary);font-weight:600">Beispiel: Spam-Erkennung, Hauspreisvorhersage</p>
+            </div>
+            <div class="ml-type-card">
+              <h4>🔍 Unsupervised Learning</h4>
+              <p>Keine Labels. Das Modell findet selbst Struktur, Muster und Gruppen in den Daten.</p>
+              <p style="margin-top:var(--space-2);color:var(--color-primary);font-weight:600">Beispiel: Kundensegmentierung, Anomalie-Erkennung</p>
+            </div>
+            <div class="ml-type-card">
+              <h4>🎮 Reinforcement Learning</h4>
+              <p>Ein Agent lernt durch Interaktion mit einer Umgebung. Belohnungen und Strafen steuern das Lernen.</p>
+              <p style="margin-top:var(--space-2);color:var(--color-primary);font-weight:600">Beispiel: Schach-KI, Robotersteuerung</p>
+            </div>
+          </div>
+
+          <h3>Supervised vs. Unsupervised im Detail</h3>
+          <table>
+            <thead><tr><th>Merkmal</th><th>Supervised</th><th>Unsupervised</th></tr></thead>
+            <tbody>
+              <tr><td>Labels</td><td>✅ Vorhanden</td><td>❌ Nicht vorhanden</td></tr>
+              <tr><td>Ziel</td><td>Vorhersage/Klassifikation</td><td>Struktur finden</td></tr>
+              <tr><td>Evaluation</td><td>Accuracy, MSE etc.</td><td>Schwieriger (Silhouette Score)</td></tr>
+              <tr><td>Beispiele in PRM</td><td>SVM, Random Forest</td><td>k-Means, GMM</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Was ML nicht kann</h3>
+          <div class="info-box" style="border-left-color:var(--color-error,#e74c3c)">
+            <strong>ML ist kein Allheilmittel.</strong> Es funktioniert schlecht wenn:<br>
+            • Zu wenig Daten vorhanden sind (&lt;100 Beispiele)<br>
+            • Die Daten-Qualität schlecht ist ("Garbage in, garbage out")<br>
+            • Das Problem perfekte Erklärbarkeit erfordert<br>
+            • Einfache regelbasierte Logik ausreicht
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button>
+        </div>
+      </div>
+
+      <!-- STUFE 3: Algorithmus -->
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 3</span>
+          <h2 class="stufe-title">⚙️ Der ML-Workflow Schritt für Schritt</h2>
+        </div>
+        <div class="stufe-body">
+          <p>Jedes ML-Projekt folgt demselben grundlegenden Ablauf:</p>
+          <div class="workflow-steps">
+            <div class="workflow-step">
+              <div class="workflow-step-num">1</div>
+              <div>
+                <strong>Problem definieren</strong>
+                <p style="margin:var(--space-1) 0 0;color:var(--color-text-muted);font-size:var(--text-sm)">Klassifikation oder Regression? Welche Zielvariable? Welche Features stehen zur Verfügung?</p>
+              </div>
+            </div>
+            <div class="workflow-step">
+              <div class="workflow-step-num">2</div>
+              <div>
+                <strong>Daten sammeln &amp; erkunden (EDA)</strong>
+                <p style="margin:var(--space-1) 0 0;color:var(--color-text-muted);font-size:var(--text-sm)">Verteilungen ansehen, fehlende Werte finden, Ausreißer identifizieren.</p>
+              </div>
+            </div>
+            <div class="workflow-step">
+              <div class="workflow-step-num">3</div>
+              <div>
+                <strong>Daten aufbereiten (K1 Themen)</strong>
+                <p style="margin:var(--space-1) 0 0;color:var(--color-text-muted);font-size:var(--text-sm)">train_test_split → Encoding → Scaling → Feature Selection</p>
+              </div>
+            </div>
+            <div class="workflow-step">
+              <div class="workflow-step-num">4</div>
+              <div>
+                <strong>Modell wählen &amp; trainieren</strong>
+                <p style="margin:var(--space-1) 0 0;color:var(--color-text-muted);font-size:var(--text-sm)"><code>model.fit(X_train, y_train)</code> — der Algorithmus lernt Parameter aus den Trainingsdaten.</p>
+              </div>
+            </div>
+            <div class="workflow-step">
+              <div class="workflow-step-num">5</div>
+              <div>
+                <strong>Evaluieren</strong>
+                <p style="margin:var(--space-1) 0 0;color:var(--color-text-muted);font-size:var(--text-sm)"><code>model.score(X_test, y_test)</code> — Leistung auf ungesehenen Daten messen.</p>
+              </div>
+            </div>
+            <div class="workflow-step">
+              <div class="workflow-step-num">6</div>
+              <div>
+                <strong>Hyperparameter optimieren</strong>
+                <p style="margin:var(--space-1) 0 0;color:var(--color-text-muted);font-size:var(--text-sm)">GridSearchCV / CrossValidation — Modelleinstellungen systematisch verbessern.</p>
+              </div>
+            </div>
+          </div>
+
+          <h3>Was passiert intern beim Training?</h3>
+          <p>Der Algorithmus minimiert eine <strong>Verlustfunktion</strong> (Loss Function). Für Regression typisch: Mean Squared Error (MSE):</p>
+          <div class="info-box" style="font-family:var(--font-mono);text-align:center;font-size:var(--text-base)">
+            L = (1/n) · Σ (y_pred − y_true)²
+          </div>
+          <p>Der Algorithmus passt seine internen Parameter (Gewichte, Schwellenwerte, ...) so an, dass dieser Fehler minimal wird.</p>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="algo">✓ Workflow verstanden</button>
+        </div>
+      </div>
+
+      <!-- STUFE 4: Von Scratch -->
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 4</span>
+          <h2 class="stufe-title">🛠️ Von Scratch: Einfacher Classifier</h2>
+        </div>
+        <div class="stufe-body">
+          <p>Wir implementieren den einfachsten möglichen Klassifikator: den <strong>1-Nearest-Neighbor</strong> (ohne sklearn). Er klassifiziert jeden Punkt nach seinem nächsten Nachbarn im Trainingsset.</p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 1/2a — Klasse: SimpleKNN</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import numpy as np
+
+class SimpleKNN:
+    """Einfachster ML-Algorithmus: 1-Nearest-Neighbor."""
+
+    def fit(self, X_train, y_train):
+        # "Training" = Daten merken (kein echtes Lernen bei KNN!)
+        self.X_train = np.array(X_train)
+        self.y_train = np.array(y_train)
+
+    def predict(self, X_test):
+        X_test = np.array(X_test)
+        predictions = []
+        for x in X_test:
+            # Euklidische Distanz zu allen Trainingspunkten
+            distances = np.sqrt(np.sum((self.X_train - x) ** 2, axis=1))
+            # Index des nächsten Nachbarn
+            nearest_idx = np.argmin(distances)
+            # Label des nächsten Nachbarn übernehmen
+            predictions.append(self.y_train[nearest_idx])
+        return np.array(predictions)
+
+    def score(self, X_test, y_test):
+        y_pred = self.predict(X_test)
+        return np.mean(y_pred == np.array(y_test))
+</code></pre>
+          </div>
+
+          <p>Jetzt <strong>testen</strong> wir die Klasse mit dem Iris-Datensatz:</p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 1/2b — Test: SimpleKNN</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+model = SimpleKNN()
+model.fit(X_train, y_train)
+acc = model.score(X_test, y_test)
+print(f"Accuracy: {acc:.2%}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Accuracy: 100.00%</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <strong>Beobachtung:</strong> KNN hat keinen echten "Trainingsschritt" — er merkt sich einfach alle Daten. Das ist ein <em>Lazy Learner</em>. Die eigentliche Arbeit passiert erst bei der Vorhersage.
+          </div>
+
+          <h3>Klassifikation vs. Regression</h3>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 2/2a — Klasse: SimpleLinearRegression</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">class SimpleLinearRegression:
+    """Lineare Regression: y = w*x + b (eine Feature)."""
+
+    def fit(self, X, y):
+        X, y = np.array(X).flatten(), np.array(y)
+        n = len(X)
+        # Analytische Lösung der kleinsten Quadrate
+        self.w = (n * np.sum(X*y) - np.sum(X)*np.sum(y)) / \
+                 (n * np.sum(X**2) - np.sum(X)**2)
+        self.b = (np.sum(y) - self.w * np.sum(X)) / n
+
+    def predict(self, X):
+        return self.w * np.array(X).flatten() + self.b
+
+    def mse(self, X, y):
+        y_pred = self.predict(X)
+        return np.mean((y_pred - np.array(y))**2)
+</code></pre>
+          </div>
+
+          <p>Test mit dem klassischen Beispiel <strong>Wohnungsgröße → Preis</strong>:</p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 2/2b — Test: SimpleLinearRegression</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">X = [30, 50, 60, 80, 100]
+y = [150, 230, 280, 360, 450]  # Tausend Euro
+
+model = SimpleLinearRegression()
+model.fit(X, y)
+print(f"w={model.w:.2f}, b={model.b:.2f}")
+print(f"Preis für 70m²: {model.predict([70])[0]:.0f}k€")
+print(f"MSE: {model.mse(X, y):.2f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>w=4.29, b=19.59
+Preis für 70m²: 320k€
+MSE: 7.67</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Regressionsgerade durch die Datenpunkte</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, y, model)
+import matplotlib.pyplot as plt
+import numpy as np
+
+x_line = np.linspace(20, 110, 100)
+y_line = model.predict(x_line)
+x_pred = 70
+
+fig, ax = plt.subplots(figsize=(5, 3.4))
+ax.scatter(X, y, color='#3a7ca5', s=50, zorder=3, label='Trainingsdaten')
+ax.plot(x_line, y_line, color='#2e8b57', label=f'y = {model.w:.2f}x + {model.b:.2f}')
+ax.scatter([x_pred], model.predict([x_pred]), color='#d9534f', marker='x', s=80, zorder=4, label='Vorhersage (70m²)')
+ax.set_xlabel("Wohnungsgröße (m²)")
+ax.set_ylabel("Preis (k€)")
+ax.set_title("Lineare Regression: Wohnungsgröße → Preis")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Regressionsgerade durch die Datenpunkte</div>
+            <p>
+              Die Gerade <code>y = 4.29x + 19.59</code> verläuft mitten durch die 5 Punkte
+              und minimiert die Summe der quadratischen Abstände (MSE).
+              Für 70 m² liefert die Gerade eine Vorhersage von 320k€, obwohl dieser Punkt
+              nicht in den Trainingsdaten enthalten war — das ist <strong>Generalisierung</strong>.
+            </p>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button>
+        </div>
+      </div>
+
+      <!-- STUFE 5: Mit sklearn -->
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 5</span>
+          <h2 class="stufe-title">🚀 Professionell mit sklearn</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Die sklearn API</h3>
+          <p>Alle sklearn-Modelle folgen derselben einheitlichen API:</p>
+          <table>
+            <thead><tr><th>Methode</th><th>Was sie tut</th><th>Wann aufrufen</th></tr></thead>
+            <tbody>
+              <tr><td><code>model.fit(X_train, y_train)</code></td><td>Modell trainieren</td><td>Einmal auf Trainingsdaten</td></tr>
+              <tr><td><code>model.predict(X_test)</code></td><td>Vorhersagen generieren</td><td>Auf Test/Neudaten</td></tr>
+              <tr><td><code>model.score(X_test, y_test)</code></td><td>Standardmetrik berechnen</td><td>Schnelle Evaluation</td></tr>
+              <tr><td><code>model.get_params()</code></td><td>Hyperparameter anzeigen</td><td>Debugging/Dokumentation</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Vollständiger ML-Workflow mit sklearn</h3>
+          <p>
+            Derselbe Workflow wie eben, aber als <strong>Pipeline aus mehreren Schritten</strong> —
+            jeder Schritt in seiner eigenen Zelle:
+          </p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 1 — Daten laden &amp; splitten</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+print(f"X_train: {X_train.shape}, X_test: {X_test.shape}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>X_train: (120, 4), X_test: (30, 4)</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 2 — Skalieren</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test  = scaler.transform(X_test)
+
+print("Mittelwert X_train:", X_train.mean(axis=0).round(2))</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Mittelwert X_train: [0. 0. 0. 0.]</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 3 — Mehrere Modelle vergleichen</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+
+models = {
+    'KNN (k=5)':       KNeighborsClassifier(n_neighbors=5),
+    'SVM (RBF)':       SVC(kernel='rbf', C=1.0),
+    'Random Forest':   RandomForestClassifier(n_estimators=100, random_state=42),
+}
+
+print(f"{'Modell':<20} {'Test Acc':>10} {'CV Mean':>10} {'CV Std':>8}")
+print("-" * 52)
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    test_acc = model.score(X_test, y_test)
+    cv_scores = cross_val_score(model, X_train, y_train, cv=5)
+    print(f"{name:<20} {test_acc:>10.2%} {cv_scores.mean():>10.2%} {cv_scores.std():>8.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Modell                 Test Acc    CV Mean   CV Std
+----------------------------------------------------
+KNN (k=5)                93.33%     96.67%   0.0312
+SVM (RBF)                96.67%     96.67%   0.0312
+Random Forest            90.00%     95.00%   0.0167</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Test Accuracy vs. CV Mean je Modell</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (models, X_train, X_test, y_train, y_test)
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.model_selection import cross_val_score
+
+names     = list(models.keys())
+test_accs = [models[n].score(X_test, y_test) for n in names]
+cv_means  = [cross_val_score(models[n], X_train, y_train, cv=5).mean() for n in names]
+
+x = np.arange(len(names))
+width = 0.35
+
+fig, ax = plt.subplots(figsize=(5.5, 3.4))
+ax.bar(x - width/2, test_accs, width, label='Test Accuracy', color='#3a7ca5')
+ax.bar(x + width/2, cv_means, width, label='CV Mean', color='#2e8b57')
+ax.set_xticks(x)
+ax.set_xticklabels(names)
+ax.set_ylim(0.8, 1.0)
+ax.set_ylabel("Accuracy")
+ax.set_title("Test Accuracy vs. CV Mean je Modell")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Test Accuracy vs. CV Mean je Modell</div>
+            <p>
+              Das Balkendiagramm mit drei Modell-Gruppen zeigt: <code>SVM (RBF)</code> hat
+              die höchste und stabilste Performance (Test Acc ≈ CV Mean ≈ 96.7%, kleine CV-Std).
+              Bei <code>KNN</code> und <code>Random Forest</code> liegt die Test-Accuracy
+              etwas unter dem CV-Mean — ein Hinweis darauf, dass der eine Test-Split (30 Punkte)
+              zufällig etwas schwieriger war als der Durchschnitt der CV-Folds.
+            </p>
+          </div>
+
+          <h3>Wann welcher Algorithmus?</h3>
+          <table>
+            <thead><tr><th>Algorithmus</th><th>Gut wenn…</th><th>Schlecht wenn…</th></tr></thead>
+            <tbody>
+              <tr><td>KNN</td><td>Kleine Datenmenge, keine Annahmen über Verteilung</td><td>Große Datenmenge (langsam), viele Features</td></tr>
+              <tr><td>SVM</td><td>Hochdimensionale Daten, klare Trennung</td><td>Sehr große Datenmenge, unbalanciert</td></tr>
+              <tr><td>Random Forest</td><td>Fast immer gut, robust, kein Scaling nötig</td><td>Braucht Interpretierbarkeit</td></tr>
+              <tr><td>Lin. Regression</td><td>Lineare Beziehungen, gut interpretierbar</td><td>Nichtlineare Zusammenhänge</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button>
+        </div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="../Kapitel1/Quiz.html" class="nav-arrow">
+          <div class="nav-arrow-icon">←</div>
+          <div><div class="nav-arrow-sub">Vorheriges</div><div class="nav-arrow-title">K1 · Quiz</div></div>
+        </a>
+        <a href="T02-overfitting-underfitting.html" class="nav-arrow next">
+          <div class="nav-arrow-icon">→</div>
+          <div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">📈 Overfitting &amp; Underfitting</div></div>
+        </a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K2 · T1 · Was ist ML?"></site-footer>
+
+  <script>
+    function copyCode(btn) {
+      const cell = btn.closest('.code-cell');
+      const code = cell.querySelector('code').textContent;
+      const out = cell.querySelector('.code-cell-output-body pre');
+      const text = out ? code + '\n\n# Ausgabe:\n' + out.textContent : code;
+      navigator.clipboard.writeText(text);
+      btn.textContent = 'Kopiert!';
+      setTimeout(() => btn.textContent = 'Kopieren', 2000);
+    }
+  </script>
+</body>
+</html>

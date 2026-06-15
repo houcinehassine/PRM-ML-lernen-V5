@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Übungsaufgaben K6 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .uebung{
+      border:1px solid var(--color-border);border-radius:var(--radius-xl);
+      background:var(--color-surface);box-shadow:var(--shadow-sm);
+      padding:var(--space-5);margin-bottom:var(--space-6);scroll-margin-top:90px;
+    }
+    .uebung-head{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-2)}
+    .uebung-num{
+      width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+      background:var(--color-primary);color:#fff;font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    .uebung-head h2{margin:0;font-size:var(--text-lg)}
+    .uebung-diff{margin-left:auto;font-size:var(--text-xs);font-weight:700;letter-spacing:.05em;
+      padding:.15rem .6rem;border-radius:var(--radius-full);
+      background:var(--color-surface-2);color:var(--color-text-muted)}
+    .uebung-diff.d1{color:#15803d;background:color-mix(in oklab,#16a34a 12%,var(--color-surface-2))}
+    .uebung-diff.d2{color:#b45309;background:color-mix(in oklab,#d97706 12%,var(--color-surface-2))}
+    .uebung-diff.d3{color:#b91c1c;background:color-mix(in oklab,#dc2626 12%,var(--color-surface-2))}
+    .uebung-aufgabe{font-size:var(--text-sm);line-height:1.7;margin-bottom:var(--space-3)}
+    .uebung-aufgabe ul{margin:var(--space-2) 0 0;padding-left:1.4em}
+    .uebung-aufgabe li{margin-bottom:.3em}
+
+    /* ─── Musterlösung (einklappbar) ─────────────────────── */
+    details.loesung{
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      background:var(--color-surface-2);margin-top:var(--space-3);overflow:hidden;
+    }
+    details.loesung summary{
+      cursor:pointer;padding:var(--space-3) var(--space-4);font-weight:700;font-size:var(--text-sm);
+      display:flex;align-items:center;gap:var(--space-3);list-style:none;user-select:none;transition:background .15s;
+      color:var(--color-primary);
+    }
+    details.loesung summary::-webkit-details-marker{display:none}
+    details.loesung summary::before{content:'▶';font-size:.7rem;transition:transform .2s;flex-shrink:0}
+    details.loesung[open] summary::before{transform:rotate(90deg)}
+    details.loesung summary:hover{background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))}
+    details.loesung[open]{border-color:color-mix(in oklab,var(--color-primary) 30%,var(--color-border))}
+    .loesung-body{padding:0 var(--space-4) var(--space-4)}
+    .loesung-body p{font-size:var(--text-sm);line-height:1.7}
+    .loesung-body .code-cell{margin-top:var(--space-3)}
+
+    /* ─── Freier Code-Bereich: live im Browser ausführen (Pyodide) ─── */
+    .playground{
+      margin-top:var(--space-4);padding-top:var(--space-4);
+      border-top:1px dashed var(--color-border);
+    }
+    .playground-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);display:flex;align-items:center;gap:var(--space-2);
+    }
+    .code-exercise{margin-top:var(--space-2)}
+    .code-input{
+      width:100%;min-height:160px;box-sizing:border-box;
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      padding:var(--space-4);border-radius:var(--radius-lg);
+      border:1px solid var(--color-border);background:var(--color-surface-offset);
+      color:var(--color-text);resize:vertical;tab-size:4;white-space:pre;
+    }
+    .code-input:focus{outline:2px solid var(--color-primary);outline-offset:-1px}
+    .code-exercise-toolbar{display:flex;align-items:center;gap:var(--space-3);margin-top:var(--space-2);flex-wrap:wrap}
+    .run-btn{
+      background:var(--color-primary);color:#fff;border:none;
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-btn:hover{filter:brightness(1.07)}
+    .run-btn:disabled{opacity:.6;cursor:wait}
+    .reset-btn{
+      background:var(--color-surface-2);color:var(--color-text-muted);
+      border:1px solid var(--color-border);
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-status{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .code-output{
+      margin-top:var(--space-2);min-height:2.6em;
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      border-radius:var(--radius-lg);padding:var(--space-4);
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      color:var(--color-text);white-space:pre-wrap;word-break:break-word;
+    }
+    .code-output.has-error{
+      color:#b91c1c;border-color:color-mix(in oklab,#dc2626 30%,var(--color-border));
+      background:color-mix(in oklab,#dc2626 6%,var(--color-surface-2));
+    }
+    .erwartete-ausgabe{margin-top:var(--space-3)}
+
+    /* ─── Plots: live (Pyodide) & statisch (vorgerendert) ─── */
+    .code-output-plot{margin-top:var(--space-2)}
+    .code-output-plot-img,
+    .erwartete-ausgabe img,
+    .loesung-body img{
+      max-width:100%;height:auto;display:block;margin-top:var(--space-2);
+      border-radius:var(--radius-lg);border:1px solid var(--color-border);
+    }
+    .loesung-extra{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border)}
+    .loesung-extra-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k6" title="Übungsaufgaben K6 · GMM & EM-Algorithmus – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="k6/uebung"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">K6 · Übungsaufgaben · 6 Aufgaben</span>
+            <h1>Selbst <span class="key" style="--key-color:var(--color-primary)">programmieren</span></h1>
+            <p>
+              Lies die Aufgabenstellung und vergleiche dein Ziel mit der <strong>„Erwarteten Ausgabe“</strong>.
+              Schreibe deine Lösung dann selbst im <strong>freien Code-Bereich</strong>,
+              der per Klick auf <strong>„▶ Code ausführen“</strong> echtes Python (Pyodide, inkl. numpy/pandas/scikit-learn/scipy)
+              im Browser ausführt. Erst danach die Musterlösung aufklappen.
+              Die ersten drei Aufgaben arbeiten mit einem kleinen 1D-Beispiel, die letzten beiden mit dem
+              standardisierten <code>iris</code>-Datensatz.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Erwartete Ausgabe</span>
+              <span class="pill">Freier Bereich · live ausführen</span>
+              <span class="pill">Musterlösung einklappbar</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">So funktioniert's</h2>
+            <p>
+              1. Lies die Aufgabenstellung &amp; die „Erwartete Ausgabe“.<br>
+              2. Schreibe deine Lösung in den <strong>freien Code-Bereich</strong> (Setup ist schon vorhanden).<br>
+              3. Klicke auf <strong>„▶ Code ausführen“</strong> — beim ersten Mal lädt Pyodide (10-20 Sek.).<br>
+              4. Vergleiche deine Ausgabe mit der „Erwarteten Ausgabe“.<br>
+              5. Klicke auf <strong>„💡 Musterlösung anzeigen“</strong> nur wenn du nicht weiterkommst.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 1 ═══════════════ -->
+      <section id="uebung-1" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">1</span>
+          <h2>🔔 Die Gaußsche Dichtefunktion berechnen</h2>
+          <span class="uebung-diff d1">Leicht</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Berechne die Dichte <code>f(x)</code> der Standardnormalverteilung (μ=0, σ=1) für mehrere x-Werte.</p>
+          <ul>
+            <li>Nutze <code>scipy.stats.norm.pdf(x, mu, sigma)</code> mit <code>mu=0, sigma=1</code>.</li>
+            <li>Berechne die Dichte für <code>x in [-1, 0, 1, 2]</code>.</li>
+            <li>Gib für jedes <code>x</code> den Wert gerundet auf 4 Nachkommastellen aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>x=-1: pdf=0.2420
+x=0: pdf=0.3989
+x=1: pdf=0.2420
+x=2: pdf=0.0540</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="8">from scipy.stats import norm
+
+mu, sigma = 0, 1
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Die Dichte der Normalverteilung ist symmetrisch um <code>μ</code> — daher haben <code>x=-1</code> und
+              <code>x=1</code> denselben Wert. Am Maximum <code>x=μ=0</code> ist die Dichte am höchsten
+              (<code>1/√(2π) ≈ 0.3989</code>) und fällt mit wachsendem Abstand zu <code>μ</code> schnell ab —
+              bei <code>x=2</code> (zwei Standardabweichungen entfernt) ist sie schon auf etwa ein Siebtel
+              des Maximums gesunken.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from scipy.stats import norm
+
+mu, sigma = 0, 1
+for x in [-1, 0, 1, 2]:
+    val = norm.pdf(x, mu, sigma)
+    print(f"x={x}: pdf={val:.4f}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>x=-1: pdf=0.2420
+x=0: pdf=0.3989
+x=1: pdf=0.2420
+x=2: pdf=0.0540</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 2 ═══════════════ -->
+      <section id="uebung-2" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">2</span>
+          <h2>⚙️ E-Step: Verantwortlichkeiten (gamma) berechnen</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Berechne für 6 Datenpunkte die „Verantwortlichkeiten“ (<code>gamma</code>) zweier Gauß-Komponenten — der E-Step des EM-Algorithmus.</p>
+          <ul>
+            <li>Daten: <code>X = [1, 2, 3, 4, 5, 6]</code>. Komponente 1: <code>μ₁=2, σ₁=1.5</code>. Komponente 2: <code>μ₂=5, σ₂=1.5</code>. Beide mit Gewicht <code>π₁=π₂=0.5</code>.</li>
+            <li>Berechne <code>r1 = π₁ · pdf(X, μ₁, σ₁)</code> und <code>r2 = π₂ · pdf(X, μ₂, σ₂)</code>.</li>
+            <li>Normalisiere: <code>gamma1 = r1/(r1+r2)</code>, <code>gamma2 = r2/(r1+r2)</code>. Gib beide gerundet auf 3 Nachkommastellen aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>gamma1: [0.966 0.881 0.661 0.339 0.119 0.034]
+gamma2: [0.034 0.119 0.339 0.661 0.881 0.966]</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from scipy.stats import norm
+
+X = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+mu1, mu2 = 2.0, 5.0
+sig1, sig2 = 1.5, 1.5
+pi1, pi2 = 0.5, 0.5
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>gamma1[i]</code> gibt an, mit welcher „Wahrscheinlichkeit“ Punkt <code>i</code> zur Komponente 1
+              gehört — im Gegensatz zu KMeans ist das eine <strong>weiche (soft)</strong> Zuordnung statt einer
+              harten 0/1-Entscheidung. Punkt 1.0 liegt nahe <code>μ₁=2</code> und gehört fast sicher (0.966) zu
+              Komponente 1, Punkt 6.0 liegt nahe <code>μ₂=5</code> und gehört fast sicher (0.966) zu Komponente 2.
+              Punkte in der Mitte (3.0, 4.0) sind unsicherer zugeordnet. <code>gamma1 + gamma2 = 1</code> für
+              jeden Punkt.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">import numpy as np
+from scipy.stats import norm
+
+X = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+mu1, mu2 = 2.0, 5.0
+sig1, sig2 = 1.5, 1.5
+pi1, pi2 = 0.5, 0.5
+
+r1 = pi1 * norm.pdf(X, mu1, sig1)
+r2 = pi2 * norm.pdf(X, mu2, sig2)
+total = r1 + r2
+
+gamma1 = r1 / total
+gamma2 = r2 / total
+print("gamma1:", np.round(gamma1, 3))
+print("gamma2:", np.round(gamma2, 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>gamma1: [0.966 0.881 0.661 0.339 0.119 0.034]
+gamma2: [0.034 0.119 0.339 0.661 0.881 0.966]</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 3 ═══════════════ -->
+      <section id="uebung-3" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">3</span>
+          <h2>🔄 M-Step: Mittelwerte neu schätzen</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Nutze die <code>gamma</code>-Werte aus Aufgabe 2, um die Mittelwerte <code>μ₁, μ₂</code> neu zu schätzen — der M-Step des EM-Algorithmus.</p>
+          <ul>
+            <li>Berechne <code>N1 = sum(gamma1)</code> und <code>N2 = sum(gamma2)</code> (die „effektive“ Anzahl Punkte pro Komponente).</li>
+            <li>Berechne <code>mu1_new = sum(gamma1 * X) / N1</code> und analog <code>mu2_new</code>.</li>
+            <li>Gib <code>N1, N2</code> und <code>mu1_new, mu2_new</code> gerundet auf 3 Nachkommastellen aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>N1, N2: 3.0 3.0
+mu1_new, mu2_new: 2.29 4.71</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="14">import numpy as np
+from scipy.stats import norm
+
+X = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+mu1, mu2 = 2.0, 5.0
+sig1, sig2 = 1.5, 1.5
+pi1, pi2 = 0.5, 0.5
+
+r1 = pi1 * norm.pdf(X, mu1, sig1)
+r2 = pi2 * norm.pdf(X, mu2, sig2)
+total = r1 + r2
+gamma1 = r1 / total
+gamma2 = r2 / total
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Statt wie bei KMeans jeden Punkt fest einer Gruppe zuzuordnen, fließt jeder Punkt mit seinem
+              <strong>gamma-Gewicht</strong> in die neue Schätzung beider Mittelwerte ein. <code>N1=N2=3.0</code>
+              bedeutet: „effektiv“ gehören 3 der 6 Punkte zu jeder Komponente (obwohl die Zuordnung weich ist).
+              <code>μ₁</code> bewegt sich von 2.0 auf <strong>2.29</strong> (leicht zu den mittleren Punkten hin),
+              <code>μ₂</code> von 5.0 auf <strong>4.71</strong> — E-Step und M-Step würden nun abwechselnd
+              wiederholt, bis sich die Werte nicht mehr ändern (Konvergenz).
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">N1 = gamma1.sum()
+N2 = gamma2.sum()
+
+mu1_new = (gamma1 * X).sum() / N1
+mu2_new = (gamma2 * X).sum() / N2
+
+print("N1, N2:", round(N1, 3), round(N2, 3))
+print("mu1_new, mu2_new:", round(mu1_new, 3), round(mu2_new, 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>N1, N2: 3.0 3.0
+mu1_new, mu2_new: 2.29 4.71</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 4 ═══════════════ -->
+      <section id="uebung-4" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">4</span>
+          <h2>🚀 GaussianMixture mit sklearn</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Wende <code>GaussianMixture</code> auf den standardisierten <code>iris</code>-Datensatz an.</p>
+          <ul>
+            <li>Lade <code>iris</code> und standardisiere mit <code>StandardScaler</code> zu <code>Xs</code>.</li>
+            <li>Erstelle <code>GaussianMixture(n_components=3, random_state=42)</code> und rufe <code>fit_predict(Xs)</code> auf.</li>
+            <li>Gib <code>gmm.converged_</code>, <code>gmm.n_iter_</code> und den Adjusted Rand Index (<code>adjusted_rand_score(y, labels)</code>, 3 Nachkommastellen) aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Converged: True
+Iterations: 11
+ARI vs true labels: 0.516</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="12">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from sklearn.mixture import GaussianMixture
+from sklearn.metrics import adjusted_rand_score
+
+X, y = load_iris(return_X_y=True)
+Xs = StandardScaler().fit_transform(X)
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>converged_=True</code> bedeutet, dass der EM-Algorithmus nach <strong>11 Iterationen</strong>
+              (abwechselnd E-Step und M-Step) ein stabiles Optimum erreicht hat — die Log-Likelihood ändert sich
+              kaum noch zwischen den Iterationen. Der ARI von <strong>0.516</strong> ist niedriger als der von
+              KMeans (0.62 in Kapitel 4) — GMM modelliert hier elliptische statt kugelförmige Cluster und
+              entscheidet sich für eine etwas andere Gruppierung, die nicht ganz so gut zu den drei echten
+              Iris-Arten passt.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.mixture import GaussianMixture
+from sklearn.metrics import adjusted_rand_score
+
+gmm = GaussianMixture(n_components=3, random_state=42)
+labels = gmm.fit_predict(Xs)
+
+print("Converged:", gmm.converged_)
+print("Iterations:", gmm.n_iter_)
+print("ARI vs true labels:", round(adjusted_rand_score(y, labels), 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Converged: True
+Iterations: 11
+ARI vs true labels: 0.516</pre>
+                  
+                </div>
+              </div>
+            </div>
+        <div class="loesung-extra">
+          <div class="loesung-extra-label">📊 Erweiterung: Visualisierung</div>
+          <p>
+              Wie beim KMeans-Vergleich in Kapitel 4 (Aufgabe 6) zeigen sich auch hier zwei ähnliche, aber
+              nicht identische Gruppierungen: die linke, klar abgetrennte Gruppe (Setosa) wird von GMM
+              perfekt erkannt, an der Grenze zwischen den beiden rechten Gruppen weicht die
+              GMM-Zuordnung etwas von den echten Klassen ab — sichtbar als leicht „vermischte“ Farben
+              in der rechten Grafik. Das passt zum niedrigeren ARI von 0.516 im Vergleich zu KMeans' 0.62.
+          </p>
+          <div class="code-cell">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Python — Visualisierung</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+X_pca = PCA(n_components=2).fit_transform(Xs)
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 3.5))
+axes[0].scatter(X_pca[:,0], X_pca[:,1], c=y, cmap='viridis')
+axes[0].set_title("Echte Klassen")
+axes[1].scatter(X_pca[:,0], X_pca[:,1], c=labels, cmap='viridis')
+axes[1].set_title("GMM-Cluster")
+for ax in axes:
+    ax.set_xlabel("PC1"); ax.set_ylabel("PC2")
+plt.show()</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <img src="../assets/img/uebung/k6-ex4-pca-gmm.png" alt="PCA-Scatter: links echte Klassen, rechts GMM-Cluster — leicht abweichend an der Grenze">
+              </div>
+            </div>
+          </div>
+        </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 5 ═══════════════ -->
+      <section id="uebung-5" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">5</span>
+          <h2>🧪 predict_proba: weiche Cluster-Zuordnung</h2>
+          <span class="uebung-diff d3">Schwer</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Nutze <code>predict_proba</code>, um die weichen Zuordnungswahrscheinlichkeiten des GMM für einzelne Punkte zu betrachten.</p>
+          <ul>
+            <li>Trainiere wie in Aufgabe 4 <code>GaussianMixture(n_components=3, random_state=42)</code> auf <code>Xs</code>.</li>
+            <li>Gib für die ersten 3 Punkte <code>gmm.predict_proba(Xs[:3])</code> gerundet auf 3 Nachkommastellen aus.</li>
+            <li>Gib für dieselben Punkte <code>gmm.predict(Xs[:3])</code> aus. Stimmen die Maxima von <code>predict_proba</code> mit <code>predict</code> überein?</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Proba:
+ [[0. 1. 0.]
+ [0. 1. 0.]
+ [0. 1. 0.]]
+Predict: [1 1 1]</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="12">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from sklearn.mixture import GaussianMixture
+
+X, y = load_iris(return_X_y=True)
+Xs = StandardScaler().fit_transform(X)
+
+gmm = GaussianMixture(n_components=3, random_state=42)
+gmm.fit(Xs)
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>predict_proba</code> gibt für jeden Punkt die Wahrscheinlichkeit für jede der 3 Komponenten
+              zurück — die Zeilen summieren sich jeweils zu 1.0. Für die ersten 3 (Setosa-)Punkte ist das GMM sich
+              hier praktisch <strong>sicher</strong>: Wahrscheinlichkeit ≈ 1.0 für Komponente 1, ≈ 0 für die anderen
+              beiden. <code>predict</code> wählt einfach die Komponente mit der höchsten Wahrscheinlichkeit
+              (<code>argmax</code>) — bei eindeutigen Fällen wie hier stimmen beide Sichten überein, bei
+              Punkten nahe einer Cluster-Grenze würde <code>predict_proba</code> aber zusätzlich die
+              Unsicherheit zeigen.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">print("Proba:\n", np.round(gmm.predict_proba(Xs[:3]), 3))
+print("Predict:", gmm.predict(Xs[:3]))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Proba:
+ [[0. 1. 0.]
+ [0. 1. 0.]
+ [0. 1. 0.]]
+Predict: [1 1 1]</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 6 ═══════════════ -->
+      <section id="uebung-6" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">6</span>
+          <h2>🔔 Zwei Gaußverteilungen mit Datenpunkten plotten</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Stelle die beiden 1D-Gaußkomponenten aus Aufgabe 2/3 (<code>μ₁=2, σ₁=1.5</code> und <code>μ₂=5, σ₂=1.5</code>) zusammen mit den 6 Datenpunkten <code>X = [1,2,3,4,5,6]</code> grafisch dar.</p>
+          <ul>
+            <li>Erzeuge mit <code>np.linspace(-2, 9, 300)</code> eine x-Achse für die Dichtekurven.</li>
+            <li>Plotte <code>norm.pdf(x, mu1, sig1)</code> und <code>norm.pdf(x, mu2, sig2)</code> als zwei Linien.</li>
+            <li>Markiere die 6 Datenpunkte zusätzlich mit <code>plt.scatter(X, np.zeros_like(X))</code> auf der x-Achse.</li>
+            <li>Füge eine Legende, Achsentitel und einen Plot-Titel hinzu.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Zwei überlappende Gauß-Glockenkurven (Maxima bei x=2 und x=5)
+sowie 6 schwarze Punkte auf der x-Achse bei x=1..6.</pre>
+            <img src="../assets/img/uebung/k6-ex6-gaussians.png" alt="Zwei überlappende Gauß-Glockenkurven mit Maxima bei x=2 und x=5, plus 6 Datenpunkte auf der x-Achse">
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+X = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+mu1, mu2 = 2.0, 5.0
+sig1, sig2 = 1.5, 1.5
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Die beiden Glockenkurven überlappen sich deutlich im Bereich <code>x=3..4</code> — genau dort
+              waren in Aufgabe 2 die <code>gamma</code>-Werte am unsichersten (nahe 0.5/0.5). Die Punkte
+              <code>x=1,2</code> liegen klar unter der linken Kurve, <code>x=5,6</code> klar unter der
+              rechten — das erklärt visuell, warum diese Punkte in Aufgabe 2 mit hoher Sicherheit
+              (gamma ≈ 0.97 bzw. 0.97) einer Komponente zugeordnet wurden.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">import matplotlib.pyplot as plt
+
+xs_plot = np.linspace(-2, 9, 300)
+plt.plot(xs_plot, norm.pdf(xs_plot, mu1, sig1), label=f'Komponente 1 (μ={mu1})')
+plt.plot(xs_plot, norm.pdf(xs_plot, mu2, sig2), label=f'Komponente 2 (μ={mu2})')
+plt.scatter(X, np.zeros_like(X), color='k', zorder=5, label='Datenpunkte')
+plt.xlabel("x"); plt.ylabel("Dichte")
+plt.title("Zwei Gaußverteilungen + Daten")
+plt.legend()
+plt.show()</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre></pre>
+                  <img src="../assets/img/uebung/k6-ex6-gaussians.png" alt="Zwei überlappende Gauß-Glockenkurven mit Maxima bei x=2 und x=5, plus 6 Datenpunkte auf der x-Achse">
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="Quiz.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Zurück</div><div class="nav-arrow-title">🧠 Quiz</div></div></a>
+        <a href="../Kapitel7/Kapitel7.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">7 · Evaluation</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K6 · Übungsaufgaben · PRM V5"></site-footer>
+</body>
+</html>

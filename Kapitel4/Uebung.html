@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Übungsaufgaben K4 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .uebung{
+      border:1px solid var(--color-border);border-radius:var(--radius-xl);
+      background:var(--color-surface);box-shadow:var(--shadow-sm);
+      padding:var(--space-5);margin-bottom:var(--space-6);scroll-margin-top:90px;
+    }
+    .uebung-head{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-2)}
+    .uebung-num{
+      width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+      background:var(--color-primary);color:#fff;font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    .uebung-head h2{margin:0;font-size:var(--text-lg)}
+    .uebung-diff{margin-left:auto;font-size:var(--text-xs);font-weight:700;letter-spacing:.05em;
+      padding:.15rem .6rem;border-radius:var(--radius-full);
+      background:var(--color-surface-2);color:var(--color-text-muted)}
+    .uebung-diff.d1{color:#15803d;background:color-mix(in oklab,#16a34a 12%,var(--color-surface-2))}
+    .uebung-diff.d2{color:#b45309;background:color-mix(in oklab,#d97706 12%,var(--color-surface-2))}
+    .uebung-diff.d3{color:#b91c1c;background:color-mix(in oklab,#dc2626 12%,var(--color-surface-2))}
+    .uebung-aufgabe{font-size:var(--text-sm);line-height:1.7;margin-bottom:var(--space-3)}
+    .uebung-aufgabe ul{margin:var(--space-2) 0 0;padding-left:1.4em}
+    .uebung-aufgabe li{margin-bottom:.3em}
+
+    /* ─── Musterlösung (einklappbar) ─────────────────────── */
+    details.loesung{
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      background:var(--color-surface-2);margin-top:var(--space-3);overflow:hidden;
+    }
+    details.loesung summary{
+      cursor:pointer;padding:var(--space-3) var(--space-4);font-weight:700;font-size:var(--text-sm);
+      display:flex;align-items:center;gap:var(--space-3);list-style:none;user-select:none;transition:background .15s;
+      color:var(--color-primary);
+    }
+    details.loesung summary::-webkit-details-marker{display:none}
+    details.loesung summary::before{content:'▶';font-size:.7rem;transition:transform .2s;flex-shrink:0}
+    details.loesung[open] summary::before{transform:rotate(90deg)}
+    details.loesung summary:hover{background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))}
+    details.loesung[open]{border-color:color-mix(in oklab,var(--color-primary) 30%,var(--color-border))}
+    .loesung-body{padding:0 var(--space-4) var(--space-4)}
+    .loesung-body p{font-size:var(--text-sm);line-height:1.7}
+    .loesung-body .code-cell{margin-top:var(--space-3)}
+
+    /* ─── Freier Code-Bereich: live im Browser ausführen (Pyodide) ─── */
+    .playground{
+      margin-top:var(--space-4);padding-top:var(--space-4);
+      border-top:1px dashed var(--color-border);
+    }
+    .playground-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);display:flex;align-items:center;gap:var(--space-2);
+    }
+    .code-exercise{margin-top:var(--space-2)}
+    .code-input{
+      width:100%;min-height:160px;box-sizing:border-box;
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      padding:var(--space-4);border-radius:var(--radius-lg);
+      border:1px solid var(--color-border);background:var(--color-surface-offset);
+      color:var(--color-text);resize:vertical;tab-size:4;white-space:pre;
+    }
+    .code-input:focus{outline:2px solid var(--color-primary);outline-offset:-1px}
+    .code-exercise-toolbar{display:flex;align-items:center;gap:var(--space-3);margin-top:var(--space-2);flex-wrap:wrap}
+    .run-btn{
+      background:var(--color-primary);color:#fff;border:none;
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-btn:hover{filter:brightness(1.07)}
+    .run-btn:disabled{opacity:.6;cursor:wait}
+    .reset-btn{
+      background:var(--color-surface-2);color:var(--color-text-muted);
+      border:1px solid var(--color-border);
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-status{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .code-output{
+      margin-top:var(--space-2);min-height:2.6em;
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      border-radius:var(--radius-lg);padding:var(--space-4);
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      color:var(--color-text);white-space:pre-wrap;word-break:break-word;
+    }
+    .code-output.has-error{
+      color:#b91c1c;border-color:color-mix(in oklab,#dc2626 30%,var(--color-border));
+      background:color-mix(in oklab,#dc2626 6%,var(--color-surface-2));
+    }
+    .erwartete-ausgabe{margin-top:var(--space-3)}
+
+    /* ─── Plots: live (Pyodide) & statisch (vorgerendert) ─── */
+    .code-output-plot{margin-top:var(--space-2)}
+    .code-output-plot-img,
+    .erwartete-ausgabe img,
+    .loesung-body img{
+      max-width:100%;height:auto;display:block;margin-top:var(--space-2);
+      border-radius:var(--radius-lg);border:1px solid var(--color-border);
+    }
+    .loesung-extra{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border)}
+    .loesung-extra-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k4" title="Übungsaufgaben K4 · Clustering – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="k4/uebung"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">K4 · Übungsaufgaben · 6 Aufgaben</span>
+            <h1>Selbst <span class="key" style="--key-color:var(--color-primary)">programmieren</span></h1>
+            <p>
+              Lies die Aufgabenstellung und vergleiche dein Ziel mit der <strong>„Erwarteten Ausgabe“</strong>.
+              Schreibe deine Lösung dann selbst im <strong>freien Code-Bereich</strong>,
+              der per Klick auf <strong>„▶ Code ausführen“</strong> echtes Python (Pyodide, inkl. numpy/pandas/scikit-learn)
+              im Browser ausführt. Erst danach die Musterlösung aufklappen.
+              Alle Aufgaben arbeiten mit dem <code>iris</code>-Datensatz (150 Samples, 4 Features, 3 Klassen), standardisiert mit <code>StandardScaler</code>.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Erwartete Ausgabe</span>
+              <span class="pill">Freier Bereich · live ausführen</span>
+              <span class="pill">Musterlösung einklappbar</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">So funktioniert's</h2>
+            <p>
+              1. Lies die Aufgabenstellung &amp; die „Erwartete Ausgabe“.<br>
+              2. Schreibe deine Lösung in den <strong>freien Code-Bereich</strong> (Setup ist schon vorhanden).<br>
+              3. Klicke auf <strong>„▶ Code ausführen“</strong> — beim ersten Mal lädt Pyodide (10-20 Sek.).<br>
+              4. Vergleiche deine Ausgabe mit der „Erwarteten Ausgabe“.<br>
+              5. Klicke auf <strong>„💡 Musterlösung anzeigen“</strong> nur wenn du nicht weiterkommst.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 1 ═══════════════ -->
+      <section id="uebung-1" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">1</span>
+          <h2>🔵 KMeans: Cluster-Größen & Inertia</h2>
+          <span class="uebung-diff d1">Leicht</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Clustere die standardisierten <code>iris</code>-Daten mit <code>KMeans(n_clusters=3)</code>.</p>
+          <ul>
+            <li>Erstelle <code>KMeans(n_clusters=3, random_state=42, n_init=10)</code> und fitte ihn auf <code>Xs</code>.</li>
+            <li>Gib die Clustergrößen mit <code>np.bincount(labels)</code> aus.</li>
+            <li>Gib <code>km.inertia_</code> gerundet auf 2 Nachkommastellen aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Cluster sizes: [53 50 47]
+Inertia: 139.82</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_iris(return_X_y=True)
+Xs = StandardScaler().fit_transform(X)
+from sklearn.cluster import KMeans
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>fit_predict</code> liefert für jeden Punkt ein Cluster-Label (0, 1 oder 2). Mit drei echten
+              Iris-Arten von je 50 Samples erkennt KMeans eine Klasse fast perfekt (50), die anderen beiden
+              überlappen sich leicht (53/47). Die <code>inertia_</code> ist die Summe der quadrierten Abstände
+              aller Punkte zu ihrem Cluster-Zentrum — je kleiner, desto „kompakter“ die Cluster.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.cluster import KMeans
+
+km = KMeans(n_clusters=3, random_state=42, n_init=10)
+labels = km.fit_predict(Xs)
+
+print("Cluster sizes:", np.bincount(labels))
+print("Inertia:", round(km.inertia_, 2))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Cluster sizes: [53 50 47]
+Inertia: 139.82</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 2 ═══════════════ -->
+      <section id="uebung-2" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">2</span>
+          <h2>📐 Elbow-Methode: das richtige k finden</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Berechne die <code>inertia_</code> für verschiedene Werte von <code>k</code>, um den „Ellenbogen“ zu finden.</p>
+          <ul>
+            <li>Trainiere für <code>k in [1, 2, 3, 4, 5, 6]</code> jeweils ein <code>KMeans(n_clusters=k, random_state=42, n_init=10)</code> auf <code>Xs</code>.</li>
+            <li>Gib für jedes <code>k</code> die <code>inertia_</code> mit 2 Nachkommastellen aus.</li>
+            <li>An welcher Stelle flacht die Kurve deutlich ab (Ellenbogen)?</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>k=1: inertia=600.00
+k=2: inertia=222.36
+k=3: inertia=139.82
+k=4: inertia=114.09
+k=5: inertia=90.93
+k=6: inertia=81.54</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_iris(return_X_y=True)
+Xs = StandardScaler().fit_transform(X)
+from sklearn.cluster import KMeans
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Die <code>inertia_</code> sinkt mit wachsendem <code>k</code> immer (mehr Cluster = kompaktere Gruppen),
+              aber der <strong>Gewinn pro zusätzlichem Cluster</strong> nimmt ab. Der größte Sprung passiert von
+              <code>k=1</code> auf <code>k=2</code> (600 → 222) und von <code>k=2</code> auf <code>k=3</code>
+              (222 → 140) — danach werden die Verbesserungen klein. Der „Ellenbogen“ liegt bei <code>k=3</code>,
+              was genau zur Anzahl der echten Iris-Arten passt.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.cluster import KMeans
+
+for k in [1, 2, 3, 4, 5, 6]:
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    km.fit(Xs)
+    print(f"k={k}: inertia={km.inertia_:.2f}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>k=1: inertia=600.00
+k=2: inertia=222.36
+k=3: inertia=139.82
+k=4: inertia=114.09
+k=5: inertia=90.93
+k=6: inertia=81.54</pre>
+                  
+                </div>
+              </div>
+            </div>
+        <div class="loesung-extra">
+          <div class="loesung-extra-label">📊 Erweiterung: Visualisierung</div>
+          <p>
+              Im Plot zeigt sich der „Ellenbogen“ deutlich: zwischen <code>k=1</code> und <code>k=3</code>
+              fällt die Kurve sehr steil ab, danach wird sie deutlich flacher. Der Punkt, an dem die Kurve
+              „abknickt“ (hier bei <code>k=3</code>), ist ein guter Kompromiss zwischen wenigen Clustern und
+              niedriger Inertia.
+          </p>
+          <div class="code-cell">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Python — Visualisierung</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import matplotlib.pyplot as plt
+
+ks = [1, 2, 3, 4, 5, 6]
+inertias = []
+for k in ks:
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    km.fit(Xs)
+    inertias.append(km.inertia_)
+
+plt.plot(ks, inertias, marker='o')
+plt.xlabel("k"); plt.ylabel("Inertia")
+plt.title("Elbow-Methode")
+plt.show()</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <img src="../assets/img/uebung/k4-ex2-elbow.png" alt="Elbow-Plot: Inertia fällt steil von k=1 bis k=3, danach flacher">
+              </div>
+            </div>
+          </div>
+        </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 3 ═══════════════ -->
+      <section id="uebung-3" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">3</span>
+          <h2>🌊 DBSCAN: Cluster & Ausreißer finden</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Wende <code>DBSCAN</code> auf die standardisierten <code>iris</code>-Daten an und identifiziere Cluster und Noise-Punkte.</p>
+          <ul>
+            <li>Erstelle <code>DBSCAN(eps=0.8, min_samples=5)</code> und fitte ihn mit <code>fit_predict</code> auf <code>Xs</code>.</li>
+            <li>Gib mit <code>np.unique(labels, return_counts=True)</code> die Label-Häufigkeiten aus.</li>
+            <li>Gib die Anzahl der Cluster (ohne Noise, Label <code>-1</code>) und die Anzahl der Noise-Punkte aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Labels: {-1: 4, 0: 49, 1: 97}
+Anzahl Cluster (ohne Noise): 2
+Noise-Punkte: 4</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_iris(return_X_y=True)
+Xs = StandardScaler().fit_transform(X)
+from sklearn.cluster import DBSCAN
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              DBSCAN braucht <strong>kein</strong> festes <code>k</code> — es bildet Cluster aus dicht beieinander
+              liegenden Punkten und markiert isolierte Punkte als <strong>Noise (Label -1)</strong>. Mit
+              <code>eps=0.8</code> findet DBSCAN hier nur <strong>2</strong> Cluster statt 3, weil zwei der drei
+              Iris-Arten (Versicolor/Virginica) im standardisierten Raum so dicht zusammenliegen, dass sie zu
+              einem Cluster verschmelzen. 4 Punkte sind zu isoliert und werden als Noise markiert.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.cluster import DBSCAN
+
+db = DBSCAN(eps=0.8, min_samples=5)
+labels = db.fit_predict(Xs)
+
+unique, counts = np.unique(labels, return_counts=True)
+print("Labels:", dict(zip(unique, counts)))
+print("Anzahl Cluster (ohne Noise):", len(set(labels)) - (1 if -1 in labels else 0))
+print("Noise-Punkte:", np.sum(labels == -1))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Labels: {-1: 4, 0: 49, 1: 97}
+Anzahl Cluster (ohne Noise): 2
+Noise-Punkte: 4</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 4 ═══════════════ -->
+      <section id="uebung-4" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">4</span>
+          <h2>🚀 KMeans vs. echte Klassen (Adjusted Rand Index)</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Vergleiche die von <code>KMeans</code> gefundenen Cluster mit den echten Iris-Klassen <code>y</code>.</p>
+          <ul>
+            <li>Trainiere wie in Aufgabe 1 <code>KMeans(n_clusters=3, random_state=42, n_init=10)</code> auf <code>Xs</code>.</li>
+            <li>Importiere <code>adjusted_rand_score</code> aus <code>sklearn.metrics</code>.</li>
+            <li>Gib <code>adjusted_rand_score(y, labels)</code> gerundet auf 3 Nachkommastellen aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Adjusted Rand Index: 0.62</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_iris(return_X_y=True)
+Xs = StandardScaler().fit_transform(X)
+from sklearn.cluster import KMeans
+from sklearn.metrics import adjusted_rand_score
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Clustering ist <strong>unüberwacht</strong> — KMeans kennt <code>y</code> nicht. Der
+              <strong>Adjusted Rand Index (ARI)</strong> vergleicht trotzdem im Nachhinein, wie gut die gefundenen
+              Cluster mit den echten Klassen übereinstimmen: 1.0 = perfekte Übereinstimmung, 0.0 = Zufallsniveau.
+              Ein Wert von <strong>0.62</strong> zeigt, dass KMeans die grobe Struktur (3 Gruppen) gut erkennt,
+              aber an den Grenzen zwischen den beiden ähnlichen Arten Fehler macht.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.cluster import KMeans
+from sklearn.metrics import adjusted_rand_score
+
+km = KMeans(n_clusters=3, random_state=42, n_init=10)
+labels = km.fit_predict(Xs)
+
+print("Adjusted Rand Index:", round(adjusted_rand_score(y, labels), 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Adjusted Rand Index: 0.62</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 5 ═══════════════ -->
+      <section id="uebung-5" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">5</span>
+          <h2>🧭 PCA: Dimensionsreduktion auf 2D</h2>
+          <span class="uebung-diff d3">Schwer</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Reduziere die 4 Features von <code>iris</code> mit <code>PCA</code> auf 2 Hauptkomponenten.</p>
+          <ul>
+            <li>Erstelle <code>PCA(n_components=2)</code> und wende <code>fit_transform</code> auf <code>Xs</code> an.</li>
+            <li>Gib <code>explained_variance_ratio_</code> (gerundet auf 3 Nachkommastellen) und deren Summe aus.</li>
+            <li>Gib die ersten 3 transformierten Punkte gerundet auf 3 Nachkommastellen aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Explained variance ratio: [0.73  0.229]
+Sum: 0.958
+First 3 transformed points:
+ [[-2.265  0.48 ]
+ [-2.081 -0.674]
+ [-2.364 -0.342]]</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_iris(return_X_y=True)
+Xs = StandardScaler().fit_transform(X)
+from sklearn.decomposition import PCA
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Die erste Hauptkomponente (PC1) erfasst allein schon <strong>73%</strong> der Gesamtvarianz der
+              4 Features, PC2 weitere <strong>23%</strong> — zusammen <strong>95.8%</strong>. Das bedeutet: man
+              kann die 4-dimensionalen Iris-Daten fast verlustfrei in einem 2D-Streudiagramm darstellen, was
+              für Visualisierung und auch für nachgeschaltetes Clustering sehr nützlich ist.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.decomposition import PCA
+
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(Xs)
+
+print("Explained variance ratio:", np.round(pca.explained_variance_ratio_, 3))
+print("Sum:", round(pca.explained_variance_ratio_.sum(), 3))
+print("First 3 transformed points:\n", np.round(X_pca[:3], 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Explained variance ratio: [0.73  0.229]
+Sum: 0.958
+First 3 transformed points:
+ [[-2.265  0.48 ]
+ [-2.081 -0.674]
+ [-2.364 -0.342]]</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 6 ═══════════════ -->
+      <section id="uebung-6" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">6</span>
+          <h2>🎨 PCA-Visualisierung: KMeans-Cluster vs. echte Klassen</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Reduziere <code>Xs</code> mit <code>PCA(n_components=2)</code> auf 2D und vergleiche in zwei Scatterplots die echten Iris-Klassen mit den von <code>KMeans</code> gefundenen Clustern.</p>
+          <ul>
+            <li>Berechne <code>X_pca = PCA(n_components=2).fit_transform(Xs)</code>.</li>
+            <li>Trainiere wie in Aufgabe 4 <code>KMeans(n_clusters=3, random_state=42, n_init=10)</code> auf <code>Xs</code> und hole <code>km.labels_</code>.</li>
+            <li>Erstelle zwei Subplots: links <code>X_pca</code> einmal eingefärbt nach <code>y</code> (echte Klassen), rechts eingefärbt nach <code>km.labels_</code> (KMeans-Cluster).</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Zwei nebeneinander liegende Scatterplots in den PCA-Achsen PC1/PC2:
+links 3 Farbgruppen nach echten Iris-Arten, rechts 3 Farbgruppen
+nach KMeans-Clustern — beide sehen sehr ähnlich aus, mit leichten
+Abweichungen an den Cluster-Grenzen.</pre>
+            <img src="../assets/img/uebung/k4-ex6-pca-kmeans.png" alt="PCA-Scatter: links echte Klassen, rechts KMeans-Cluster — beide sehr ähnlich">
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="12">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_iris(return_X_y=True)
+Xs = StandardScaler().fit_transform(X)
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Die beiden Plots sehen sich sehr ähnlich — das ist die visuelle Bestätigung des
+              <strong>Adjusted Rand Index von 0.62</strong> aus Aufgabe 4: KMeans erkennt die grobe
+              3-Gruppen-Struktur der Daten gut (vor allem die linke, klar abgetrennte Gruppe = Setosa),
+              an der Grenze zwischen den beiden rechten, eng beieinander liegenden Gruppen
+              (Versicolor/Virginica) weicht die KMeans-Zuordnung aber leicht von den echten Klassen ab.
+              <code>PCA</code> dient hier nur der <strong>Visualisierung</strong> — geclustert wurde im
+              vollen 4D-Raum <code>Xs</code>.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+X_pca = PCA(n_components=2).fit_transform(Xs)
+km = KMeans(n_clusters=3, random_state=42, n_init=10)
+km.fit(Xs)
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 3.5))
+axes[0].scatter(X_pca[:,0], X_pca[:,1], c=y, cmap='viridis')
+axes[0].set_title("Echte Klassen")
+axes[1].scatter(X_pca[:,0], X_pca[:,1], c=km.labels_, cmap='viridis')
+axes[1].set_title("KMeans-Cluster")
+for ax in axes:
+    ax.set_xlabel("PC1"); ax.set_ylabel("PC2")
+plt.show()</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre></pre>
+                  <img src="../assets/img/uebung/k4-ex6-pca-kmeans.png" alt="PCA-Scatter: links echte Klassen, rechts KMeans-Cluster — beide sehr ähnlich">
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="Quiz.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Zurück</div><div class="nav-arrow-title">🧠 Quiz</div></div></a>
+        <a href="../Kapitel5/Kapitel5.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">5 · Random Forest</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K4 · Übungsaufgaben · PRM V5"></site-footer>
+</body>
+</html>

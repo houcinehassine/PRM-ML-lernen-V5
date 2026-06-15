@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Übungsaufgaben K3 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .uebung{
+      border:1px solid var(--color-border);border-radius:var(--radius-xl);
+      background:var(--color-surface);box-shadow:var(--shadow-sm);
+      padding:var(--space-5);margin-bottom:var(--space-6);scroll-margin-top:90px;
+    }
+    .uebung-head{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-bottom:var(--space-2)}
+    .uebung-num{
+      width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+      background:var(--color-primary);color:#fff;font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    .uebung-head h2{margin:0;font-size:var(--text-lg)}
+    .uebung-diff{margin-left:auto;font-size:var(--text-xs);font-weight:700;letter-spacing:.05em;
+      padding:.15rem .6rem;border-radius:var(--radius-full);
+      background:var(--color-surface-2);color:var(--color-text-muted)}
+    .uebung-diff.d1{color:#15803d;background:color-mix(in oklab,#16a34a 12%,var(--color-surface-2))}
+    .uebung-diff.d2{color:#b45309;background:color-mix(in oklab,#d97706 12%,var(--color-surface-2))}
+    .uebung-diff.d3{color:#b91c1c;background:color-mix(in oklab,#dc2626 12%,var(--color-surface-2))}
+    .uebung-aufgabe{font-size:var(--text-sm);line-height:1.7;margin-bottom:var(--space-3)}
+    .uebung-aufgabe ul{margin:var(--space-2) 0 0;padding-left:1.4em}
+    .uebung-aufgabe li{margin-bottom:.3em}
+
+    /* ─── Musterlösung (einklappbar) ─────────────────────── */
+    details.loesung{
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      background:var(--color-surface-2);margin-top:var(--space-3);overflow:hidden;
+    }
+    details.loesung summary{
+      cursor:pointer;padding:var(--space-3) var(--space-4);font-weight:700;font-size:var(--text-sm);
+      display:flex;align-items:center;gap:var(--space-3);list-style:none;user-select:none;transition:background .15s;
+      color:var(--color-primary);
+    }
+    details.loesung summary::-webkit-details-marker{display:none}
+    details.loesung summary::before{content:'▶';font-size:.7rem;transition:transform .2s;flex-shrink:0}
+    details.loesung[open] summary::before{transform:rotate(90deg)}
+    details.loesung summary:hover{background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))}
+    details.loesung[open]{border-color:color-mix(in oklab,var(--color-primary) 30%,var(--color-border))}
+    .loesung-body{padding:0 var(--space-4) var(--space-4)}
+    .loesung-body p{font-size:var(--text-sm);line-height:1.7}
+    .loesung-body .code-cell{margin-top:var(--space-3)}
+
+    /* ─── Freier Code-Bereich: live im Browser ausführen (Pyodide) ─── */
+    .playground{
+      margin-top:var(--space-4);padding-top:var(--space-4);
+      border-top:1px dashed var(--color-border);
+    }
+    .playground-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);display:flex;align-items:center;gap:var(--space-2);
+    }
+    .code-exercise{margin-top:var(--space-2)}
+    .code-input{
+      width:100%;min-height:160px;box-sizing:border-box;
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      padding:var(--space-4);border-radius:var(--radius-lg);
+      border:1px solid var(--color-border);background:var(--color-surface-offset);
+      color:var(--color-text);resize:vertical;tab-size:4;white-space:pre;
+    }
+    .code-input:focus{outline:2px solid var(--color-primary);outline-offset:-1px}
+    .code-exercise-toolbar{display:flex;align-items:center;gap:var(--space-3);margin-top:var(--space-2);flex-wrap:wrap}
+    .run-btn{
+      background:var(--color-primary);color:#fff;border:none;
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-btn:hover{filter:brightness(1.07)}
+    .run-btn:disabled{opacity:.6;cursor:wait}
+    .reset-btn{
+      background:var(--color-surface-2);color:var(--color-text-muted);
+      border:1px solid var(--color-border);
+      padding:.55rem 1.2rem;border-radius:var(--radius-md);
+      font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;
+    }
+    .run-status{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .code-output{
+      margin-top:var(--space-2);min-height:2.6em;
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      border-radius:var(--radius-lg);padding:var(--space-4);
+      font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.7;
+      color:var(--color-text);white-space:pre-wrap;word-break:break-word;
+    }
+    .code-output.has-error{
+      color:#b91c1c;border-color:color-mix(in oklab,#dc2626 30%,var(--color-border));
+      background:color-mix(in oklab,#dc2626 6%,var(--color-surface-2));
+    }
+    .erwartete-ausgabe{margin-top:var(--space-3)}
+
+    /* ─── Plots: live (Pyodide) & statisch (vorgerendert) ─── */
+    .code-output-plot{margin-top:var(--space-2)}
+    .code-output-plot-img,
+    .erwartete-ausgabe img,
+    .loesung-body img{
+      max-width:100%;height:auto;display:block;margin-top:var(--space-2);
+      border-radius:var(--radius-lg);border:1px solid var(--color-border);
+    }
+    .loesung-extra{margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border)}
+    .loesung-extra-label{
+      font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+      color:var(--color-primary);margin-bottom:var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k3" title="Übungsaufgaben K3 · SVM & Klassifikation – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="k3/uebung"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">K3 · Übungsaufgaben · 6 Aufgaben</span>
+            <h1>Selbst <span class="key" style="--key-color:var(--color-primary)">programmieren</span></h1>
+            <p>
+              Lies die Aufgabenstellung und vergleiche dein Ziel mit der <strong>„Erwarteten Ausgabe“</strong>.
+              Schreibe deine Lösung dann selbst im <strong>freien Code-Bereich</strong>,
+              der per Klick auf <strong>„▶ Code ausführen“</strong> echtes Python (Pyodide, inkl. numpy/pandas/scikit-learn)
+              im Browser ausführt. Erst danach die Musterlösung aufklappen.
+              Alle Aufgaben arbeiten mit dem <code>iris</code>-Datensatz (150 Samples, 4 Features, 3 Klassen).
+            </p>
+            <div class="pill-row">
+              <span class="pill">Erwartete Ausgabe</span>
+              <span class="pill">Freier Bereich · live ausführen</span>
+              <span class="pill">Musterlösung einklappbar</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">So funktioniert's</h2>
+            <p>
+              1. Lies die Aufgabenstellung &amp; die „Erwartete Ausgabe“.<br>
+              2. Schreibe deine Lösung in den <strong>freien Code-Bereich</strong> (Setup ist schon vorhanden).<br>
+              3. Klicke auf <strong>„▶ Code ausführen“</strong> — beim ersten Mal lädt Pyodide (10-20 Sek.).<br>
+              4. Vergleiche deine Ausgabe mit der „Erwarteten Ausgabe“.<br>
+              5. Klicke auf <strong>„💡 Musterlösung anzeigen“</strong> nur wenn du nicht weiterkommst.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 1 ═══════════════ -->
+      <section id="uebung-1" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">1</span>
+          <h2>📐 Lineare SVC & Margin-Breite</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Trainiere eine lineare SVC auf zwei Klassen (Setosa vs. Versicolor) mit den Features <code>petal_length</code> und <code>petal_width</code> (Spalten 2 und 3).</p>
+          <ul>
+            <li>Filtere Train/Test auf <code>y &lt; 2</code> (nur Klassen 0 und 1) und nutze die Spalten <code>[2, 3]</code> von X.</li>
+            <li>Trainiere <code>SVC(kernel='linear', C=1.0)</code> und gib die Test-Accuracy aus.</li>
+            <li>Gib die Anzahl der Support Vectors, <code>coef_</code>, <code>intercept_</code> und die Margin-Breite <code>2/||w||</code> aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Test-Accuracy: 1.0
+Anzahl Support Vectors: 2
+Coef: [1.1 0.7] Intercept: [-3.3]
+Margin-Breite: 1.534</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="12">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+from sklearn.svm import SVC
+
+mask_train = y_train < 2
+Xb, yb = X_train[mask_train][:, 2:4], y_train[mask_train]
+mask_test = y_test < 2
+Xbt, ybt = X_test[mask_test][:, 2:4], y_test[mask_test]
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Mit nur zwei (gut trennbaren) Klassen und zwei Features findet die SVC eine breite Trennlinie —
+              nur <strong>2 Support Vectors</strong> (die Punkte direkt am Rand) bestimmen die Lage der Hyperebene,
+              alle anderen Punkte sind irrelevant für das Modell. Die Margin-Breite <code>2/||w||</code> gibt
+              den Abstand zwischen den beiden parallelen Randgeraden an — je größer, desto „sicherer“ die Trennung.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.svm import SVC
+
+mask_train = y_train < 2
+Xb, yb = X_train[mask_train][:, 2:4], y_train[mask_train]
+mask_test = y_test < 2
+Xbt, ybt = X_test[mask_test][:, 2:4], y_test[mask_test]
+
+svc = SVC(kernel='linear', C=1.0)
+svc.fit(Xb, yb)
+
+print("Test-Accuracy:", round(svc.score(Xbt, ybt), 3))
+print("Anzahl Support Vectors:", svc.support_vectors_.shape[0])
+print("Coef:", np.round(svc.coef_[0], 3), "Intercept:", np.round(svc.intercept_, 3))
+
+w = svc.coef_[0]
+print("Margin-Breite:", round(2 / np.linalg.norm(w), 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Test-Accuracy: 1.0
+Anzahl Support Vectors: 2
+Coef: [1.1 0.7] Intercept: [-3.3]
+Margin-Breite: 1.534</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 2 ═══════════════ -->
+      <section id="uebung-2" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">2</span>
+          <h2>🔧 Soft Margin: der C-Parameter</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Vergleiche eine SVC mit kleinem und großem <code>C</code> auf allen drei Klassen von <code>iris</code>.</p>
+          <ul>
+            <li>Trainiere <code>SVC(kernel='linear', C=0.01)</code> und <code>SVC(kernel='linear', C=100)</code> auf <code>X_train, y_train</code>.</li>
+            <li>Gib für beide Train-Accuracy, Test-Accuracy und die Gesamtzahl der Support Vectors (<code>n_support_.sum()</code>) aus.</li>
+            <li>Welches Modell hat eine breitere, welches eine schmalere Margin?</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>C=0.01: train=0.908 test=0.900 #SV=100
+C=100: train=0.983 test=0.967 #SV=12</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+from sklearn.svm import SVC
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Ein <strong>kleines C</strong> (0.01) bestraft Fehlklassifikationen kaum — die SVC erlaubt eine
+              breite Margin mit vielen Punkten darin (100 Support Vectors), nimmt dafür niedrigere Accuracy in Kauf
+              (mehr Bias). Ein <strong>großes C</strong> (100) bestraft Fehler stark — die Margin wird schmal,
+              nur 12 Punkte sind Support Vectors, und das Modell passt sich enger an die Trainingsdaten an
+              (mehr Varianz, höhere Accuracy hier).
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.svm import SVC
+
+for C in [0.01, 100]:
+    svc = SVC(kernel='linear', C=C)
+    svc.fit(X_train, y_train)
+    print(f"C={C}: train={svc.score(X_train,y_train):.3f} "
+          f"test={svc.score(X_test,y_test):.3f} #SV={svc.n_support_.sum()}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>C=0.01: train=0.908 test=0.900 #SV=100
+C=100: train=0.983 test=0.967 #SV=12</pre>
+                  
+                </div>
+              </div>
+            </div>
+        <div class="loesung-extra">
+          <div class="loesung-extra-label">📊 Erweiterung: Visualisierung</div>
+          <p>
+              Zur Visualisierung verwenden wir nur die zwei Features <code>petal_length</code> und
+              <code>petal_width</code> (Spalten 2/3): bei <code>C=0.01</code> ist die Entscheidungsgrenze sehr
+              glatt und „großzügig“ (breite Margin, viele Punkte landen auf der falschen Seite), bei
+              <code>C=100</code> schmiegt sich die Grenze viel enger an die Trainingspunkte an (schmale Margin,
+              wenige Fehler) — genau das, was die <code>#SV</code>-Werte in der Tabelle oben schon andeuten.
+          </p>
+          <div class="code-cell">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Python — Visualisierung</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+
+X2 = X[:, 2:4]
+X2_train, X2_test, y2_train, y2_test = train_test_split(
+    X2, y, test_size=0.2, stratify=y, random_state=42
+)
+xx, yy = np.meshgrid(
+    np.linspace(X2[:,0].min()-0.5, X2[:,0].max()+0.5, 200),
+    np.linspace(X2[:,1].min()-0.5, X2[:,1].max()+0.5, 200)
+)
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 3.5))
+for ax, C in zip(axes, [0.01, 100]):
+    svc = SVC(kernel='linear', C=C)
+    svc.fit(X2_train, y2_train)
+    Z = svc.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+    ax.contourf(xx, yy, Z, alpha=0.3, cmap='viridis')
+    ax.scatter(X2_train[:,0], X2_train[:,1], c=y2_train, cmap='viridis', edgecolor='k', s=20)
+    ax.set_title(f"C={C}")
+    ax.set_xlabel("petal_length"); ax.set_ylabel("petal_width")
+plt.show()</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <img src="../assets/img/uebung/k3-ex2-c-boundaries.png" alt="Entscheidungsgrenzen: links sehr glatt (C=0.01), rechts enger an Trainingspunkten (C=100)">
+              </div>
+            </div>
+          </div>
+        </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 3 ═══════════════ -->
+      <section id="uebung-3" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">3</span>
+          <h2>🌀 Kernel-Trick: linear vs. rbf vs. poly</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Vergleiche drei verschiedene Kernel der SVC auf <code>iris</code>.</p>
+          <ul>
+            <li>Trainiere <code>SVC(kernel=...)</code> für <code>'linear'</code>, <code>'rbf'</code> und <code>'poly'</code> (jeweils Standard-Parameter).</li>
+            <li>Gib für jeden Kernel die Test-Accuracy aus (gerundet auf 3 Nachkommastellen).</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>kernel=linear: test-accuracy=1.000
+kernel=rbf: test-accuracy=0.967
+kernel=poly: test-accuracy=0.967</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="10">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+from sklearn.svm import SVC
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Der <strong>Kernel-Trick</strong> erlaubt der SVC, im Hintergrund eine nichtlineare Transformation der
+              Features zu „simulieren“, ohne sie explizit zu berechnen — nur über Skalarprodukte
+              (<code>K(x, x') = φ(x)·φ(x')</code>). Bei <code>iris</code> sind die Klassen schon mit einer
+              linearen Grenze fast perfekt trennbar, daher liegt <code>linear</code> hier sogar leicht vorne;
+              <code>rbf</code> und <code>poly</code> liefern fast identische Ergebnisse.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.svm import SVC
+
+for kernel in ['linear', 'rbf', 'poly']:
+    svc = SVC(kernel=kernel)
+    svc.fit(X_train, y_train)
+    print(f"kernel={kernel}: test-accuracy={svc.score(X_test, y_test):.3f}")</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>kernel=linear: test-accuracy=1.000
+kernel=rbf: test-accuracy=0.967
+kernel=poly: test-accuracy=0.967</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 4 ═══════════════ -->
+      <section id="uebung-4" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">4</span>
+          <h2>🚀 SVC mit sklearn: Scaling in der Pipeline</h2>
+          <span class="uebung-diff d3">Schwer</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Zeige, wie wichtig Feature Scaling für die SVC ist, wenn Features stark unterschiedliche Skalen haben.</p>
+          <ul>
+            <li>Erzeuge <code>X2 = X.copy()</code> und multipliziere Spalte 0 (sepal_length) mit <code>1000</code>.</li>
+            <li>Splitte <code>X2, y</code> genauso wie <code>X, y</code> (stratify, random_state=42).</li>
+            <li>Trainiere eine <code>Pipeline([('scaler', StandardScaler()), ('svc', SVC(kernel='rbf'))])</code> und eine reine <code>SVC(kernel='rbf')</code> ohne Scaling. Vergleiche die Test-Accuracy.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Mit Scaling:    0.967
+Ohne Scaling:   0.5</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="14">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+X, y = load_iris(return_X_y=True)
+X2 = X.copy()
+X2[:, 0] *= 1000
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X2, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Der <code>rbf</code>-Kernel basiert auf euklidischen Abständen (<code>||x - x'||²</code>). Wenn ein Feature
+              um den Faktor 1000 größer skaliert ist als die anderen, dominiert es den Abstand vollständig — die SVC
+              „sieht“ praktisch nur noch dieses eine Feature und kollabiert auf Zufallsniveau (0.5). Die
+              <code>Pipeline</code> mit <code>StandardScaler</code> bringt alle Features auf μ=0, σ=1 und stellt
+              die ursprüngliche Performance wieder her.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+pipe = Pipeline([('scaler', StandardScaler()), ('svc', SVC(kernel='rbf'))])
+pipe.fit(X_train, y_train)
+print("Mit Scaling:   ", round(pipe.score(X_test, y_test), 3))
+
+svc = SVC(kernel='rbf')
+svc.fit(X_train, y_train)
+print("Ohne Scaling:  ", round(svc.score(X_test, y_test), 3))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Mit Scaling:    0.967
+Ohne Scaling:   0.5</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 5 ═══════════════ -->
+      <section id="uebung-5" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">5</span>
+          <h2>🎯 decision_function: Abstand zur Hyperebene</h2>
+          <span class="uebung-diff d2">Mittel</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Nutze <code>decision_function</code>, um zu sehen, wie „sicher“ sich eine binäre SVC bei einzelnen Testpunkten ist.</p>
+          <ul>
+            <li>Nutze wie in Aufgabe 1 nur die Klassen 0/1 und die Features <code>[2, 3]</code>.</li>
+            <li>Trainiere <code>SVC(kernel='linear', C=1.0)</code>.</li>
+            <li>Gib für die ersten 5 Testpunkte <code>decision_function(Xbt[:5])</code> (gerundet auf 3 Nachkommastellen) und die zugehörigen Vorhersagen <code>predict(Xbt[:5])</code> aus.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Decision values: [-1.73  1.03  1.03 -1.73  2.99]
+Predictions: [0 1 1 0 1]</pre>
+            
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="12">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+from sklearn.svm import SVC
+
+mask_train = y_train < 2
+Xb, yb = X_train[mask_train][:, 2:4], y_train[mask_train]
+mask_test = y_test < 2
+Xbt, ybt = X_test[mask_test][:, 2:4], y_test[mask_test]
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              <code>decision_function</code> gibt den (vorzeichenbehafteten) Abstand jedes Punkts zur Hyperebene
+              zurück — Werte <strong>&lt; 0</strong> liegen auf der Seite von Klasse 0, Werte <strong>&gt; 0</strong>
+              auf der Seite von Klasse 1. Je größer der Betrag, desto weiter entfernt der Punkt von der
+              Entscheidungsgrenze liegt, desto „sicherer“ ist die Vorhersage. <code>predict</code> ist einfach
+              das Vorzeichen davon, auf die Klassenlabels gemappt.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">from sklearn.svm import SVC
+
+mask_train = y_train < 2
+Xb, yb = X_train[mask_train][:, 2:4], y_train[mask_train]
+mask_test = y_test < 2
+Xbt, ybt = X_test[mask_test][:, 2:4], y_test[mask_test]
+
+svc = SVC(kernel='linear', C=1.0)
+svc.fit(Xb, yb)
+
+print("Decision values:", np.round(svc.decision_function(Xbt[:5]), 3))
+print("Predictions:", svc.predict(Xbt[:5]))</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre>Decision values: [-1.73  1.03  1.03 -1.73  2.99]
+Predictions: [0 1 1 0 1]</pre>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- ═══════════════ AUFGABE 6 ═══════════════ -->
+      <section id="uebung-6" class="uebung">
+        <div class="uebung-head">
+          <span class="uebung-num">6</span>
+          <h2>📐 SVM-Hyperebene, Margin & Support Vectors plotten</h2>
+          <span class="uebung-diff d3">Schwer</span>
+        </div>
+        <div class="uebung-aufgabe">
+          <p>Visualisiere für eine binäre SVC (Klassen 0 vs. 1, Features <code>petal_length</code>/<code>petal_width</code>) die Hyperebene, die Margin-Grenzen und die Support Vectors.</p>
+          <ul>
+            <li>Nutze wie in Aufgabe 1 <code>Xb, yb</code> (Klassen 0/1, Spalten 2/3) und trainiere <code>SVC(kernel='linear', C=1.0)</code>.</li>
+            <li>Erzeuge ein Gitter mit <code>np.meshgrid</code> und berechne <code>decision_function</code> für jeden Gitterpunkt.</li>
+            <li>Zeichne mit <code>plt.contour</code> die Linien für <code>decision_function = -1, 0, 1</code> (Margin-Rand, Hyperebene, Margin-Rand).</li>
+            <li>Markiere die Support Vectors (<code>svc.support_vectors_</code>) zusätzlich mit großen, ungefüllten Kreisen.</li>
+          </ul>
+        </div>
+
+        <div class="code-cell-output erwartete-ausgabe">
+          <div class="code-cell-output-header">▶ Erwartete Ausgabe</div>
+          <div class="code-cell-output-body">
+            <pre>Ein Scatterplot mit den Trainingspunkten (farbig nach Klasse),
+einer durchgezogenen Linie (Hyperebene), zwei gestrichelten Linien
+(Margin-Rand) und 2 großen Kreisen um die Support Vectors.</pre>
+            <img src="../assets/img/uebung/k3-ex6-svm-boundary.png" alt="SVM-Entscheidungsgrenze mit Margin (gestrichelt) und 2 markierten Support Vectors">
+          </div>
+        </div>
+
+        <div class="playground">
+          <div class="playground-label">🧪 Freier Code-Bereich — schreibe &amp; führe deinen Code aus</div>
+          <div class="code-exercise">
+            <textarea class="code-input" spellcheck="false" rows="14">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+from sklearn.svm import SVC
+import matplotlib.pyplot as plt
+
+mask_train = y_train < 2
+Xb, yb = X_train[mask_train][:, 2:4], y_train[mask_train]
+
+# Schreibe hier deinen Code:
+</textarea>
+            <div class="code-exercise-toolbar">
+              <button class="run-btn" type="button">▶ Code ausführen</button>
+              <button class="reset-btn" type="button">↺ Zurücksetzen</button>
+              <span class="run-status"></span>
+            </div>
+            <pre class="code-output"></pre>
+          </div>
+        </div>
+
+        <details class="loesung">
+          <summary>💡 Musterlösung anzeigen</summary>
+          <div class="loesung-body">
+            <p>
+              Die durchgezogene Linie ist die <strong>Hyperebene</strong> (<code>decision_function = 0</code>),
+              die beiden gestrichelten Linien sind die <strong>Margin-Grenzen</strong>
+              (<code>decision_function = ±1</code>) — der Abstand zwischen ihnen ist genau die
+              Margin-Breite <code>2/||w||</code> aus Aufgabe 1. Die <strong>Support Vectors</strong> (große
+              Kreise) sind die einzigen Punkte, die <em>genau auf</em> den Margin-Grenzen liegen — sie allein
+              bestimmen Lage und Orientierung der Hyperebene; verschiebt man irgendeinen anderen Punkt
+              (außerhalb der Margin), ändert sich an der Lösung nichts.
+            </p>
+            <div class="code-cell">
+              <div class="code-cell-header">
+                <span class="cell-lang">🐍 Python — Lösung</span>
+                <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+              </div>
+              <pre><code class="language-python">svc = SVC(kernel='linear', C=1.0)
+svc.fit(Xb, yb)
+
+xx, yy = np.meshgrid(
+    np.linspace(Xb[:,0].min()-0.5, Xb[:,0].max()+0.5, 200),
+    np.linspace(Xb[:,1].min()-0.5, Xb[:,1].max()+0.5, 200)
+)
+Z = svc.decision_function(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+
+plt.contourf(xx, yy, Z, levels=[-100,0,100], alpha=0.2, colors=['#f59e0b','#4f7cff'])
+plt.contour(xx, yy, Z, levels=[-1,0,1], colors='k', linestyles=['--','-','--'])
+plt.scatter(Xb[:,0], Xb[:,1], c=yb, cmap='coolwarm', edgecolor='k', s=25)
+plt.scatter(svc.support_vectors_[:,0], svc.support_vectors_[:,1], s=120,
+            facecolors='none', edgecolors='k', linewidths=2, label='Support Vectors')
+plt.xlabel("petal_length"); plt.ylabel("petal_width")
+plt.title("Lineare SVC: Hyperebene, Margin & Support Vectors")
+plt.legend()
+plt.show()</code></pre>
+              <div class="code-cell-output">
+                <div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body">
+                  <pre></pre>
+                  <img src="../assets/img/uebung/k3-ex6-svm-boundary.png" alt="SVM-Entscheidungsgrenze mit Margin (gestrichelt) und 2 markierten Support Vectors">
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="Quiz.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Zurück</div><div class="nav-arrow-title">🧠 Quiz</div></div></a>
+        <a href="../Kapitel4/Kapitel4.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">4 · Clustering</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K3 · Übungsaufgaben · PRM V5"></site-footer>
+</body>
+</html>

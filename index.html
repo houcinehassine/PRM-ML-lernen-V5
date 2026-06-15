@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PRM · Lernpfad V5 – Schritt für Schritt zum ML-Experten</title>
+  <meta name="description" content="7 Kapitel Maschinelles Lernen – von der Theorie über den Algorithmus bis zur eigenen Python-Implementierung. Strukturiertes Lernen in 5 Stufen."/>
+  <script type="module" src="header.js"></script>
+  <script type="module" src="footer.js"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* Index-only styles */
+    .home-hero{
+      position:relative;padding:clamp(5rem,12vw,8rem) 0 clamp(3rem,7vw,5rem);
+      text-align:center;overflow:hidden;
+    }
+    .home-hero::before{
+      content:'';position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 70% 60% at 15% 10%,color-mix(in oklab,var(--color-primary) 18%,transparent),transparent 65%),
+        radial-gradient(ellipse 60% 50% at 85% 90%,color-mix(in oklab,var(--color-primary) 12%,transparent),transparent 60%),
+        radial-gradient(ellipse 50% 40% at 70% 5%,color-mix(in oklab,var(--color-success) 9%,transparent),transparent 55%);
+      pointer-events:none;
+    }
+    .home-hero > *{position:relative;z-index:1}
+    .hero-eyebrow{
+      display:inline-flex;align-items:center;gap:.5rem;
+      padding:.3rem 1.25rem;border-radius:9999px;
+      background:color-mix(in oklab,var(--color-primary) 10%,var(--color-surface));
+      border:1px solid color-mix(in oklab,var(--color-primary) 22%,var(--color-border));
+      color:var(--color-primary);font-size:var(--text-xs);font-weight:700;
+      letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.75rem;
+    }
+    .hero-title{
+      font-family:var(--font-display);font-size:clamp(2.8rem,6.5vw,5.5rem);
+      line-height:1.03;font-weight:700;max-width:14ch;margin:0 auto 1.5rem;
+      text-transform:none;letter-spacing:-.02em;
+    }
+    .hero-title .line-accent{color:var(--color-primary)}
+    .hero-subtitle{
+      max-width:56ch;margin:0 auto 2.5rem;
+      color:var(--color-text-muted);font-size:var(--text-base);line-height:1.75;
+    }
+
+    /* 5-Stufen Erklärung */
+    .stufen-strip{
+      display:flex;align-items:stretch;gap:0;
+      background:var(--color-surface);border:1px solid var(--color-border);
+      border-radius:1rem;box-shadow:var(--shadow-md);overflow:hidden;
+      max-width:860px;margin:0 auto 3rem;
+    }
+    .stufen-item{
+      flex:1;display:flex;flex-direction:column;align-items:center;
+      gap:.35rem;padding:1.25rem .75rem;text-align:center;
+      border-right:1px solid var(--color-border);
+      font-size:.68rem;font-weight:700;
+      color:var(--color-text-muted);letter-spacing:.04em;text-transform:uppercase;
+      line-height:1.3;
+    }
+    .stufen-item:last-child{border-right:none}
+    .stufen-item .st-icon{font-size:1.5rem;margin-bottom:.1rem}
+    .stufen-item .st-num{
+      font-size:.58rem;font-weight:800;letter-spacing:.1em;
+      opacity:.6;margin-bottom:.1rem;
+    }
+    .stufen-item.st-ziel   {--st-c:var(--color-ziel)}
+    .stufen-item.st-theorie{--st-c:var(--color-theorie)}
+    .stufen-item.st-algo   {--st-c:var(--color-algo)}
+    .stufen-item.st-scratch{--st-c:var(--color-scratch)}
+    .stufen-item.st-sklearn{--st-c:var(--color-sklearn)}
+    .stufen-item .st-num{color:var(--st-c,var(--color-text-faint))}
+    .stufen-item .st-label{color:var(--st-c,var(--color-text-muted))}
+
+    .section-heading-index{
+      max-width:1120px;margin:3rem auto 1.5rem;
+      padding:0 2rem;display:flex;align-items:center;gap:1.25rem;
+    }
+    .section-heading-index-text{font-size:var(--text-xs);font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--color-text-faint);white-space:nowrap}
+    .section-heading-index-line{flex:1;height:1px;background:var(--color-border)}
+
+    /* Intro card */
+    .intro-section{max-width:1120px;margin:0 auto 0;padding:0 2rem}
+    .intro-card{
+      background:var(--color-surface);border:1px solid var(--color-border);
+      border-radius:1rem;padding:2rem 2.5rem;
+      display:grid;grid-template-columns:auto 1fr;gap:2rem;align-items:center;
+      box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+    }
+    .intro-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--color-primary),color-mix(in oklab,var(--color-primary) 50%,var(--color-success)))}
+    .intro-icon{width:68px;height:68px;border-radius:1rem;background:linear-gradient(145deg,color-mix(in oklab,var(--color-primary) 14%,var(--color-surface-2)),var(--color-surface-offset));border:1px solid var(--color-border);display:grid;place-items:center;font-size:2rem;flex-shrink:0}
+    .intro-content h2{font-family:var(--font-display);font-size:var(--text-lg);font-weight:700;margin-bottom:.75rem;text-align:left}
+    .intro-content p{font-size:var(--text-sm);color:var(--color-text-muted);max-width:72ch;margin:0;line-height:1.75}
+
+    @media (max-width:700px){
+      .stufen-strip{flex-wrap:wrap}
+      .stufen-item{flex:1 1 calc(33.33% - 2px);border-bottom:1px solid var(--color-border)}
+      .intro-card{grid-template-columns:1fr;gap:1.25rem;padding:1.5rem 1.5rem 1.5rem 2rem}
+      .section-heading-index,.intro-section{padding:0 1.25rem}
+      .kapitel-grid{padding:0 1.25rem 3rem}
+    }
+  </style>
+</head>
+<body>
+  <site-header active="home" title="PRM · Lernpfad V5"></site-header>
+
+  <main id="main-content">
+
+    <!-- HERO -->
+    <div class="home-hero">
+      <div class="hero-eyebrow">
+        <span>🎓</span> PRM · Maschinelles Lernen · Lernpfad V5
+      </div>
+      <h1 class="hero-title">
+        Verstehen.<br>
+        <span class="line-accent">Programmieren.</span><br>
+        Beherrschen.
+      </h1>
+      <p class="hero-subtitle">
+        Jedes Thema – von der Intuition bis zur sklearn-API –
+        in <strong>5 klar getrennten Lernstufen</strong>.
+        Theorie, Algorithmus, eigene Implementierung und Praxis in einem Durchgang.
+      </p>
+
+      <!-- 5-Stufen Strip -->
+      <div class="stufen-strip">
+        <div class="stufen-item st-ziel">
+          <span class="st-icon">🎯</span>
+          <span class="st-num">Stufe 1</span>
+          <span class="st-label">Ziel &amp; Kontext</span>
+        </div>
+        <div class="stufen-item st-theorie">
+          <span class="st-icon">🧠</span>
+          <span class="st-num">Stufe 2</span>
+          <span class="st-label">Theorie</span>
+        </div>
+        <div class="stufen-item st-algo">
+          <span class="st-icon">⚙️</span>
+          <span class="st-num">Stufe 3</span>
+          <span class="st-label">Algorithmus</span>
+        </div>
+        <div class="stufen-item st-scratch">
+          <span class="st-icon">🛠️</span>
+          <span class="st-num">Stufe 4</span>
+          <span class="st-label">Von Scratch</span>
+        </div>
+        <div class="stufen-item st-sklearn">
+          <span class="st-icon">🚀</span>
+          <span class="st-num">Stufe 5</span>
+          <span class="st-label">Mit sklearn</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTRO -->
+    <div class="intro-section">
+      <div class="intro-card">
+        <div class="intro-icon">💡</div>
+        <div class="intro-content">
+          <h2>Warum dieser Aufbau?</h2>
+          <p>
+            Wer nur Copy-Pastet versteht nicht – wer nur Theorie liest kann nicht programmieren.
+            Diese Version verbindet beides: Du lernst zuerst <em>was</em> ein Algorithmus macht und
+            <em>warum</em>, dann wie er schrittweise abläuft, dann baust du ihn selbst in Python nach –
+            und erst dann nutzt du die fertige sklearn-Funktion. So entsteht echtes Verständnis.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- KAPITEL GRID -->
+    <div class="section-heading-index">
+      <span class="section-heading-index-text">7 Kapitel · Alle Lernpfade</span>
+      <span class="section-heading-index-line"></span>
+    </div>
+
+    <div class="kapitel-grid">
+
+      <a class="kcard" href="Kapitel1/Kapitel1.html">
+        <div class="kcard-header">
+          <div class="kcard-num">1</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Data Preparation</div>
+            <div class="kcard-title">Daten vorbereiten &amp;<br>Feature Engineering</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Wie verwandeln wir rohe Daten in brauchbare Features? Von train_test_split bis Normalisierung – der Grundstein aller ML-Projekte.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">train_test_split</span>
+          <span class="kcard-topic">Normalisierung</span>
+          <span class="kcard-topic">One-Hot-Encoding</span>
+          <span class="kcard-topic">Feature Scaling</span>
+          <span class="kcard-topic">Feature Selection</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">5 Themen</span>
+          <span class="kcard-badge scratch">🛠️ Von Scratch</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="Kapitel2/Kapitel2.html">
+        <div class="kcard-header">
+          <div class="kcard-num">2</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">ML Grundlagen</div>
+            <div class="kcard-title">Einführung in<br>Machine Learning</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Was ist ML überhaupt? Overfitting, Bias-Variance Tradeoff und Kreuzvalidierung – das konzeptuelle Fundament für alles Weitere.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">Was ist ML?</span>
+          <span class="kcard-topic">Overfitting</span>
+          <span class="kcard-topic">Bias-Variance</span>
+          <span class="kcard-topic">Cross-Validation</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">4 Themen</span>
+          <span class="kcard-badge scratch">🛠️ Von Scratch</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="Kapitel3/Kapitel3.html">
+        <div class="kcard-header">
+          <div class="kcard-num">3</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Klassifikation</div>
+            <div class="kcard-title">SVM &amp;<br>Klassifikation</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Vom Hyperebenen-Konzept über den Kernel-Trick bis zur SVC-Implementierung. Wie findet eine SVM die optimale Trenngrenze?</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">Hyperebene</span>
+          <span class="kcard-topic">Margin</span>
+          <span class="kcard-topic">Kernel-Trick</span>
+          <span class="kcard-topic">SVC sklearn</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">4 Themen</span>
+          <span class="kcard-badge scratch">🛠️ Von Scratch</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="Kapitel4/Kapitel4.html">
+        <div class="kcard-header">
+          <div class="kcard-num">4</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Clustering</div>
+            <div class="kcard-title">k-means &amp;<br>DBSCAN</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Unüberwachtes Lernen: Wie gruppieren wir Datenpunkte ohne Labels? k-means von Hand implementiert, Elbow-Methode und DBSCAN.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">k-means Algo</span>
+          <span class="kcard-topic">Elbow-Methode</span>
+          <span class="kcard-topic">DBSCAN</span>
+          <span class="kcard-topic">KMeans sklearn</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">4 Themen</span>
+          <span class="kcard-badge scratch">🛠️ Von Scratch</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="Kapitel5/Kapitel5.html">
+        <div class="kcard-header">
+          <div class="kcard-num">5</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Ensemble-Methoden</div>
+            <div class="kcard-title">Random Forest &amp;<br>Bagging</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Viele schwache Lerner werden ein starker: Entscheidungsbaum, Bagging, Feature Importance und der vollständige Random Forest Algorithmus.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">Entscheidungsbaum</span>
+          <span class="kcard-topic">Bagging</span>
+          <span class="kcard-topic">Random Forest</span>
+          <span class="kcard-topic">Feature Importance</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">4 Themen</span>
+          <span class="kcard-badge scratch">🛠️ Von Scratch</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="Kapitel6/Kapitel6.html">
+        <div class="kcard-header">
+          <div class="kcard-num">6</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Gaussian Mixture</div>
+            <div class="kcard-title">GMM &amp;<br>EM-Algorithmus</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Weiche Clustergrenzen statt harter Zuweisung: Gaußverteilung, der EM-Algorithmus Schritt für Schritt, und GaussianMixture in sklearn.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">Gaußverteilung</span>
+          <span class="kcard-topic">E-Step / M-Step</span>
+          <span class="kcard-topic">EM-Algorithmus</span>
+          <span class="kcard-topic">GaussianMixture</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">4 Themen</span>
+          <span class="kcard-badge scratch">🛠️ Von Scratch</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="Kapitel7/Kapitel7.html">
+        <div class="kcard-header">
+          <div class="kcard-num">7</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Evaluation</div>
+            <div class="kcard-title">Modelle ehrlich<br>bewerten</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Wie gut ist ein Modell wirklich? Confusion Matrix, ROC-AUC, Precision/Recall und korrekte Kreuzvalidierung – die Metriken-Toolbox.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">Confusion Matrix</span>
+          <span class="kcard-topic">ROC / AUC</span>
+          <span class="kcard-topic">Precision/Recall</span>
+          <span class="kcard-topic">Cross-Validation</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">4 Themen</span>
+          <span class="kcard-badge scratch">🛠️ Von Scratch</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </main>
+
+  <site-footer caption="PRM · Lernpfad V5 · Stand Juni 2026"></site-footer>
+</body>
+</html>

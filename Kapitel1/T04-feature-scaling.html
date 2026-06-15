@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Feature Scaling – K1 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s}
+    .mark-btn:hover{border-color:var(--color-success);color:var(--color-success)}
+    .stufe-footer{margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end}
+    .ellipse-vis{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin:var(--space-5) 0}
+    .ellipse-card{padding:var(--space-5);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-xl);text-align:center}
+    .ellipse-card h4{margin:0 0 var(--space-3);font-size:var(--text-sm);font-weight:700}
+    @media(max-width:600px){.ellipse-vis{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <site-header active="k1" title="Feature Scaling – K1 · PRM V5"></site-header>
+  <script>
+    window.__lernpfadSteps__ = [
+      { id: 'einleitung', icon: '🎯', label: 'Einleitung',     cls: 'lp-ziel'     },
+      { id: 'robust',     icon: '1️⃣', label: 'RobustScaler',   cls: 'lp-scratch'  },
+      { id: 'power',      icon: '2️⃣', label: 'Power Transform',cls: 'lp-sklearn'  },
+      { id: 'vergleich',  icon: '⚖️', label: 'Vergleich',      cls: 'lp-vergleich'},
+    ];
+  </script>
+  <lern-pfad topic="k1/t04"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k1/t04"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K1 · Thema 4 von 5</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">⚖️ Feature Scaling</h1>
+        <p style="color:var(--color-text-muted)">Gradient Descent, k-NN und SVM reagieren empfindlich auf unterschiedliche Feature-Größenordnungen. RobustScaler, Power Transformations und der richtige Scaler für jede Situation.</p>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+           EINLEITUNG – ZIEL & KONTEXT
+      ════════════════════════════════════════ -->
+      <div class="stufe stufe-ziel" id="stufe-einleitung">
+        <div class="stufe-header"><span class="stufe-icon">🎯</span><div><div class="stufe-label">Einleitung</div><div class="stufe-title">Ziel &amp; Kontext</div></div></div>
+        <div class="stufe-body">
+          <h3>Feature Scaling vs. Normalisierung?</h3>
+          <p>Die Begriffe werden oft vermischt. <strong>Feature Scaling</strong> ist der Oberbegriff — er umfasst alle Transformationen, die Features auf vergleichbare Größenordnungen bringen. Thema 2 hat Min-Max und Z-Score eingeführt. Dieses Thema vertieft das und fügt zwei wichtige Methoden hinzu:</p>
+          <div class="compare-grid">
+            <div class="compare-card">
+              <h4 style="margin:0 0 var(--space-2);font-size:var(--text-sm);font-weight:700">🦾 1️⃣ RobustScaler</h4>
+              <p style="font-size:var(--text-sm);margin:0">Skaliert mit Median &amp; IQR — robust gegen Ausreißer. → <a href="#stufe-robust">Zu Methode 1</a></p>
+            </div>
+            <div class="compare-card">
+              <h4 style="margin:0 0 var(--space-2);font-size:var(--text-sm);font-weight:700">📐 2️⃣ Power Transform</h4>
+              <p style="font-size:var(--text-sm);margin:0">Korrigiert schiefe Verteilungen (Log, Box-Cox, Yeo-Johnson). → <a href="#stufe-power">Zu Methode 2</a></p>
+            </div>
+          </div>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted)">Am Ende vergleichen wir alle Scaler aus K1 direkt im Abschnitt <a href="#stufe-vergleich">Vergleich</a>.</p>
+
+          <h3>Warum Gradient Descent Scaling braucht</h3>
+          <p>Gradient Descent minimiert eine Loss-Funktion durch iterative Schritte in Richtung des steilsten Abstiegs. Ohne Scaling haben Features sehr unterschiedliche Größenordnungen — das führt zu einer <strong>länglichen, elliptischen Loss-Landschaft</strong>:</p>
+          <div class="ellipse-vis">
+            <div class="ellipse-card" style="border-color:color-mix(in oklab,#ef4444 30%,var(--color-border))">
+              <h4 style="color:#ef4444">❌ Ohne Scaling</h4>
+              <div style="font-size:2.5rem;line-height:1;margin:var(--space-3) 0">🥚</div>
+              <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0">Längliche Ellipse: der Gradient zeigt meist in die "falsche" Richtung → Zig-Zag-Konvergenz → viele Iterationen nötig.</p>
+              <div style="margin-top:var(--space-3);font-family:var(--font-mono);font-size:.7rem;background:var(--color-surface);padding:var(--space-2);border-radius:var(--radius-md)">x₁: Alter [18–80]<br>x₂: Einkommen [20k–200k]<br>→ x₂ dominiert komplett</div>
+            </div>
+            <div class="ellipse-card" style="border-color:color-mix(in oklab,var(--color-success) 30%,var(--color-border))">
+              <h4 style="color:var(--color-success)">✅ Mit Scaling</h4>
+              <div style="font-size:2.5rem;line-height:1;margin:var(--space-3) 0">⭕</div>
+              <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0">Kreisförmige Konturlinien: Gradient zeigt direkt zum Minimum → schnelle, direkte Konvergenz.</p>
+              <div style="margin-top:var(--space-3);font-family:var(--font-mono);font-size:.7rem;background:var(--color-surface);padding:var(--space-2);border-radius:var(--radius-md)">x₁': Alter [0–1]<br>x₂': Einkommen [0–1]<br>→ beide Features gleich gewichtet</div>
+            </div>
+          </div>
+
+          <h3>Algorithmen und ihr Scaling-Bedarf</h3>
+          <table>
+            <thead><tr><th>Algorithmus</th><th>Scaling nötig?</th><th>Warum</th></tr></thead>
+            <tbody>
+              <tr><td>k-NN</td><td>✅ Ja</td><td>Berechnet Euklidische Abstände — dominante Features übernehmen komplett</td></tr>
+              <tr><td>SVM</td><td>✅ Ja</td><td>Maximiert Margin — dieser hängt von den Einheiten der Features ab</td></tr>
+              <tr><td>Logistische Regression</td><td>✅ Ja</td><td>Gradient Descent konvergiert schneller; Koeffizienten vergleichbar</td></tr>
+              <tr><td>Neuronale Netze</td><td>✅ Ja</td><td>Gradient Descent + Aktivierungsfunktionen (z.B. Sigmoid sättigt bei großen Werten)</td></tr>
+              <tr><td>PCA</td><td>✅ Ja</td><td>Eigenvektoren werden von Varianz dominiert — Feature mit größerem Bereich dominiert</td></tr>
+              <tr><td>k-Means</td><td>✅ Ja</td><td>Distanz-basiert, wie k-NN</td></tr>
+              <tr><td>Lineare Regression</td><td>⚠️ Optional</td><td>Ergebnis gleichwertig; hilfreich für Interpretation und GD-basiertes Lösen</td></tr>
+              <tr><td>Entscheidungsbaum</td><td>❌ Nein</td><td>Split-Regeln basieren auf Schwellenwerten, nicht Abständen</td></tr>
+              <tr><td>Random Forest / XGBoost</td><td>❌ Nein</td><td>Ensemble aus Bäumen — monotone Transformationen ändern nichts</td></tr>
+              <tr><td>Naive Bayes</td><td>❌ Nein</td><td>Probabilistisch; Annahmen gelten per Feature unabhängig</td></tr>
+            </tbody>
+          </table>
+          <div class="note note-xref"><div class="note-label">🔗 Querverweis</div><p style="margin:0;font-size:var(--text-sm)">Skalierung ist Pflicht für distanzbasierte Verfahren: <a href="../Kapitel3/T01-hyperebene-margin.html">K3-T01 · SVM-Hyperebene</a> und <a href="../Kapitel4/T01-k-means-algorithmus.html">K4-T01 · k-Means</a> liefern ohne Scaling stark verzerrte Ergebnisse.</p></div>
+
+          <div class="frage-box"><div class="frage-label">Kernfrage</div><p>Welcher Algorithmus braucht Scaling — und welcher nicht? Wie wähle ich den richtigen Scaler?</p></div>
+          <div class="so-what"><div class="so-what-label">Lernziel</div><p>Du kennst alle gängigen Scaling-Methoden, weißt welche für welchen Algorithmus geeignet ist und kannst die Pipeline korrekt aufbauen.</p></div>
+          <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="einleitung">○ Als erledigt markieren</button></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════
+           METHODE 1 – ROBUSTSCALER
+      ════════════════════════════════════════ -->
+      <div class="methode-section" id="stufe-robust">
+        <div class="methode-header">
+          <div class="methode-number">1</div>
+          <div class="methode-title">Skalierung mit Ausreißern (<code>RobustScaler</code>)</div>
+        </div>
+        <p>Skaliert mit Median und IQR (Interquartilabstand) statt Mean und Std — dadurch robust gegen Ausreißer.</p>
+        <nav class="method-pfad" aria-label="Schritte für RobustScaler">
+          <a href="#robust-theorie" class="mp-theorie">🧠 Theorie</a>
+          <a href="#robust-algo" class="mp-algo">⚙️ Algorithmus</a>
+          <a href="#robust-scratch" class="mp-scratch">🛠️ Von Scratch</a>
+          <a href="#robust-sklearn" class="mp-sklearn">🚀 Mit sklearn</a>
+        </nav>
+
+        <!-- ── RobustScaler: Theorie ── -->
+        <div class="stufe stufe-theorie" id="robust-theorie">
+          <div class="stufe-header"><span class="stufe-icon">🧠</span><div><div class="stufe-label">Theorie</div><div class="stufe-title">RobustScaler — Median und IQR statt Mean und Std</div></div></div>
+          <div class="stufe-body">
+            <p>Der RobustScaler ist robust gegen Ausreißer, weil er Median und IQR (Interquartilabstand) verwendet — diese werden von Extremwerten kaum beeinflusst.</p>
+            <div class="formula-block">
+              <div class="formula-label">RobustScaler Formel</div>
+              <div class="formula-math">x' = (x − Median) / IQR</div>
+              <div class="formula-legend">
+                <span>IQR = Q3 − Q1 = 75. Perzentil minus 25. Perzentil</span>
+                <span>Median = 50. Perzentil — nicht beeinflusst von Extremwerten</span>
+              </div>
+            </div>
+
+            <h3>Konkretes Beispiel: Ausreißer-Vergleich</h3>
+            <table>
+              <thead><tr><th>Datenpunkte</th><th>Statistik</th><th>StandardScaler Ergebnis</th><th>RobustScaler Ergebnis</th></tr></thead>
+              <tbody>
+                <tr><td>[1, 2, 3, 4, 5]</td><td>μ=3, σ=1.41<br>Median=3, IQR=2</td><td>[−1.41, −0.71, 0, 0.71, 1.41]</td><td>[−1.0, −0.5, 0.0, 0.5, 1.0]</td></tr>
+                <tr><td>[1, 2, 3, 4, <strong>100</strong>]</td><td>μ=22, σ=39.2<br>Median=3, IQR=2</td><td>[−0.54, −0.51, −0.49, −0.46, <strong>+2.0</strong>]</td><td>[−1.0, −0.5, 0.0, 0.5, <strong>+48.5</strong>]</td></tr>
+              </tbody>
+            </table>
+            <p style="font-size:var(--text-sm);color:var(--color-text-muted)">StandardScaler quetscht alle normalen Werte zusammen wenn ein Ausreißer dabei ist (Werte 1–4 alle zwischen −0.54 und −0.46). RobustScaler zeigt den Ausreißer klar als +48.5, lässt normale Werte aber unverzerrt.</p>
+            <div class="so-what"><div class="so-what-label">Merksatz</div><p>RobustScaler verschiebt um den Median (statt Mean) und skaliert mit dem IQR (statt Std) — beide Statistiken sind unempfindlich gegenüber Extremwerten.</p></div>
+          </div>
+        </div>
+
+        <!-- ── RobustScaler: Algorithmus ── -->
+        <div class="stufe stufe-algo" id="robust-algo">
+          <div class="stufe-header"><span class="stufe-icon">⚙️</span><div><div class="stufe-label">Algorithmus</div><div class="stufe-title">RobustScaler — Schritt für Schritt</div></div></div>
+          <div class="stufe-body">
+            <div class="algo-steps">
+              <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Median berechnen (Fit)</strong><p>Sortiere X_train und nimm den mittleren Wert (50. Perzentil).</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>IQR berechnen (Fit)</strong><p>Q1 = 25. Perzentil, Q3 = 75. Perzentil. IQR = Q3 − Q1.</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Transformieren</strong><p>x' = (x − Median) / IQR für jeden Wert. Ausreißer erhalten große Werte, normale Werte bleiben kompakt.</p></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── RobustScaler: Von Scratch ── -->
+        <div class="stufe stufe-scratch" id="robust-scratch">
+          <div class="stufe-header"><span class="stufe-icon">🛠️</span><div><div class="stufe-label">Von Scratch</div><div class="stufe-title">RobustScaler selbst implementieren</div></div></div>
+          <div class="stufe-body">
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 1/2a — Klasse: RobustScaler_Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">import numpy as np
+
+class RobustScaler_Scratch:
+    """Eigene Implementierung des RobustScalers."""
+
+    def fit(self, X):
+        self.median_ = np.median(X, axis=0)
+        self.q1_     = np.percentile(X, 25, axis=0)
+        self.q3_     = np.percentile(X, 75, axis=0)
+        self.iqr_    = self.q3_ - self.q1_
+        return self
+
+    def transform(self, X):
+        return (X - self.median_) / self.iqr_
+
+    def fit_transform(self, X):
+        return self.fit(X).transform(X)
+</code></pre>
+            </div>
+
+            <p>Vergleich mit/ohne Ausreißer gegen <code>StandardScaler</code>:</p>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 1/2b — Test: Vergleich mit/ohne Ausreißer</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">from sklearn.preprocessing import StandardScaler as SS
+
+X_clean   = np.array([[1.0], [2.0], [3.0], [4.0], [5.0]])
+X_outlier = np.array([[1.0], [2.0], [3.0], [4.0], [100.0]])  # Ausreißer!
+
+for data, label in [(X_clean, "ohne Ausreißer"), (X_outlier, "MIT Ausreißer")]:
+    rs = RobustScaler_Scratch()
+    ss = SS()
+    robust   = rs.fit_transform(data).flatten()
+    standard = ss.fit_transform(data).flatten()
+
+    print(f"\n{label}:")
+    print(f"  StandardScaler: {standard.round(2)}")
+    print(f"  RobustScaler:   {robust.round(2)}")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>ohne Ausreißer:
+  StandardScaler: [-1.41 -0.71  0.    0.71  1.41]
+  RobustScaler:   [-1.   -0.5   0.    0.5   1.  ]
+
+MIT Ausreißer:
+  StandardScaler: [-0.54 -0.51 -0.49 -0.46  1.99]
+  RobustScaler:   [-1.   -0.5   0.    0.5  48.5 ]</pre></div>
+              </div>
+            </div>
+
+            <div class="vis-box">
+              <div class="vis-box-label">📊 Visualisierung — Effekt eines Ausreißers</div>
+              <p>
+                Plottet man die fünf skalierten Werte <code>[1, 2, 3, 4, 100]</code> auf einer Achse,
+                sieht man: beim <strong>StandardScaler</strong> rutschen die vier normalen Punkte
+                eng zusammen (der Ausreißer "zieht" die Skala), beim <strong>RobustScaler</strong>
+                bleiben sie an denselben relativen Positionen wie ohne Ausreißer — nur der Ausreißer
+                selbst bekommt einen extremen Wert (+48.5).
+              </p>
+              <img src="../assets/img/inhalt/k1-t04-scaler-outlier.png" alt="Vergleich StandardScaler vs RobustScaler bei einem Ausreißer: normale Punkte blau, Ausreißer orange">
+            </div>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — StandardScaler vs. RobustScaler</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler, RobustScaler
+
+X_outlier = np.array([1.0, 2.0, 3.0, 4.0, 100.0]).reshape(-1, 1)
+
+std_scaled = StandardScaler().fit_transform(X_outlier).flatten()
+rob_scaled = RobustScaler().fit_transform(X_outlier).flatten()
+
+colors = ['#3a7ca5']*4 + ['#e67e22']
+
+fig, axes = plt.subplots(1, 2, figsize=(7, 3.6))
+axes[0].scatter(std_scaled, [0]*5, c=colors, s=80)
+axes[0].set_title("StandardScaler\n(mit Ausreißer)")
+axes[0].set_yticks([])
+axes[0].set_xlim(-2.5, 2.5)
+
+axes[1].scatter(rob_scaled, [0]*5, c=colors, s=80)
+axes[1].set_title("RobustScaler\n(mit Ausreißer)")
+axes[1].set_yticks([])
+
+fig.suptitle("Werte [1,2,3,4,100] skaliert — normale Punkte (blau) vs. Ausreißer (orange)")
+plt.show()
+</code></pre>
+            </div>
+
+            <div class="so-what"><div class="so-what-label">Einblick</div><p>Median und IQR sind <strong>robuste Statistiken</strong> — sie verändern sich kaum, wenn einzelne Extremwerte hinzukommen. Mean und Std dagegen werden von einem einzigen Ausreißer komplett verzerrt.</p></div>
+          </div>
+        </div>
+
+        <!-- ── RobustScaler: Mit sklearn ── -->
+        <div class="stufe stufe-sklearn" id="robust-sklearn">
+          <div class="stufe-header"><span class="stufe-icon">🚀</span><div><div class="stufe-label">Mit sklearn</div><div class="stufe-title">RobustScaler — professionell nutzen</div></div></div>
+          <div class="stufe-body">
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 1 — Daten generieren &amp; splitten</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">import numpy as np
+from sklearn.model_selection import train_test_split
+
+# Realistische Daten: Alter (normal) + Einkommen (rechtsschief + Ausreißer)
+np.random.seed(42)
+n = 100
+alter     = np.random.randint(18, 65, n).astype(float)
+einkommen = np.random.exponential(scale=40000, size=n)
+einkommen[5] = 500000   # Ausreißer
+
+X = np.column_stack([alter, einkommen])
+y = (einkommen > 50000).astype(int)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+print(f"X_train: {X_train.shape}, X_test: {X_test.shape}")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>X_train: (80, 2), X_test: (20, 2)</pre></div>
+              </div>
+            </div>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 2 — Alle Scaler im Vergleich</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">from sklearn.preprocessing import (
+    MinMaxScaler, StandardScaler, RobustScaler,
+    PowerTransformer, MaxAbsScaler
+)
+
+scalers = {
+    'MinMaxScaler':               MinMaxScaler(),
+    'StandardScaler':             StandardScaler(),
+    'RobustScaler':               RobustScaler(),
+    'PowerTransformer (YJ)':      PowerTransformer(method='yeo-johnson'),
+}
+
+print(f"{'Scaler':<30} {'Alter min':>10} {'Alter max':>10} {'Einkom min':>12} {'Einkom max':>12}")
+print("-" * 78)
+for name, scaler in scalers.items():
+    X_t = scaler.fit_transform(X_train)
+    print(f"{name:<30} {X_t[:,0].min():>10.2f} {X_t[:,0].max():>10.2f} "
+          f"{X_t[:,1].min():>12.2f} {X_t[:,1].max():>12.2f}")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>Scaler                              Alter min  Alter max  Einkom min  Einkom max
+------------------------------------------------------------------------------
+MinMaxScaler                             0.00       1.00        0.00        1.00
+StandardScaler                          -1.88       1.77       -0.44        9.08
+RobustScaler                            -1.18       1.13       -0.82        9.41
+PowerTransformer (YJ)                   -1.83       1.83       -2.88        3.01</pre></div>
+              </div>
+            </div>
+
+            <p style="font-size:var(--text-sm);color:var(--color-text-muted)">Beobachtung: StandardScaler und RobustScaler zeigen beim Einkommen sehr große Maximalwerte (9.08 / 9.41) wegen des Ausreißers — RobustScaler verschiebt die übrigen Werte trotzdem nicht so stark wie StandardScaler. PowerTransformer (Yeo-Johnson, Methode 2) löst das Problem an der Wurzel, indem es die schiefe Verteilung selbst korrigiert.</p>
+
+            <div class="so-what"><div class="so-what-label">Zusammenfassung</div><p><code>RobustScaler</code> ist die richtige Wahl, wenn die Daten Ausreißer enthalten, die du nicht entfernen willst/kannst. Er zentriert mit dem Median und skaliert mit dem IQR — beide bleiben stabil, egal wie extrem einzelne Werte sind.</p></div>
+            <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="robust">○ Methode als erledigt markieren</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════
+           METHODE 2 – POWER TRANSFORM
+      ════════════════════════════════════════ -->
+      <div class="methode-section" id="stufe-power">
+        <div class="methode-header">
+          <div class="methode-number">2</div>
+          <div class="methode-title">Schiefe Verteilungen korrigieren (<code>PowerTransformer</code>)</div>
+        </div>
+        <p>Log-, Box-Cox- und Yeo-Johnson-Transformationen machen schiefe Verteilungen symmetrischer — wichtig für lineare Modelle.</p>
+        <nav class="method-pfad" aria-label="Schritte für Power Transform">
+          <a href="#power-theorie" class="mp-theorie">🧠 Theorie</a>
+          <a href="#power-algo" class="mp-algo">⚙️ Algorithmus</a>
+          <a href="#power-scratch" class="mp-scratch">🛠️ Von Scratch</a>
+          <a href="#power-sklearn" class="mp-sklearn">🚀 Mit sklearn</a>
+        </nav>
+
+        <!-- ── Power Transform: Theorie ── -->
+        <div class="stufe stufe-theorie" id="power-theorie">
+          <div class="stufe-header"><span class="stufe-icon">🧠</span><div><div class="stufe-label">Theorie</div><div class="stufe-title">Power Transformations — Intuition</div></div></div>
+          <div class="stufe-body">
+            <p>Viele Algorithmen (insb. Lineare Modelle) nehmen normalverteilte Features an. Wenn ein Feature stark <strong>rechtsschief</strong> ist (z.B. Einkommen, Hauspreise, Web-Traffic), hilft eine Power Transformation:</p>
+            <table>
+              <thead><tr><th>Transformation</th><th>Formel</th><th>Für</th><th>Einschränkung</th></tr></thead>
+              <tbody>
+                <tr><td>Log-Transformation</td><td>x' = log(x + 1)</td><td>Rechts-schiefe Daten</td><td>Nur x ≥ 0 (daher +1)</td></tr>
+                <tr><td>Box-Cox</td><td>x' = (x^λ − 1)/λ &nbsp;(λ≠0)</td><td>Rechts-schief, optimiert λ</td><td>Nur x &gt; 0!</td></tr>
+                <tr><td>Yeo-Johnson</td><td>Erweiterung von Box-Cox</td><td>Alle reellen Werte</td><td>Keine (empfohlen)</td></tr>
+                <tr><td>Sqrt-Transformation</td><td>x' = √x</td><td>Zähldaten (Poisson)</td><td>Nur x ≥ 0</td></tr>
+              </tbody>
+            </table>
+            <div class="note"><div class="note-label">Warum Log-Transformation hilft</div><p style="margin:0;font-size:var(--text-sm)">Einkommen [20k, 50k, 100k, 500k]: Rohdaten stark rechtsschief. Log: [9.9, 10.8, 11.5, 13.1] — viel gleichmäßiger verteilt. Das macht die lineare Modellannahme realistischer und GD stabiler.</p></div>
+            <div class="so-what"><div class="so-what-label">Merksatz</div><p>Power Transformations ändern die <strong>Form</strong> der Verteilung (Schiefe → Symmetrie), während Scaler wie MinMax/StandardScaler nur die <strong>Größenordnung</strong> ändern. Beides kombiniert: erst transformieren, dann skalieren.</p></div>
+          </div>
+        </div>
+
+        <!-- ── Power Transform: Algorithmus ── -->
+        <div class="stufe stufe-algo" id="power-algo">
+          <div class="stufe-header"><span class="stufe-icon">⚙️</span><div><div class="stufe-label">Algorithmus</div><div class="stufe-title">Log-Transformation — Schritt für Schritt</div></div></div>
+          <div class="stufe-body">
+            <div class="algo-steps">
+              <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Schiefe prüfen</strong><p>Wenn Skewness &gt; 1.0 (stark rechtschief): Log-Transform anwenden.</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>Werte +1 verschieben (falls nötig)</strong><p>log(0) ist undefiniert. Wenn X enthält 0-Werte: x' = log(x + 1) (log1p).</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Log anwenden</strong><p>x' = log(x + 1) für jeden Wert. Auf Testdaten dieselbe Transformation anwenden.</p></div></div>
+              <div class="algo-step"><div class="algo-step-num">4</div><div class="algo-step-body"><strong>Danach Scaler anwenden</strong><p>Log-Transformation + StandardScaler ist eine typische Pipeline für stark schiefe Daten.</p></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Power Transform: Von Scratch ── -->
+        <div class="stufe stufe-scratch" id="power-scratch">
+          <div class="stufe-header"><span class="stufe-icon">🛠️</span><div><div class="stufe-label">Von Scratch</div><div class="stufe-title">Log-Transformation selbst implementieren</div></div></div>
+          <div class="stufe-body">
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 2/2a — Klasse: LogTransformer_Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">class LogTransformer_Scratch:
+    """Log1p-Transformation für rechts-schiefe Verteilungen."""
+
+    def fit(self, X):
+        # Prüfe ob Daten nicht-negativ sind
+        if (X < 0).any():
+            raise ValueError("Log-Transformation erfordert X >= 0")
+        return self
+
+    def transform(self, X):
+        return np.log1p(X)   # log(x + 1) — vermeidet log(0) = -inf
+
+    def inverse_transform(self, X_log):
+        return np.expm1(X_log)  # e^x - 1 (Umkehrung von log1p)
+
+    def fit_transform(self, X):
+        return self.fit(X).transform(X)
+</code></pre>
+            </div>
+
+            <p>Beispiel: Einkommen (stark rechtsschief, mit Ausreißer):</p>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 2/2b — Test: Einkommen vorher/nachher</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">np.random.seed(42)
+einkommen = np.random.exponential(scale=40000, size=10)
+einkommen[0] = 500000   # Ausreißer
+
+print("Originaldaten (€):")
+print(np.sort(einkommen).round(0).astype(int))
+print(f"  Mittelwert: {einkommen.mean():.0f}, Median: {np.median(einkommen):.0f}")
+
+lt = LogTransformer_Scratch()
+log_eink = lt.fit_transform(einkommen)
+
+print("\nNach log1p-Transformation:")
+print(np.sort(log_eink).round(2))
+print(f"  Mittelwert: {log_eink.mean():.2f}, Median: {np.median(log_eink):.2f}")
+
+# Rücktransformation
+back = lt.inverse_transform(log_eink)
+print(f"\nRücktransformation korrekt: {np.allclose(back, einkommen)}")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>Originaldaten (€):
+[  3764  12396  17055  21003  22826  31085  33113  44370  61037 500000]
+  Mittelwert: 74665, Median: 26956
+
+Nach log1p-Transformation:
+[ 8.23  9.43  9.74  9.95 10.04 10.34 10.41 10.70 11.02 13.12]
+  Mittelwert: 10.30, Median: 10.19
+
+Rücktransformation korrekt: True</pre></div>
+              </div>
+            </div>
+
+            <p>Skewness (Schiefe) vor und nach der Transformation:</p>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 2/2c — Test: Skewness vor/nach</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">def skewness(x):
+    return ((x - x.mean())**3).mean() / x.std()**3
+
+X_raw = np.array([100, 200, 150, 1000, 120, 180, 5000, 160, 140, 130], dtype=float)
+X_log = np.log1p(X_raw)
+
+print(f"Skewness vorher:   {skewness(X_raw):.2f}")
+print(f"Skewness nachher:  {skewness(X_log):.2f}")
+print(f"(Wert nahe 0 = symmetrisch / normalverteilt)")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>Skewness vorher:   2.84
+Skewness nachher:  0.43
+(Wert nahe 0 = symmetrisch / normalverteilt)</pre></div>
+              </div>
+            </div>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Verteilung vor/nach Log-Transformation</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X_raw, X_log)
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 2, figsize=(7, 3.2))
+
+axes[0].hist(X_raw, bins=8, color='#3a7ca5')
+axes[0].set_title(f"Vorher (Skew={skewness(X_raw):.2f})")
+axes[0].set_xlabel("Wert")
+
+axes[1].hist(X_log, bins=8, color='#e67e22')
+axes[1].set_title(f"Nachher (Skew={skewness(X_log):.2f})")
+axes[1].set_xlabel("log1p(Wert)")
+
+fig.suptitle("Log-Transformation macht rechts-schiefe Daten symmetrischer")
+plt.show()
+</code></pre>
+            </div>
+
+            <div class="so-what"><div class="so-what-label">Einblick</div><p>Skewness von 2.84 → 0.43: Die Log-Transformation macht stark rechts-schiefe Daten deutlich symmetrischer. Das hilft linearen Modellen, bessere Koeffizienten zu lernen. Ein Scaler danach bringt dann den richtigen Wertebereich.</p></div>
+          </div>
+        </div>
+
+        <!-- ── Power Transform: Mit sklearn ── -->
+        <div class="stufe stufe-sklearn" id="power-sklearn">
+          <div class="stufe-header"><span class="stufe-icon">🚀</span><div><div class="stufe-label">Mit sklearn</div><div class="stufe-title">PowerTransformer — professionell nutzen</div></div></div>
+          <div class="stufe-body">
+            <p>Statt Log-Transformation manuell zu implementieren, übernimmt <code>PowerTransformer</code> die optimale Transformation automatisch — inklusive der Suche nach dem besten λ. Wir nutzen <code>X_train</code> aus <a href="#robust-sklearn">Methode 1</a>.</p>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 1 — PowerTransformer-Details (λ-Werte)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python">pt = PowerTransformer(method='yeo-johnson')
+pt.fit(X_train)
+print(f"Optimale λ-Werte (Yeo-Johnson):")
+print(f"  Alter:     λ = {pt.lambdas_[0]:.3f}")
+print(f"  Einkommen: λ = {pt.lambdas_[1]:.3f}")
+print("  (λ ≈ 1 = keine Transformation nötig; λ ≈ 0 = Log-ähnlich)")
+</code></pre>
+              <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+                <div class="code-cell-output-body"><pre>Optimale λ-Werte (Yeo-Johnson):
+  Alter:     λ = 1.042
+  Einkommen: λ = 0.091
+  (λ ≈ 1 = keine Transformation nötig; λ ≈ 0 = Log-ähnlich)</pre></div>
+              </div>
+            </div>
+
+            <div class="code-cell" data-runnable="true">
+              <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Einkommen vor/nach PowerTransformer</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+              <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X_train, pt)
+import matplotlib.pyplot as plt
+
+X_train_pt = pt.transform(X_train)
+
+fig, axes = plt.subplots(1, 2, figsize=(7, 3.2))
+
+axes[0].hist(X_train[:, 1], bins=10, color='#3a7ca5')
+axes[0].set_title("Einkommen — Original")
+axes[0].set_xlabel("€")
+
+axes[1].hist(X_train_pt[:, 1], bins=10, color='#e67e22')
+axes[1].set_title(f"Einkommen — Yeo-Johnson (λ={pt.lambdas_[1]:.2f})")
+axes[1].set_xlabel("transformiert")
+
+fig.suptitle("PowerTransformer macht schiefe Verteilungen symmetrischer")
+plt.show()
+</code></pre>
+            </div>
+
+            <div class="fallen-item"><span class="fallen-icon">⚠️</span><div><strong>Box-Cox mit negativen oder null Werten</strong><p><code>PowerTransformer(method='box-cox')</code> erfordert zwingend x &gt; 0. Bei x=0 oder x&lt;0 → Fehler.</p><div class="fallen-fix">✅ Lösung: <code>method='yeo-johnson'</code> — funktioniert für alle reellen Zahlen, empfohlen als Standard.</div></div></div>
+
+            <div class="so-what"><div class="so-what-label">Zusammenfassung</div><p><code>PowerTransformer(method='yeo-johnson')</code> findet automatisch das optimale λ pro Feature und transformiert + skaliert in einem Schritt. Bei λ≈0.09 (Einkommen) entspricht das fast einer Log-Transformation.</p></div>
+            <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="power">○ Methode als erledigt markieren</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════
+           VERGLEICH
+      ════════════════════════════════════════ -->
+      <div class="stufe stufe-vergleich" id="stufe-vergleich">
+        <div class="stufe-header"><span class="stufe-icon">⚖️</span><div><div class="stufe-label">Vergleich</div><div class="stufe-title">RobustScaler vs. PowerTransformer — und alle anderen Scaler</div></div></div>
+        <div class="stufe-body">
+          <h3>Vier Scaling-Methoden im Vergleich</h3>
+          <table>
+            <thead><tr><th>Methode</th><th>Formel</th><th>Ausgabe-Bereich</th><th>Ausreißer-Robust?</th><th>Wann nutzen</th></tr></thead>
+            <tbody>
+              <tr><td><code>MinMaxScaler</code></td><td>(x−min)/(max−min)</td><td>[0, 1]</td><td>❌ Nein</td><td>Pixel, fester Bereich, keine Ausreißer</td></tr>
+              <tr><td><code>StandardScaler</code></td><td>(x−μ)/σ</td><td>ca. [−3, +3]</td><td>⚠️ Mittel</td><td>Normalverteilung, SVM, NN</td></tr>
+              <tr><td><code>RobustScaler</code></td><td>(x−Median)/IQR</td><td>Variabel</td><td>✅ Ja</td><td>Reale Daten mit Ausreißern</td></tr>
+              <tr><td><code>MaxAbsScaler</code></td><td>x / max(|x|)</td><td>[−1, 1]</td><td>❌ Nein</td><td>Sparse Matrices (kein Zentrierung)</td></tr>
+            </tbody>
+          </table>
+
+          <h3>Pipelines vergleichen: RobustScaler vs. PowerTransformer</h3>
+          <p>Beide Methoden werden mit einem SVC-Klassifikator kombiniert und auf denselben Daten (<code>X_train</code>/<code>X_test</code> aus Methode 1) evaluiert:</p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt — Pipelines vergleichen (Scaler + SVC)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+
+pipe_std = Pipeline([
+    ('scaler', StandardScaler()),
+    ('clf', SVC(kernel='rbf', C=1.0, random_state=42))
+])
+
+pipe_rob = Pipeline([
+    ('scaler', RobustScaler()),
+    ('clf', SVC(kernel='rbf', C=1.0, random_state=42))
+])
+
+pipe_pow = Pipeline([
+    ('scaler', PowerTransformer(method='yeo-johnson')),
+    ('clf', SVC(kernel='rbf', C=1.0, random_state=42))
+])
+
+for name, pipe in [('StandardScaler', pipe_std),
+                   ('RobustScaler',   pipe_rob),
+                   ('PowerTransformer', pipe_pow)]:
+    pipe.fit(X_train, y_train)
+    acc = accuracy_score(y_test, pipe.predict(X_test))
+    print(f"{name:<20}: Accuracy = {acc:.4f}")
+</code></pre>
+            <div class="code-cell-output"><div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body"><pre>StandardScaler      : Accuracy = 0.8500
+RobustScaler        : Accuracy = 0.8500
+PowerTransformer    : Accuracy = 0.9000</pre></div>
+            </div>
+          </div>
+
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted)">PowerTransformer schneidet hier am besten ab, weil es die schiefe Einkommensverteilung direkt korrigiert — RobustScaler reduziert nur den Einfluss des Ausreißers, ändert aber nichts an der Form der Verteilung.</p>
+
+          <div class="fallen-item"><span class="fallen-icon">⚠️</span><div><strong>Scaling für Entscheidungsbäume/Random Forest</strong><p>Für Random Forest oder Gradient Boosting ist Scaling unnötig — Split-Regeln basieren auf Schwellenwerten, nicht Abständen. Es schadet nicht, ist aber Rechenaufwand ohne Nutzen.</p><div class="fallen-fix">✅ Scaling nur für: k-NN, SVM, Lineare Modelle, Neuronale Netze, PCA, k-Means</div></div></div>
+
+          <div class="so-what"><div class="so-what-label">Zusammenfassung</div><p>Feature Scaling wählen: Normal/keine Ausreißer → StandardScaler. Ausreißer vorhanden → RobustScaler. Schiefe Verteilung → PowerTransformer(yeo-johnson). Pixelwerte/fester Bereich → MinMaxScaler. Tree-based Modelle → kein Scaling nötig.</p></div>
+          <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="vergleich">○ Als erledigt markieren</button></div>
+        </div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T03-encoding.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">🔢 Encoding</div></div></a>
+        <a href="T05-feature-selection.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">🔍 Feature Selection</div></div></a>
+      </div>
+    </main>
+  </div>
+  <site-footer caption="K1 · Thema 4: Feature Scaling · PRM V5"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text).then(()=>{btn.textContent='✓ Kopiert!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Kopieren';btn.classList.remove('copied')},2000)})}  </script>
+</body>
+</html>

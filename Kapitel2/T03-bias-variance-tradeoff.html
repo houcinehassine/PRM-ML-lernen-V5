@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bias-Variance Tradeoff – K2 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .35rem .9rem; border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      font-size: var(--text-xs); font-weight: 700; cursor: pointer;
+      color: var(--btn-color, var(--color-text-faint));
+      transition: all .15s;
+    }
+    .mark-btn:hover { border-color: var(--color-success); color: var(--color-success); }
+    .stufe-footer {
+      margin-top: var(--space-6); padding-top: var(--space-4);
+      border-top: 1px solid var(--color-border);
+      display: flex; justify-content: flex-end;
+    }
+    .dart-board {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-5); margin: var(--space-5) 0;
+    }
+    .dart-card {
+      border-radius: var(--radius-lg); padding: var(--space-4);
+      border: 1px solid var(--color-border); text-align: center;
+      background: var(--color-surface-2);
+    }
+    .dart-visual { font-size: 2.5rem; margin-bottom: var(--space-2); }
+    .dart-card h4 { margin: 0 0 var(--space-2); font-size: var(--text-sm); }
+    .dart-card p { margin: 0; font-size: var(--text-xs); color: var(--color-text-muted); }
+    .bv-formula {
+      font-family: var(--font-mono); font-size: var(--text-base);
+      padding: var(--space-4) var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      margin: var(--space-4) 0;
+      text-align: center;
+    }
+    @media (max-width: 640px) { .dart-board { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <site-header active="k2" title="Bias-Variance Tradeoff – K2 · PRM V5"></site-header>
+  <lern-pfad topic="k2/t03"></lern-pfad>
+
+  <div class="layout">
+    <site-sidebar active="k2/t03"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K2 · Thema 3 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">⚖️ Bias-Variance Tradeoff</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">
+          Warum ist der Fehler eines ML-Modells in zwei Komponenten zerlegbar — und warum kann man nicht beides gleichzeitig minimieren?
+        </p>
+      </section>
+
+      <!-- STUFE 1: Ziel & Kontext -->
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 1</span>
+          <h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Die Dartscheiben-Analogie</h3>
+          <p>Stell dir vier Schützen vor, die auf eine Dartscheibe zielen. Das Zentrum ist der "wahre" Wert:</p>
+          <div class="dart-board">
+            <div class="dart-card">
+              <div class="dart-visual">🎯</div>
+              <h4>Low Bias, Low Variance</h4>
+              <p>Alle Würfe nah am Zentrum, eng beieinander. <strong>Ideal!</strong></p>
+            </div>
+            <div class="dart-card">
+              <div class="dart-visual">↗️🎯</div>
+              <h4>High Bias, Low Variance</h4>
+              <p>Konsistent daneben — immer am selben falschen Ort. <strong>Underfitting.</strong></p>
+            </div>
+            <div class="dart-card">
+              <div class="dart-visual">💫</div>
+              <h4>Low Bias, High Variance</h4>
+              <p>Im Schnitt richtig, aber sehr streuen. <strong>Overfitting.</strong></p>
+            </div>
+            <div class="dart-card">
+              <div class="dart-visual">🌪️</div>
+              <h4>High Bias, High Variance</h4>
+              <p>Daneben UND überall verstreut. <strong>Schlimmstes Szenario.</strong></p>
+            </div>
+          </div>
+          <div class="info-box warning">
+            <strong>Das Dilemma:</strong> Erhöht man die Modellkomplexität, sinkt Bias — aber Variance steigt. Verringert man Komplexität, sinkt Variance — aber Bias steigt. Man kann nicht beide gleichzeitig minimieren.
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button>
+        </div>
+      </div>
+
+      <!-- STUFE 2: Theorie -->
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 2</span>
+          <h2 class="stufe-title">🧠 Theorie: Die Fehlerzerlegung</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Mathematische Zerlegung</h3>
+          <p>Der <strong>Expected Prediction Error</strong> (erwarteter Vorhersagefehler) zerfällt in drei Teile:</p>
+
+          <div class="bv-formula">
+            E[(y − ŷ)²] = Bias² + Variance + Irreducible Noise
+          </div>
+
+          <table>
+            <thead><tr><th>Komponente</th><th>Was es ist</th><th>Verringerbar?</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Bias²</strong></td>
+                <td>Systematischer Fehler — das Modell liegt im Schnitt daneben, weil es zu simpel ist</td>
+                <td>✅ Durch komplexeres Modell</td>
+              </tr>
+              <tr>
+                <td><strong>Variance</strong></td>
+                <td>Wie stark reagiert das Modell auf kleine Änderungen in den Trainingsdaten?</td>
+                <td>✅ Durch Regularisierung / mehr Daten</td>
+              </tr>
+              <tr>
+                <td><strong>Irreducible Noise</strong></td>
+                <td>Zufälliges Rauschen in den Daten — kann kein Modell eliminieren</td>
+                <td>❌ Nie</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Bias und Variance in Abhängigkeit von Modellkomplexität</h3>
+          <div class="info-box">
+            <strong>Niedriger Komplexität (z.B. lineares Modell):</strong><br>
+            → Bias hoch (kann komplexe Muster nicht lernen)<br>
+            → Variance niedrig (reagiert kaum auf Datenschwankungen)<br><br>
+            <strong>Hoher Komplexität (z.B. tiefer Entscheidungsbaum):</strong><br>
+            → Bias niedrig (kann fast alles lernen)<br>
+            → Variance hoch (kleine Änderungen in Trainingsdaten → stark anderes Modell)<br><br>
+            <strong>Der Sweet Spot:</strong> Dort wo Bias² + Variance minimal ist.
+          </div>
+
+          <div class="compare-grid">
+            <div class="compare-card compare-card-a">
+              <div class="compare-card-label">📏 Niedrige Komplexität</div>
+              <p>z.B. lineares Modell. Bias hoch (kann komplexe Muster nicht abbilden),
+              Variance niedrig (reagiert kaum auf Datenschwankungen).</p>
+            </div>
+            <div class="compare-card-arrow">↔</div>
+            <div class="compare-card compare-card-b">
+              <div class="compare-card-label">🌳 Hohe Komplexität</div>
+              <p>z.B. tiefer Entscheidungsbaum. Bias niedrig (kann fast alles lernen),
+              Variance hoch (kleine Änderungen in Trainingsdaten → stark anderes Modell).</p>
+            </div>
+          </div>
+
+          <h3>Praktische Implikationen</h3>
+          <table>
+            <thead><tr><th>Problem</th><th>Hauptursache</th><th>Lösung</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Modell generalisiert schlecht (Train ≈ Test, beide schlecht)</td>
+                <td>High Bias</td>
+                <td>Komplexeres Modell, mehr Features, weniger Regularisierung</td>
+              </tr>
+              <tr>
+                <td>Modell generalisiert schlecht (Train gut, Test schlecht)</td>
+                <td>High Variance</td>
+                <td>Regularisierung, mehr Daten, Ensemble-Methoden</td>
+              </tr>
+              <tr>
+                <td>Ensemble (Random Forest) reduziert Variance</td>
+                <td>—</td>
+                <td>Viele verschiedene Modelle → Variance mittelt sich raus</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="note note-xref"><div class="note-label">🔗 Querverweis</div><p style="margin:0;font-size:var(--text-sm)">Wie Bagging die Variance konkret reduziert, siehe <a href="../Kapitel5/T03-random-forest.html">K5-T03 · Random Forest</a>.</p></div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button>
+        </div>
+      </div>
+
+      <!-- STUFE 3: Algorithmus -->
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 3</span>
+          <h2 class="stufe-title">⚙️ Bias und Variance empirisch schätzen</h2>
+        </div>
+        <div class="stufe-body">
+          <p>Man kann Bias und Variance empirisch schätzen, indem man dasselbe Modell auf <em>vielen verschiedenen Trainingsdatensätzen</em> trainiert:</p>
+          <div class="algo-steps">
+            <div class="algo-step">
+              <div class="algo-step-num">1</div>
+              <div class="algo-step-body">
+                <strong>B Bootstrap-Stichproben aus den Daten ziehen</strong>
+                <p>Jede Stichprobe ist ein anderes "Trainingsszenario".</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">2</div>
+              <div class="algo-step-body">
+                <strong>Modell auf jeder Stichprobe trainieren</strong>
+                <p>Man erhält B verschiedene Modelle <code>f₁, f₂, ..., f_B</code>.</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">3</div>
+              <div class="algo-step-body">
+                <strong>Bias schätzen</strong>
+                <p><code>Bias = (Mittelwert aller Vorhersagen) − wahrer Wert</code></p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">4</div>
+              <div class="algo-step-body">
+                <strong>Variance schätzen</strong>
+                <p><code>Variance = Varianz der B Vorhersagen am selben Punkt</code></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="algo">✓ Schema verstanden</button>
+        </div>
+      </div>
+
+      <!-- STUFE 4: Von Scratch -->
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 4</span>
+          <h2 class="stufe-title">🛠️ Von Scratch: Bias-Variance schätzen</h2>
+        </div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 1/2a — Funktion: bias_variance_decomp</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import numpy as np
+
+def bias_variance_decomp(model_class, X, y, test_x, true_y,
+                          n_bootstrap=200, **model_kwargs):
+    """
+    Schätzt Bias² und Variance eines Modells durch Bootstrapping.
+    model_class: sklearn-kompatible Klasse
+    test_x: einzelner Testpunkt (1D Array)
+    true_y: wahrer Wert an test_x
+    """
+    predictions = []
+    n = len(X)
+
+    for _ in range(n_bootstrap):
+        # Bootstrap-Stichprobe (mit Zurücklegen)
+        idx = np.random.choice(n, n, replace=True)
+        X_boot, y_boot = X[idx], y[idx]
+
+        # Modell trainieren
+        m = model_class(**model_kwargs)
+        m.fit(X_boot.reshape(-1,1), y_boot)
+
+        # Vorhersage am Testpunkt
+        pred = m.predict(test_x.reshape(1,-1))[0]
+        predictions.append(pred)
+
+    predictions = np.array(predictions)
+    mean_pred = predictions.mean()
+
+    bias_sq = (mean_pred - true_y) ** 2
+    variance = predictions.var()
+    mse      = bias_sq + variance  # (ohne irred. Noise)
+
+    return bias_sq, variance, mse
+</code></pre>
+          </div>
+
+          <p>
+            Jetzt vergleichen wir <strong>Lineare Regression</strong> mit
+            <strong>Decision Trees</strong> unterschiedlicher Tiefe auf Daten
+            <code>y = x³ + Rauschen</code>:
+          </p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 1/2b — Test: Modelle vergleichen</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+
+np.random.seed(42)
+X = np.linspace(-2, 2, 80)
+y = X**3 + np.random.normal(0, 1.5, 80)
+
+test_x = np.array([1.0])
+true_y = 1.0**3  # = 1.0
+
+print("Modell             | Bias²   | Variance | MSE")
+print("-" * 52)
+for name, cls, kwargs in [
+    ("Lineare Regression",  LinearRegression,    {}),
+    ("Tree depth=2",        DecisionTreeRegressor, {"max_depth": 2}),
+    ("Tree depth=5",        DecisionTreeRegressor, {"max_depth": 5}),
+    ("Tree depth=10",       DecisionTreeRegressor, {"max_depth": 10}),
+]:
+    b2, var, mse = bias_variance_decomp(cls, X, y, test_x, true_y, **kwargs)
+    print(f"{name:<20} | {b2:>7.4f} | {var:>8.4f} | {mse:.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Modell             | Bias²   | Variance | MSE
+----------------------------------------------------
+Lineare Regression   |  1.6793 |   0.0755 | 1.7548
+Tree depth=2         |  0.7350 |   0.6899 | 1.4249
+Tree depth=5         |  0.0250 |   0.6572 | 0.6822
+Tree depth=10        |  0.5143 |   0.8452 | 1.3595</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Bias² und Variance je Modell</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (bias_variance_decomp, X, y, test_x, true_y)
+import matplotlib.pyplot as plt
+
+models_info = [
+    ("Linear Reg",  LinearRegression,    {}),
+    ("Tree d=2",    DecisionTreeRegressor, {"max_depth": 2}),
+    ("Tree d=5",    DecisionTreeRegressor, {"max_depth": 5}),
+    ("Tree d=10",   DecisionTreeRegressor, {"max_depth": 10}),
+]
+names, bias2s, vars_ = [], [], []
+for name, cls, kwargs in models_info:
+    b2, var, _ = bias_variance_decomp(cls, X, y, test_x, true_y, **kwargs)
+    names.append(name); bias2s.append(b2); vars_.append(var)
+
+x = np.arange(len(names))
+width = 0.35
+
+fig, ax = plt.subplots(figsize=(5.5, 3.4))
+ax.bar(x - width/2, bias2s, width, label='Bias²', color='#3a7ca5')
+ax.bar(x + width/2, vars_, width, label='Variance', color='#d9a23a')
+ax.set_xticks(x)
+ax.set_xticklabels(names, fontsize=8)
+ax.set_title("Bias² und Variance je Modell")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Bias² und Variance je Modell</div>
+            <p>
+              Das gruppierte Balkendiagramm zeigt für jedes Modell zwei Balken (Bias² und
+              Variance). Die <strong>Lineare Regression</strong> hat den höchsten Bias²
+              (1.68, weil eine Gerade die Kubik-Kurve nicht treffen kann) aber die
+              niedrigste Variance (0.08, sehr stabil). <strong>Tree depth=5</strong> hat
+              den niedrigsten Bias² (0.03) bei moderater Variance — daher auch das
+              niedrigste MSE (0.68) und der beste Kompromiss. <strong>Tree depth=10</strong>
+              ist überraschend instabil (hohe Variance), da einzelne Bootstrap-Stichproben
+              zu sehr unterschiedlichen tiefen Bäumen führen.
+            </p>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button>
+        </div>
+      </div>
+
+      <!-- STUFE 5: Mit sklearn -->
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 5</span>
+          <h2 class="stufe-title">🚀 Tradeoff navigieren mit sklearn</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Regularisierungsparameter kontrollieren den Tradeoff</h3>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 1 — Daten erzeugen</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.datasets import make_regression
+
+X, y = make_regression(
+    n_samples=100,
+    n_features=1,
+    noise=20,
+    random_state=42
+)
+
+print(f"X: {X.shape}, y: {y.shape}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>X: (100, 1), y: (100,)</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 2 — Regularisierungsstärke variieren</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.linear_model import Ridge
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import Pipeline
+
+alphas = [0.001, 0.01, 0.1, 1.0, 10.0, 100.0]
+
+print(f"{'alpha':>8} | {'CV Mean':>10} | {'CV Std':>8} | Interpretation")
+print("-" * 58)
+for alpha in alphas:
+    pipe = Pipeline([
+        ('poly', PolynomialFeatures(degree=5, include_bias=False)),
+        ('ridge', Ridge(alpha=alpha))
+    ])
+    scores = cross_val_score(pipe, X, y, cv=5, scoring='r2')
+    if alpha < 0.01:
+        interp = "High Var (Overfitting)"
+    elif alpha > 10:
+        interp = "High Bias (Underfitting)"
+    else:
+        interp = "✅ Good Balance"
+    print(f"{alpha:>8} | {scores.mean():>10.4f} | {scores.std():>8.4f} | {interp}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>   alpha |    CV Mean |   CV Std | Interpretation
+----------------------------------------------------------
+   0.001 |     0.8214 |   0.0687 | High Var (Overfitting)
+    0.01 |     0.8211 |   0.0688 | ✅ Good Balance
+     0.1 |     0.8189 |   0.0702 | ✅ Good Balance
+     1.0 |     0.7941 |   0.0964 | ✅ Good Balance
+    10.0 |     0.7552 |   0.0979 | ✅ Good Balance
+   100.0 |     0.5115 |   0.2528 | High Bias (Underfitting)</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 3 — Ensemble reduziert Variance</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.ensemble import BaggingRegressor
+from sklearn.tree import DecisionTreeRegressor
+
+base = DecisionTreeRegressor(max_depth=10)
+bag = BaggingRegressor(
+    estimator=base,
+    n_estimators=50,
+    random_state=42
+)
+
+for name, m in [("Single Tree (depth=10)", base), ("Bagging 50 Trees", bag)]:
+    s = cross_val_score(m, X, y, cv=5, scoring='r2')
+    print(f"{name:<24}: mean={s.mean():.4f}, std={s.std():.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Single Tree (depth=10)  : mean=0.6798, std=0.0804
+Bagging 50 Trees        : mean=0.7594, std=0.0757</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: CV-Score vs. alpha (Tradeoff-Kurve)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (alphas, X, y)
+import matplotlib.pyplot as plt
+
+means, stds = [], []
+for alpha in alphas:
+    pipe = Pipeline([
+        ('poly', PolynomialFeatures(degree=5, include_bias=False)),
+        ('ridge', Ridge(alpha=alpha))
+    ])
+    scores = cross_val_score(pipe, X, y, cv=5, scoring='r2')
+    means.append(scores.mean())
+    stds.append(scores.std())
+
+fig, ax = plt.subplots(figsize=(5.5, 3.4))
+ax.errorbar(alphas, means, yerr=stds, marker='o', color='#2e8b57', capsize=4)
+ax.set_xscale('log')
+ax.set_xlabel("alpha (log-Skala)")
+ax.set_ylabel("CV Mean R² (± Std)")
+ax.set_title("CV-Score vs. alpha (Tradeoff-Kurve)")
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — CV-Score vs. alpha (Tradeoff-Kurve)</div>
+            <p>
+              Die Kurve von CV-Mean (R²) gegen <code>alpha</code> (log-Skala) bildet die
+              klassische Tradeoff-Form: bei sehr kleinem alpha ist die Streuung (CV Std)
+              groß — Overfitting. Bei sehr großem alpha (100) sinkt sowohl der Mittelwert
+              als auch die Streuung stark — das Modell ist zu stark eingeschränkt
+              (Underfitting). Der <strong>Sweet Spot</strong> liegt bei alpha ≈ 0.01–10,
+              wo CV-Mean noch hoch und CV-Std moderat ist. Das Bagging-Ensemble (Schritt 3)
+              zeigt denselben Effekt auf andere Weise: derselbe Baum, aber 50× gemittelt,
+              hat eine deutlich höhere mittlere Performance als ein einzelner Baum.
+            </p>
+          </div>
+
+          <h3>Zusammenfassung: Was tun bei welchem Problem?</h3>
+          <table>
+            <thead><tr><th>Signal</th><th>Ursache</th><th>Lösung</th></tr></thead>
+            <tbody>
+              <tr><td>Train ≈ Test, beide niedrig</td><td>High Bias</td><td>Mehr Features, komplexeres Modell, alpha↓</td></tr>
+              <tr><td>Train hoch, Test niedrig</td><td>High Variance</td><td>Mehr Daten, Regularisierung (alpha↑), Ensemble</td></tr>
+              <tr><td>Hohe CV-Std</td><td>High Variance</td><td>Bagging, Random Forest, mehr Daten</td></tr>
+              <tr><td>CV Mean niedrig, Std niedrig</td><td>High Bias</td><td>Expressive Modelle, Feature Engineering</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button>
+        </div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T02-overfitting-underfitting.html" class="nav-arrow">
+          <div class="nav-arrow-icon">←</div>
+          <div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">📈 Overfitting &amp; Underfitting</div></div>
+        </a>
+        <a href="T04-cross-validation.html" class="nav-arrow next">
+          <div class="nav-arrow-icon">→</div>
+          <div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">🔄 Cross-Validation</div></div>
+        </a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K2 · T3 · Bias-Variance Tradeoff"></site-footer>
+
+  <script>
+    function copyCode(btn) {
+      const cell = btn.closest('.code-cell');
+      const code = cell.querySelector('code').textContent;
+      const out = cell.querySelector('.code-cell-output-body pre');
+      const text = out ? code + '\n\n# Ausgabe:\n' + out.textContent : code;
+      navigator.clipboard.writeText(text);
+      btn.textContent = 'Kopiert!';
+      setTimeout(() => btn.textContent = 'Kopieren', 2000);
+    }
+  </script>
+</body>
+</html>

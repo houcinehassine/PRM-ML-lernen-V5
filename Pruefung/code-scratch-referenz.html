@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Code-from-Scratch-Referenz – PRM V5</title>
+  <meta name="description" content="Kompakte Code-Snippets der wichtigsten Algorithmen aus K1–K7 von Grund auf: Scaler, Train/Test-Split, Gini/Entropie, k-Means, Entscheidungsbaum, Bagging, EM-Algorithmus, Confusion-Matrix-Metriken."/>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-6) var(--space-4) 0;text-align:center}
+    .pruef-hero h1{font-family:var(--font-display);font-size:var(--text-xl);margin-bottom:var(--space-2)}
+    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:64ch;margin:0 auto}
+    .pruef-section{max-width:880px;margin:0 auto var(--space-10);padding:0 var(--space-4)}
+    .pruef-section h2{
+      display:flex;align-items:center;gap:var(--space-3);
+      margin-bottom:var(--space-4);padding-bottom:var(--space-2);
+      border-bottom:2px solid var(--color-border);
+      scroll-margin-top:4.5rem;
+    }
+    .pruef-num{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:2rem;height:2rem;border-radius:var(--radius-md);
+      background:var(--color-primary-highlight);color:var(--color-primary);
+      font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    .pruef-section p.lead{color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--space-3)}
+  </style>
+</head>
+<body>
+  <site-header active="pruefung" title="Code-from-Scratch-Referenz – PRM V5"></site-header>
+
+  <div class="pruef-layout">
+    <nav class="pruef-side">
+      <div class="pruef-side-group">
+        <div class="pruef-side-label">Während der Prüfung</div>
+        <a href="cheatsheet.html">📋 Cheat-Sheet</a>
+        <a href="entscheidungshilfe.html">🧭 Entscheidungshilfe</a>
+        <a href="numpy-referenz.html">🔢 NumPy</a>
+        <a href="sklearn-referenz.html">🚀 sklearn</a>
+        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
+        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
+        <a href="code-scratch-referenz.html" class="active">🛠️ Von Scratch</a>
+      </div>
+      <div class="pruef-side-group" id="section-nav">
+        <div class="pruef-side-label">Auf dieser Seite</div>
+        <a href="#scaler">1 · Scaler &amp; Split</a>
+        <a href="#gini">2 · Gini/Entropie</a>
+        <a href="#splitsuche">3 · Split-Suche</a>
+        <a href="#kmeans">4 · k-Means</a>
+        <a href="#bagging">5 · Bagging</a>
+        <a href="#em">6 · EM-Algorithmus</a>
+        <a href="#metriken">7 · Metriken</a>
+        <a href="#pca">8 · PCA</a>
+        <a href="#boosting">9 · Gradient Boosting</a>
+      </div>
+    </nav>
+
+    <div class="pruef-hero">
+      <h1>🛠️ Von Scratch · Code-Referenz</h1>
+      <p>Die Kernlogik der wichtigsten selbst implementierten Algorithmen — kompakt zum Nachschlagen, falls in der Prüfung "implementiere von Hand" gefragt ist.</p>
+    </div>
+
+  <main id="main-content" class="pruef-main">
+
+    <!-- ═══ 1 · SCALER & TRAIN/TEST SPLIT ═══ -->
+    <section class="pruef-section" id="scaler">
+      <h2><span class="pruef-num">1</span> Scaler &amp; Train/Test-Split</h2>
+      <p class="lead">Z-Score-Standardisierung und ein einfacher Split ohne sklearn.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def standardize(X_train, X_test):
+    mu = X_train.mean(axis=0)
+    sigma = X_train.std(axis=0)
+    X_train_scaled = (X_train - mu) / sigma
+    X_test_scaled = (X_test - mu) / sigma   # gleiche mu/sigma wie Train!
+    return X_train_scaled, X_test_scaled</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def train_test_split_scratch(X, y, test_size=0.2, seed=42):
+    np.random.seed(seed)
+    n = len(X)
+    idx = np.random.permutation(n)
+    split = int(n * (1 - test_size))
+    train_idx, test_idx = idx[:split], idx[split:]
+    return X[train_idx], X[test_idx], y[train_idx], y[test_idx]</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 2 · GINI / ENTROPIE / INFORMATION GAIN ═══ -->
+    <section class="pruef-section" id="gini">
+      <h2><span class="pruef-num">2</span> Gini, Entropie &amp; Information Gain</h2>
+      <p class="lead">Splitkriterien für Entscheidungsbäume.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def gini(y):
+    _, counts = np.unique(y, return_counts=True)
+    p = counts / len(y)
+    return 1 - np.sum(p**2)</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def entropy(y):
+    _, counts = np.unique(y, return_counts=True)
+    p = counts / len(y)
+    return -np.sum(p * np.log2(p))</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def information_gain(y, y_left, y_right, criterion=gini):
+    n, n_l, n_r = len(y), len(y_left), len(y_right)
+    weighted_child = (n_l/n)*criterion(y_left) + (n_r/n)*criterion(y_right)
+    return criterion(y) - weighted_child</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 3 · ENTSCHEIDUNGSBAUM SPLIT-SUCHE ═══ -->
+    <section class="pruef-section" id="splitsuche">
+      <h2><span class="pruef-num">3</span> Entscheidungsbaum: Besten Split finden</h2>
+      <p class="lead">Iteriert über alle Features und alle Schwellenwerte, wählt den Split mit dem höchsten Information Gain.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def best_split(X, y):
+    best_gain, best_feature, best_threshold = -1, None, None
+    for feature_idx in range(X.shape[1]):
+        thresholds = np.unique(X[:, feature_idx])
+        for t in thresholds:
+            left_mask = X[:, feature_idx] <= t
+            right_mask = ~left_mask
+            if left_mask.sum() == 0 or right_mask.sum() == 0:
+                continue
+            gain = information_gain(y, y[left_mask], y[right_mask])
+            if gain > best_gain:
+                best_gain, best_feature, best_threshold = gain, feature_idx, t
+    return best_feature, best_threshold, best_gain</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 4 · K-MEANS ═══ -->
+    <section class="pruef-section" id="kmeans">
+      <h2><span class="pruef-num">4</span> k-Means-Algorithmus</h2>
+      <p class="lead">Init → Zuweisung → Update, bis Konvergenz oder max_iter.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def kmeans_scratch(X, k, max_iter=100, seed=42):
+    np.random.seed(seed)
+    centroids = X[np.random.choice(len(X), k, replace=False)]
+
+    for _ in range(max_iter):
+        # 1. Zuweisung: Distanz jeder Probe zu jedem Centroid
+        dists = np.linalg.norm(X[:, None, :] - centroids[None, :, :], axis=2)
+        labels = np.argmin(dists, axis=1)
+
+        # 2. Update: neue Centroids = Mittelwert der zugewiesenen Punkte
+        new_centroids = np.array([
+            X[labels == i].mean(axis=0) if np.any(labels == i) else centroids[i]
+            for i in range(k)
+        ])
+
+        if np.allclose(centroids, new_centroids):
+            break
+        centroids = new_centroids
+
+    wcss = np.sum((X - centroids[labels])**2)
+    return labels, centroids, wcss</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 5 · BAGGING ═══ -->
+    <section class="pruef-section" id="bagging">
+      <h2><span class="pruef-num">5</span> Bagging (Bootstrap Aggregating)</h2>
+      <p class="lead">Trainiert mehrere Modelle auf Bootstrap-Stichproben und kombiniert per Mehrheitsentscheid (Klassifikation) bzw. Mittelwert (Regression).</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def bagging_fit(X, y, n_estimators=10, base_estimator_fn=None, seed=42):
+    np.random.seed(seed)
+    n = len(X)
+    models = []
+    for _ in range(n_estimators):
+        idx = np.random.choice(n, n, replace=True)   # Bootstrap: mit Zurücklegen
+        model = base_estimator_fn()
+        model.fit(X[idx], y[idx])
+        models.append(model)
+    return models</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def bagging_predict(models, X):
+    preds = np.array([m.predict(X) for m in models])  # shape (n_estimators, n_samples)
+    # Mehrheitsentscheid pro Sample (Klassifikation)
+    return np.array([np.bincount(preds[:, i]).argmax() for i in range(X.shape[0])])</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 6 · EM-ALGORITHMUS ═══ -->
+    <section class="pruef-section" id="em">
+      <h2><span class="pruef-num">6</span> EM-Algorithmus (Gaussian Mixture)</h2>
+      <p class="lead">E-Step: Verantwortlichkeiten (Soft-Zuordnung) berechnen. M-Step: Parameter (μ, Σ, π) anhand der Verantwortlichkeiten neu schätzen.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from scipy.stats import multivariate_normal
+
+def e_step(X, means, covariances, weights):
+    k = len(weights)
+    resp = np.zeros((len(X), k))
+    for j in range(k):
+        resp[:, j] = weights[j] * multivariate_normal.pdf(X, means[j], covariances[j])
+    resp /= resp.sum(axis=1, keepdims=True)   # normieren -> Wahrscheinlichkeiten je Sample
+    return resp</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def m_step(X, resp):
+    Nk = resp.sum(axis=0)                      # "effektive" Anzahl Punkte pro Cluster
+    weights = Nk / len(X)
+    means = (resp.T @ X) / Nk[:, None]
+    covariances = []
+    for j in range(len(Nk)):
+        diff = X - means[j]
+        cov = (resp[:, j, None, None] * np.einsum('ni,nj->nij', diff, diff)).sum(axis=0) / Nk[j]
+        covariances.append(cov)
+    return means, np.array(covariances), weights</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 7 · CONFUSION-MATRIX-METRIKEN ═══ -->
+    <section class="pruef-section" id="metriken">
+      <h2><span class="pruef-num">7</span> Confusion-Matrix-Metriken</h2>
+      <p class="lead">Accuracy, Precision, Recall, F1 direkt aus TP/FP/FN/TN — siehe auch den <a href="cheatsheet.html#k7">Live-Rechner im Cheat-Sheet</a>.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def confusion_counts(y_true, y_pred):
+    tp = np.sum((y_true == 1) & (y_pred == 1))
+    fp = np.sum((y_true == 0) & (y_pred == 1))
+    fn = np.sum((y_true == 1) & (y_pred == 0))
+    tn = np.sum((y_true == 0) & (y_pred == 0))
+    return tp, fp, fn, tn</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def metrics_from_counts(tp, fp, fn, tn):
+    accuracy  = (tp + tn) / (tp + fp + fn + tn)
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall    = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
+    f1 = (2 * precision * recall / (precision + recall)
+          if (precision + recall) > 0 else 0.0)
+    return {"accuracy": accuracy, "precision": precision,
+            "recall": recall, "specificity": specificity, "f1": f1}</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 8 · PCA ═══ -->
+    <section class="pruef-section" id="pca">
+      <h2><span class="pruef-num">8</span> PCA via Eigenzerlegung</h2>
+      <p class="lead">Zentrieren → Kovarianzmatrix → Eigenzerlegung → absteigend sortieren → projizieren.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def pca_fit(X, n_components):
+    mean = X.mean(axis=0)
+    X_centered = X - mean
+
+    # Kovarianzmatrix (Features x Features)
+    cov = np.cov(X_centered, rowvar=False)
+
+    # Eigenzerlegung -- Sigma ist symmetrisch -> eigh (aufsteigend sortiert)
+    eigvals, eigvecs = np.linalg.eigh(cov)
+
+    # absteigend sortieren: größter Eigenwert = PC1
+    order = np.argsort(eigvals)[::-1]
+    eigvals = eigvals[order]
+    eigvecs = eigvecs[:, order]
+
+    components = eigvecs[:, :n_components].T          # (n_components, n_features)
+    explained_variance = eigvals[:n_components]
+    explained_variance_ratio = explained_variance / eigvals.sum()
+
+    return mean, components, explained_variance_ratio</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def pca_transform(X, mean, components):
+    return (X - mean) @ components.T
+
+def pca_inverse_transform(X_proj, mean, components):
+    return X_proj @ components + mean</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 9 · GRADIENT BOOSTING ═══ -->
+    <section class="pruef-section" id="boosting">
+      <h2><span class="pruef-num">9</span> Gradient Boosting</h2>
+      <p class="lead">Startwert = Mittelwert von y → Residuen berechnen → flachen Baum auf Residuen fitten → additiv mit learning_rate aktualisieren → wiederholen.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.tree import DecisionTreeRegressor
+
+def gb_fit(X, y, n_estimators=20, learning_rate=0.5, max_depth=1):
+    F0 = np.mean(y)
+    models = []
+    pred = np.full(len(y), F0)
+    for _ in range(n_estimators):
+        residuals = y - pred                # Pseudo-Gradient (squared_error)
+        tree = DecisionTreeRegressor(max_depth=max_depth)
+        tree.fit(X, residuals)
+        pred = pred + learning_rate * tree.predict(X)
+        models.append(tree)
+    return F0, models</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">def gb_predict(F0, models, X, learning_rate=0.5):
+    pred = np.full(X.shape[0], F0)
+    for tree in models:
+        pred = pred + learning_rate * tree.predict(X)
+    return pred</code></pre>
+      </div>
+    </section>
+
+  </main>
+  </div>
+
+  <site-footer caption="PRM · Während der Prüfung · Code-from-Scratch-Referenz"></site-footer>
+
+  <script>
+    const sideLinks = document.querySelectorAll('#section-nav a');
+    const sections = document.querySelectorAll('.pruef-section');
+    const setActive = () => {
+      let current = sections[0]?.id;
+      const probe = window.scrollY + 140;
+      sections.forEach(sec => {
+        if (sec.offsetTop <= probe) current = sec.id;
+      });
+      sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    };
+    document.addEventListener('scroll', setActive, { passive: true });
+    setActive();
+  </script>
+
+  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.code-cell').querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = original; }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>

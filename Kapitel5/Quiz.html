@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz K5 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <site-header active="k5" title="Quiz K5 · Random Forest – PRM V5"></site-header>
+  <div class="layout">
+    <site-sidebar active="k5/quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K5 · Quiz · 25 Fragen</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🧠 Quiz: Random Forest &amp; Boosting</h1>
+        <p style="color:var(--color-text-muted)">Klicke auf eine Frage um die Antwort aufzudecken.</p>
+      </section>
+
+      <section id="entscheidungsbaum">
+        <h2>Entscheidungsbaum</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q1</span> Was ist Gini-Impurity?</summary><div class="frage-antwort">Gini(t) = 1 − Σₖ p(k|t)² — misst Unreinheit eines Knotens. Gini=0: purer Knoten (nur eine Klasse). Gini=0.5 (bei 2 Klassen): maximale Mischung (50/50).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q2</span> Was ist der CART-Algorithmus?</summary><div class="frage-antwort">Classification and Regression Trees — greedy-rekursiver Algorithmus: für jeden Knoten werden alle (Feature, Threshold)-Paare evaluiert. Der Split mit maximaler Gini-Reduktion (oder Information Gain) wird gewählt. Dann rekursiv für beide Teilbäume.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q3</span> Wie verhindert man Overfitting bei Entscheidungsbäumen?</summary><div class="frage-antwort">max_depth (maximale Tiefe), min_samples_split (Mindest-Punkte zum Splitten), min_samples_leaf (Mindest-Punkte in Blättern), max_leaf_nodes. Ein unbeschränkter Baum memoriert alle Trainingsdaten.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q4</span> Was ist der Vorteil von Entscheidungsbäumen gegenüber SVM/logistischer Regression?</summary><div class="frage-antwort">Interpretierbarkeit (Regeln lesbar), kein Feature-Scaling nötig, kann gemischte Feature-Typen verarbeiten, handles nichtlineare Beziehungen ohne Kernel-Wahl.</div></details>
+      </section>
+
+      <section id="bagging">
+        <h2>Bagging</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q5</span> Was bedeutet Bootstrap-Sampling?</summary><div class="frage-antwort">Ziehen mit Zurücklegen — eine Stichprobe gleicher Größe wie das Original. Ca. 63.2% der Punkte werden einmal oder öfter gezogen, ~36.8% fehlen (Out-of-Bag).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q6</span> Was ist der Out-of-Bag (OOB) Score?</summary><div class="frage-antwort">Jeder Datenpunkt ist in ~36.8% der Bäume Out-of-Bag (nicht im Bootstrap). Diese Bäume können ihn vorhersagen. Der OOB-Score ist die Genauigkeit dieser OOB-Vorhersagen — eine kostenlose CV-Schätzung ohne extra Validierungsdaten.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q7</span> Warum reduziert Bagging die Variance?</summary><div class="frage-antwort">Wenn B unabhängige Modelle mit gleicher Variance σ² gemittelt werden: Var(Durchschnitt) = σ²/B. Bei korrelierten Modellen: ρσ² + (1-ρ)σ²/B. Je mehr Diversität zwischen Modellen, desto mehr Variance-Reduktion.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q8</span> Reduziert Bagging auch den Bias?</summary><div class="frage-antwort">Kaum. Bagging mittelt ähnliche Modelle — der Bias jedes Einzelmodells bleibt. Boosting reduziert Bias (sequential correction), nicht Bagging. Bagging ist ein Variance-Reduzierer.</div></details>
+      </section>
+
+      <section id="random-forest">
+        <h2>Random Forest</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q9</span> Was unterscheidet Random Forest von Bagging?</summary><div class="frage-antwort">Feature-Subsampling bei jedem Split: statt alle p Features zu betrachten, werden nur m=√p Features zufällig gewählt. Das de-korreliert die Bäume → stärkere Variance-Reduktion.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q10</span> Warum ist max_features='sqrt' der Standard für Klassifikation?</summary><div class="frage-antwort">√p Features bieten eine gute Balance zwischen Diversity (niedrige Korrelation zwischen Bäumen) und Informationsgehalt. Zu wenige Features → zu hoher Bias. Alle Features → Bagging, keine De-Korrelation.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q11</span> Braucht Random Forest Feature-Skalierung?</summary><div class="frage-antwort">Nein! Entscheidungsbäume splitten nach Schwellenwerten — absolute Werte spielen keine Rolle. Das ist ein großer Vorteil gegenüber SVM, k-NN, neuralen Netzen.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q12</span> Kann Random Forest overfittenaber mehr n_estimators hilft immer?</summary><div class="frage-antwort">Random Forest overfittet mit mehr Bäumen nicht (ein großes Ensemble kann den Fehler nicht erhöhen). Ab ~100-200 Bäumen kaum noch Verbesserung — mehr Bäume = mehr Rechenzeit, nicht mehr Overfitting.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q13</span> Was ist Extra Trees (ExtraTreesClassifier)?</summary><div class="frage-antwort">Extra Randomized Trees: Zusätzlich zu Feature-Subsampling werden auch die Split-Schwellenwerte zufällig gewählt (statt optimal). Noch mehr Diversität, schnelleres Training, oft ähnliche Performance wie RF.</div></details>
+      </section>
+
+      <section id="feature-importance">
+        <h2>Feature Importance</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q14</span> Was ist MDI Feature Importance?</summary><div class="frage-antwort">Mean Decrease Impurity: für jeden Baum, für jeden Knoten, der ein Feature nutzt: gewichtete Gini-Reduktion summieren. Gemittelt über alle Bäume und normalisiert. In sklearn: rf.feature_importances_.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q15</span> Was ist Permutation Importance?</summary><div class="frage-antwort">Feature j wird zufällig permutiert (Information zerstört) → Modelleistung neu messen. PI(j) = baseline_score − score(permutiertes j). Höhere Reduktion = Feature wichtiger. Robuster als MDI.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q16</span> Welche Biases hat MDI Feature Importance?</summary><div class="frage-antwort">1. Biased gegenüber Features mit vielen möglichen Splits (kontinuierlich, hohe Kardinalität)<br>2. Bei korrelierten Features: Importance wird "aufgeteilt", beide erscheinen unwichtiger<br>3. Überschätzt Features die zufällig gute Splits liefern</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q17</span> Wie nutzt man Feature Importance für Feature Selection?</summary><div class="frage-antwort">SelectFromModel(rf, threshold='mean') wählt Features mit Importance ≥ mittlerer Importance. Oder manuell: Importances sortieren, Cumulative Sum bis 95% → Rest wegwerfen. Immer Performance nach Selektion verifizieren.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q18</span> Prüfungsfrage: Feature A hat MDI=0.45, Feature B hat MDI=0.02. Ist Feature B wirklich unwichtig?</summary><div class="frage-antwort">Nicht unbedingt. Wenn A und B stark korreliert sind, kann B trotz MDI=0.02 fast gleich informativ sein. Permutation Importance mit permutierten A und B separat prüfen. Domänen-Wissen einbeziehen.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q19</span> Was macht sklearn.inspection.permutation_importance()?</summary><div class="frage-antwort">Permutiert jedes Feature n_repeats-mal zufällig, misst den Score-Abfall. Gibt importances_mean (Mittelwert über Wiederholungen) und importances_std zurück. Kann auf Train- oder Test-Daten gemessen werden — Test ist ehrlicher.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q20</span> Warum ist Random Forest oft ein guter "first model"?</summary><div class="frage-antwort">Kein Scaling nötig, robust gegenüber Ausreißern und fehlenden Feature-Normalisierungen, wenig Hyperparameter-Tuning nötig (n_estimators=100 reicht oft), funktioniert für Klassifikation und Regression, liefert Feature Importance gratis, OOB-Score erspart CV.</div></details>
+      </section>
+
+      <section id="boosting-regression-baume">
+        <h2>Boosting / Regression-Bäume</h2>
+        <details class="frage"><summary><span class="quiz-q-num">Q21</span> Was ist der Hauptunterschied zwischen Bagging und Boosting?</summary><div class="frage-antwort">Bagging trainiert Modelle parallel/unabhängig auf Bootstrap-Stichproben und mittelt (reduziert Variance). Boosting trainiert Modelle sequentiell — jedes neue Modell korrigiert die Fehler der vorherigen (reduziert Bias). Boosting-Bäume sind flach ("weak learners"), Bagging/RF-Bäume oft tief.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q22</span> Wie funktioniert AdaBoost?</summary><div class="frage-antwort">Sequentiell werden schwache Klassifikatoren (oft Stumps, max_depth=1) trainiert. Nach jeder Runde werden Sample-Gewichte erhöht für falsch klassifizierte Punkte, sodass der nächste Stump sich auf "schwierige" Punkte konzentriert. Jeder Stump erhält ein Stimmgewicht αₘ = ln((1−εₘ)/εₘ) basierend auf seiner Fehlerrate εₘ.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q23</span> Was passiert bei Gradient Boosting in jeder Runde?</summary><div class="frage-antwort">Ein neuer (flacher) Baum wird auf die Residuen rᵢ = yᵢ − Fₘ₋₁(xᵢ) des aktuellen Modells trainiert. Das Modell wird additiv aktualisiert: Fₘ(x) = Fₘ₋₁(x) + ν·hₘ(x), wobei ν = learning_rate. Bei squared_error-Loss entsprechen die Residuen dem negativen Gradienten.</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q24</span> Welchen Effekt hat ein kleiner learning_rate?</summary><div class="frage-antwort">Jeder Baum trägt nur einen kleinen Beitrag bei (Shrinkage) → mehr n_estimators nötig, aber meist bessere Generalisierung. Klassischer Tradeoff: kleines learning_rate + viele Bäume vs. großes learning_rate + wenige Bäume. Zu viele Bäume bei kleinem learning_rate können trotzdem zu Overfitting führen (siehe staged_predict).</div></details>
+        <details class="frage"><summary><span class="quiz-q-num">Q25</span> Prüfungsfrage: Warum sind die Bäume bei Gradient Boosting absichtlich flach (max_depth=1-5), während Random Forest oft tiefe Bäume nutzt?</summary><div class="frage-antwort">Boosting-Bäume sind "weak learners" — bei flachen Bäumen kann jeder Baum nur einen kleinen Teil des Fehlers erklären, sodass viele Bäume zusammen schrittweise lernen (Bias-Reduktion ohne sofortiges Overfitting). Bei Random Forest reduziert das Mitteln vieler unabhängiger, tiefer (low-bias, high-variance) Bäume die Variance — hier ist Tiefe kein Problem, da Bagging die Varianz ausgleicht.</div></details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="T05-boosting.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Letztes Thema</div><div class="nav-arrow-title">🚀 Boosting &amp; Regression-Bäume</div></div></a>
+        <a href="Uebung.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">✏️ Übungsaufgaben</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K5 · Quiz · PRM V5"></site-footer>
+</body>
+</html>

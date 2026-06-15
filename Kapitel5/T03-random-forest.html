@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Random Forest – K5 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn { display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s; }
+    .mark-btn:hover { border-color:var(--color-success);color:var(--color-success); }
+    .stufe-footer { margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end; }
+  </style>
+</head>
+<body>
+  <site-header active="k5" title="Random Forest – K5 · PRM V5"></site-header>
+  <lern-pfad topic="k5/t03"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k5/t03"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K5 · Thema 3 von 5</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🌲 Random Forest</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Bagging + Feature-Subsampling: Wie Random Forest Bäume de-korreliert und damit die Variance noch weiter reduziert.</p>
+      </section>
+
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header"><span class="stufe-label">Stufe 1</span><h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2></div>
+        <div class="stufe-body">
+          <h3>Von Bagging zu Random Forest</h3>
+          <p>Bagging reduziert Variance durch Averaging. Aber: wenn alle Bäume auf ähnliche Weise gebaut werden (weil ein dominantes Feature immer gewählt wird), sind die Bäume <em>korreliert</em> — der Variance-Nutzen ist begrenzt.</p>
+          <div class="info-box">
+            <strong>Random Forest Trick:</strong> Bei jedem Split wird nur eine zufällige Teilmenge von <code>max_features</code> Features betrachtet (nicht alle). Das erzwingt Diversität — Bäume werden de-korreliert.
+          </div>
+          <p>Random Forest ist fast immer eine solide Wahl — robust, kaum Tuning nötig, gut für hohe Dimensionen, kein Scaling nötig.</p>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button></div>
+      </div>
+
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header"><span class="stufe-label">Stufe 2</span><h2 class="stufe-title">🧠 Bagging vs. Random Forest</h2></div>
+        <div class="stufe-body">
+          <table>
+            <thead><tr><th></th><th>Bagging</th><th>Random Forest</th></tr></thead>
+            <tbody>
+              <tr><td>Bootstrap-Sampling</td><td>✅</td><td>✅</td></tr>
+              <tr><td>Feature-Subsampling per Split</td><td>❌ Alle Features</td><td>✅ √p Features (Klassif.)</td></tr>
+              <tr><td>Baum-Korrelation</td><td>Mittel-hoch</td><td>Niedrig (Vorteil!)</td></tr>
+              <tr><td>Variance-Reduktion</td><td>Gut</td><td>Besser</td></tr>
+              <tr><td>Feature Importance</td><td>Schwierig</td><td>✅ Eingebaut</td></tr>
+            </tbody>
+          </table>
+          <h3>Feature-Subsampling</h3>
+          <div class="info-box">
+            Für Klassifikation: <code>max_features='sqrt'</code> → √n_features Features pro Split<br>
+            Für Regression: <code>max_features=1.0/3</code> → ein Drittel der Features<br>
+            Das wichtigste Feature kann nicht immer wählen → verschiedene Bäume lernen verschiedene Muster.
+          </div>
+          <h3>Hyperparameter</h3>
+          <table>
+            <thead><tr><th>Parameter</th><th>Einfluss</th><th>Empfehlung</th></tr></thead>
+            <tbody>
+              <tr><td><code>n_estimators</code></td><td>Mehr Bäume → besser (kein Overfitting!)</td><td>100–500</td></tr>
+              <tr><td><code>max_features</code></td><td>Weniger → mehr Diversität, mehr Bias</td><td>'sqrt' (Klassif.)</td></tr>
+              <tr><td><code>max_depth</code></td><td>Flacher → mehr Regularisierung</td><td>None (oft besser)</td></tr>
+              <tr><td><code>min_samples_leaf</code></td><td>Größer → glattere Vorhersagen</td><td>1–5</td></tr>
+              <tr><td><code>oob_score</code></td><td>Kostenloser CV-Ersatz</td><td>True</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button></div>
+      </div>
+
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header"><span class="stufe-label">Stufe 3</span><h2 class="stufe-title">⚙️ Random Forest Algorithmus</h2></div>
+        <div class="stufe-body">
+          <div class="algo-steps">
+            <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>B Bootstrap-Samples ziehen</strong></div></div>
+            <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>Für jeden Bootstrap-Sample: Baum wachsen lassen</strong><p>An jedem Split: zufällig m Features auswählen (m = √p für Klassifikation). Nur auf diesen m Features splitten.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Bäume vollständig wachsen (kein Pruning)</strong><p>Variance-Reduktion kommt durch Averaging, nicht durch Einzelbaum-Regularisierung.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">4</div><div class="algo-step-body"><strong>Aggregation: Mehrheitsvoting (Klassif.) oder Mittelwert (Regression)</strong></div></div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="algo">✓ Algorithmus klar</button></div>
+      </div>
+
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ Von Scratch: Random Forest</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 1/2a — Klasse: RandomForestScratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+from sklearn.tree import DecisionTreeClassifier
+
+class RandomForestScratch:
+    """Random Forest = Bagging + Feature-Subsampling pro Split."""
+
+    def __init__(self, n_estimators=100, max_features='sqrt',
+                 max_depth=None, random_state=42):
+        self.n_estimators = n_estimators
+        self.max_features = max_features
+        self.max_depth = max_depth
+        self.rng = np.random.default_rng(random_state)
+        self.trees = []
+
+    def fit(self, X, y):
+        X, y = np.array(X), np.array(y)
+        n, p = X.shape
+
+        if self.max_features == 'sqrt':
+            m = max(1, int(np.sqrt(p)))
+        elif self.max_features == 'log2':
+            m = max(1, int(np.log2(p)))
+        else:
+            m = p
+
+        self.trees = []
+        for i in range(self.n_estimators):
+            # Bootstrap-Sample
+            idx = self.rng.choice(n, n, replace=True)
+            X_boot, y_boot = X[idx], y[idx]
+
+            # DecisionTree mit max_features=m nutzt beim Split nur m Features
+            tree = DecisionTreeClassifier(
+                max_features=m,          # Feature-Subsampling!
+                max_depth=self.max_depth,
+                random_state=int(self.rng.integers(100000))
+            )
+            tree.fit(X_boot, y_boot)
+            self.trees.append(tree)
+
+    def predict(self, X):
+        preds = np.array([t.predict(X) for t in self.trees])
+        return np.array([np.bincount(col.astype(int)).argmax() for col in preds.T])
+
+    def score(self, X, y):
+        return np.mean(self.predict(X) == np.array(y))</code></pre>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 1/2b — Test: Einzelbaum vs. Scratch RF vs. sklearn RF</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.tree import DecisionTreeClassifier as DTC
+from sklearn.ensemble import RandomForestClassifier
+
+X, y = load_breast_cancer(return_X_y=True)
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 1. Einzelner Baum
+dt = DTC(random_state=42)
+dt.fit(X_tr, y_tr)
+print(f"Einzelner Baum: {dt.score(X_te, y_te):.2%}")
+
+# 2. Scratch Random Forest
+rf_scratch = RandomForestScratch(n_estimators=100)
+rf_scratch.fit(X_tr, y_tr)
+print(f"Scratch RF:     {rf_scratch.score(X_te, y_te):.2%}")
+
+# 3. sklearn RandomForest
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_tr, y_tr)
+print(f"sklearn RF:     {rf.score(X_te, y_te):.2%}")
+cv = cross_val_score(rf, X, y, cv=5)
+print(f"sklearn RF CV:  {cv.mean():.2%} ± {cv.std():.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Einzelner Baum: 94.74%
+Scratch RF:     96.49%
+sklearn RF:     96.49%
+sklearn RF CV:  95.61% ± 0.0228</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="compare-grid">
+            <div class="compare-card compare-card-a">
+              <div class="compare-card-label">🌳 Bagging — alle Features pro Split</div>
+              <p>Jeder Split betrachtet alle p Features. Bäume sind dadurch ähnlicher
+              (korrelierter), weil das dominante Feature immer gewählt wird.</p>
+            </div>
+            <div class="compare-card-arrow">↔</div>
+            <div class="compare-card compare-card-b">
+              <div class="compare-card-label">🌲 Random Forest — √p Features pro Split</div>
+              <p>Jeder Split betrachtet nur eine zufällige Teilmenge der Features. Das
+              erzwingt unterschiedliche Splits in verschiedenen Bäumen — Bäume werden
+              de-korreliert, die Variance-Reduktion durch Averaging wird stärker.</p>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
+      </div>
+
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 RandomForest professionell</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 1 — GridSearchCV über die wichtigsten Hyperparameter</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.datasets import load_breast_cancer
+
+X, y = load_breast_cancer(return_X_y=True)
+
+param_grid = {
+    'n_estimators': [50, 100, 200],
+    'max_features': ['sqrt', 'log2', None],
+    'max_depth': [None, 5, 10],
+    'min_samples_leaf': [1, 2, 5]
+}
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+gs = GridSearchCV(
+    RandomForestClassifier(random_state=42, oob_score=True),
+    param_grid,
+    cv=cv,
+    scoring='accuracy',
+    n_jobs=-1
+)
+gs.fit(X, y)
+print(f"Beste Parameter: {gs.best_params_}")
+print(f"CV Accuracy:     {gs.best_score_:.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Beste Parameter: {'max_depth': None, 'max_features': 'log2', 'min_samples_leaf': 1, 'n_estimators': 100}
+CV Accuracy:     0.9596</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 2 — Extra Trees &amp; OOB Score</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.model_selection import cross_val_score
+
+# Extra Trees: noch mehr Randomisierung (zufällige Splits statt beste Splits)
+et = ExtraTreesClassifier(n_estimators=100, random_state=42)
+et_cv = cross_val_score(et, X, y, cv=5)
+print(f"Extra Trees CV: {et_cv.mean():.4f} ± {et_cv.std():.4f}")
+
+# OOB Score (kein extra Validierungsdaten nötig)
+rf_oob = RandomForestClassifier(
+    n_estimators=200,
+    oob_score=True,
+    random_state=42
+)
+rf_oob.fit(X, y)
+print(f"RF OOB Score: {rf_oob.oob_score_:.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Extra Trees CV: 0.9631 ± 0.0195
+RF OOB Score: 0.9596</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T02-bagging.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">🎒 Bagging</div></div></a>
+        <a href="T04-feature-importance.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">📊 Feature Importance</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K5 · T3 · Random Forest"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text);btn.textContent='Kopiert!';setTimeout(()=>btn.textContent='Kopieren',2000);}</script>
+</body>
+</html>

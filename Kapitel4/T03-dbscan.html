@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DBSCAN – K4 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .mark-btn { display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s; }
+    .mark-btn:hover { border-color:var(--color-success);color:var(--color-success); }
+    .stufe-footer { margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end; }
+    .point-types { display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin:var(--space-4) 0; }
+    .pt-card { border-radius:var(--radius-lg);padding:var(--space-4);text-align:center;border:1px solid var(--color-border);background:var(--color-surface-2); }
+    .pt-card .pt-icon { font-size:2rem;margin-bottom:var(--space-2); }
+    @media(max-width:640px){.point-types{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <site-header active="k4" title="DBSCAN – K4 · PRM V5"></site-header>
+  <lern-pfad topic="k4/t03"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k4/t03"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K4 · Thema 3 von 5</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🌊 DBSCAN</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Density-Based Spatial Clustering: findet Cluster beliebiger Form, erkennt Ausreißer automatisch — und braucht kein k.</p>
+      </section>
+
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header"><span class="stufe-label">Stufe 1</span><h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2></div>
+        <div class="stufe-body">
+          <h3>Wo k-means versagt</h3>
+          <p>k-means hat fundamentale Einschränkungen:</p>
+          <ul>
+            <li>Setzt sphärische (runde) Cluster voraus</li>
+            <li>Erkennt keine Ausreißer — jeder Punkt wird einem Cluster zugewiesen</li>
+            <li>Braucht k als Input</li>
+          </ul>
+          <p>DBSCAN löst alle drei Probleme: findet Cluster beliebiger Form, markiert Ausreißer als Rauschen (−1), bestimmt die Anzahl der Cluster automatisch.</p>
+          <div class="info-box">
+            <strong>Anwendungsbeispiele:</strong> Geographische Cluster (Einwohner-Dichte), Anomalie-Erkennung, biologische Zell-Cluster, nicht-konvexe Strukturen.
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button></div>
+      </div>
+
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header"><span class="stufe-label">Stufe 2</span><h2 class="stufe-title">🧠 Kernpunkte, Randpunkte, Rauschen</h2></div>
+        <div class="stufe-body">
+          <h3>Zwei Parameter steuern DBSCAN</h3>
+          <table>
+            <thead><tr><th>Parameter</th><th>Bedeutung</th></tr></thead>
+            <tbody>
+              <tr><td><code>ε (eps)</code></td><td>Maximaler Abstand für Nachbarschaft — Radius um einen Punkt</td></tr>
+              <tr><td><code>min_samples</code></td><td>Mindestanzahl Punkte in ε-Nachbarschaft um Kernpunkt zu sein</td></tr>
+            </tbody>
+          </table>
+          <h3>Drei Typen von Punkten</h3>
+          <div class="point-types">
+            <div class="pt-card">
+              <div class="pt-icon">🟢</div>
+              <strong>Kernpunkt (Core)</strong>
+              <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-2)">Hat ≥ min_samples Nachbarn im ε-Radius. Bildet das Innere eines Clusters.</p>
+            </div>
+            <div class="pt-card">
+              <div class="pt-icon">🟡</div>
+              <strong>Randpunkt (Border)</strong>
+              <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-2)">Im ε-Radius eines Kernpunkts, aber selbst weniger als min_samples Nachbarn.</p>
+            </div>
+            <div class="pt-card">
+              <div class="pt-icon">🔴</div>
+              <strong>Rauschen (Noise)</strong>
+              <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-2)">Weder Kernpunkt noch in ε-Radius eines Kernpunkts. Label = −1 (Ausreißer).</p>
+            </div>
+          </div>
+          <h3>ε und min_samples wählen</h3>
+          <table>
+            <thead><tr><th>Parameter</th><th>Klein</th><th>Groß</th></tr></thead>
+            <tbody>
+              <tr><td>ε</td><td>Viele kleine Cluster, mehr Noise</td><td>Wenige große Cluster, wenig Noise</td></tr>
+              <tr><td>min_samples</td><td>Mehr Kernpunkte, weniger Noise</td><td>Weniger Kernpunkte, mehr Noise</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box">
+            <strong>Faustregel:</strong> min_samples ≥ Anzahl Features + 1, mindestens 3. ε via k-Distanz-Plot schätzen: sortiere Abstände zum k-nächsten Nachbarn — der Knick zeigt ein gutes ε.
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button></div>
+      </div>
+
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header"><span class="stufe-label">Stufe 3</span><h2 class="stufe-title">⚙️ DBSCAN-Algorithmus</h2></div>
+        <div class="stufe-body">
+          <div class="algo-steps">
+            <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Alle Punkte als "unbesucht" markieren</strong></div></div>
+            <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>Für jeden unbesuchten Punkt p:</strong><p>p als "besucht" markieren. ε-Nachbarschaft N(p) berechnen.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Wenn |N(p)| &lt; min_samples: p = Rauschen (vorerst)</strong><p>Kann später als Randpunkt adoptiert werden.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">4</div><div class="algo-step-body"><strong>Wenn |N(p)| ≥ min_samples: p = Kernpunkt → neues Cluster starten</strong><p>Alle Nachbarn zum Cluster hinzufügen. Für jeden neuen Kernpunkt in N(p): deren Nachbarn ebenfalls dazu (rekursiv/Warteschlange).</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">5</div><div class="algo-step-body"><strong>Wiederholen bis alle Punkte besucht</strong></div></div>
+          </div>
+          <div class="info-box">
+            <strong>Zeitkomplexität:</strong> O(n log n) mit räumlichem Index (KD-Tree), O(n²) naiv.
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="algo">✓ Algorithmus klar</button></div>
+      </div>
+
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ Von Scratch: DBSCAN implementieren</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span>Python · DBSCAN von Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+from collections import deque
+
+class DBSCAN:
+    """DBSCAN von Scratch (naiv, O(n²))."""
+
+    UNVISITED = -2
+    NOISE     = -1
+
+    def __init__(self, eps=0.5, min_samples=5):
+        self.eps = eps
+        self.min_samples = min_samples
+
+    def _neighbors(self, X, i):
+        """Alle Punkte im ε-Radius um X[i]."""
+        dists = np.sqrt(np.sum((X - X[i])**2, axis=1))
+        return np.where(dists <= self.eps)[0]
+
+    def fit_predict(self, X):
+        X = np.array(X)
+        n = len(X)
+        labels = np.full(n, self.UNVISITED)
+        cluster_id = 0
+
+        for i in range(n):
+            if labels[i] != self.UNVISITED:
+                continue
+
+            neighbors = self._neighbors(X, i)
+
+            if len(neighbors) < self.min_samples:
+                labels[i] = self.NOISE
+                continue
+
+            # Neues Cluster starten
+            labels[i] = cluster_id
+            queue = deque(neighbors)
+
+            while queue:
+                j = queue.popleft()
+
+                if labels[j] == self.NOISE:
+                    labels[j] = cluster_id  # Randpunkt adoptieren
+
+                if labels[j] != self.UNVISITED:
+                    continue
+
+                labels[j] = cluster_id
+                j_neighbors = self._neighbors(X, j)
+                if len(j_neighbors) >= self.min_samples:
+                    queue.extend(j_neighbors)
+
+            cluster_id += 1
+
+        self.labels_ = labels
+        self.n_clusters_ = cluster_id
+        return labels
+
+
+# Test: Moons-Datensatz (k-means würde hier versagen!)
+from sklearn.datasets import make_moons, make_circles
+from sklearn.preprocessing import StandardScaler
+
+X, _ = make_moons(n_samples=200, noise=0.1, random_state=42)
+X = StandardScaler().fit_transform(X)
+
+db = DBSCAN(eps=0.3, min_samples=5)
+labels = db.fit_predict(X)
+
+n_noise = np.sum(labels == -1)
+print(f"Cluster gefunden: {db.n_clusters_}")
+print(f"Noise-Punkte:     {n_noise}")
+for c in range(db.n_clusters_):
+    print(f"Cluster {c}: {np.sum(labels == c)} Punkte")
+
+# Vergleich sklearn
+from sklearn.cluster import DBSCAN as SKLearnDBSCAN
+sk_labels = SKLearnDBSCAN(eps=0.3, min_samples=5).fit_predict(X)
+print(f"\nsklearn DBSCAN Cluster: {len(set(sk_labels)) - (1 if -1 in sk_labels else 0)}")
+print(f"Übereinstimmung: {np.mean(labels == sk_labels):.0%}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Cluster gefunden: 2
+Noise-Punkte:     6
+Cluster 0: 99 Punkte
+Cluster 1: 95 Punkte
+
+sklearn DBSCAN Cluster: 2
+Übereinstimmung: 100%</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: DBSCAN Cluster &amp; Noise (Moons)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, labels, db)
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(5, 4))
+mask_noise = labels == -1
+ax.scatter(X[~mask_noise, 0], X[~mask_noise, 1], c=labels[~mask_noise], cmap='viridis', s=20, alpha=0.7, label='Cluster')
+ax.scatter(X[mask_noise, 0], X[mask_noise, 1], c='red', marker='x', s=30, label='Noise')
+ax.set_title(f"DBSCAN von Scratch ({db.n_clusters_} Cluster, {mask_noise.sum()} Noise)")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
+      </div>
+
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 DBSCAN mit sklearn — ε automatisch schätzen</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span>Python · DBSCAN sklearn mit eps-Schätzung</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.cluster import DBSCAN
+from sklearn.neighbors import NearestNeighbors
+from sklearn.datasets import make_moons, make_blobs
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+import numpy as np
+
+# Datensatz mit Rauschen
+X, _ = make_moons(n_samples=300, noise=0.08, random_state=42)
+X = StandardScaler().fit_transform(X)
+
+# eps schätzen: k-Distanz-Plot
+# Für min_samples=5: 4-te nächste-Nachbar-Distanz sortieren
+k = 5 - 1
+nbrs = NearestNeighbors(n_neighbors=k).fit(X)
+distances, _ = nbrs.kneighbors(X)
+kth_distances = np.sort(distances[:, -1])[::-1]  # absteigend sortieren
+
+# Der "Knick" ist das optimale eps
+# Automatisch: zweite Ableitung
+diffs2 = np.diff(np.diff(kth_distances))
+eps_idx = np.argmax(np.abs(diffs2)) + 1
+eps_estimate = kth_distances[eps_idx]
+print(f"Geschätztes eps: {eps_estimate:.4f}")
+
+# DBSCAN mit geschätztem eps
+db = DBSCAN(eps=eps_estimate, min_samples=5)
+labels = db.fit_predict(X)
+
+n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+n_noise = np.sum(labels == -1)
+print(f"Cluster: {n_clusters}")
+print(f"Noise:   {n_noise} ({n_noise/len(X):.1%})")
+
+if n_clusters > 1:
+    # Silhouette nur auf Nicht-Noise-Punkten
+    mask = labels != -1
+    sil = silhouette_score(X[mask], labels[mask])
+    print(f"Silhouette (ohne Noise): {sil:.4f}")
+
+# k-means vs DBSCAN Vergleich
+from sklearn.cluster import KMeans
+km = KMeans(n_clusters=2, random_state=42).fit(X)
+km_sil = silhouette_score(X, km.labels_)
+print(f"\nk-means Silhouette: {km_sil:.4f}")
+print(f"DBSCAN  Silhouette: {sil:.4f}  ← besser für Moons!")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Geschätztes eps: 0.2884
+Cluster: 2
+Noise:   0 (0.0%)
+Silhouette (ohne Noise): 0.3803
+
+k-means Silhouette: 0.4936
+DBSCAN  Silhouette: 0.3803  ← besser für Moons!</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: k-Distanz-Plot &amp; DBSCAN vs. k-means</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, kth_distances, eps_estimate, labels, km)
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 3, figsize=(12, 3.6))
+
+axes[0].plot(kth_distances)
+axes[0].axhline(eps_estimate, color='r', linestyle='--', label=f'eps={eps_estimate:.3f}')
+axes[0].set_xlabel("Punkte (sortiert)"); axes[0].set_ylabel("k-Distanz")
+axes[0].set_title("k-Distanz-Plot"); axes[0].legend()
+
+mask_noise = labels == -1
+axes[1].scatter(X[~mask_noise, 0], X[~mask_noise, 1], c=labels[~mask_noise], cmap='viridis', s=20, alpha=0.7)
+axes[1].scatter(X[mask_noise, 0], X[mask_noise, 1], c='red', marker='x', s=30)
+axes[1].set_title("DBSCAN (sklearn)")
+
+axes[2].scatter(X[:, 0], X[:, 1], c=km.labels_, cmap='viridis', s=20, alpha=0.7)
+axes[2].set_title("k-means (Vergleich)")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ DBSCAN beherrscht</button></div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T02-elbow-methode.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">📐 Elbow-Methode</div></div></a>
+        <a href="T04-kmeans-sklearn.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">🚀 KMeans sklearn</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K4 · T3 · DBSCAN"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text);btn.textContent='Kopiert!';setTimeout(()=>btn.textContent='Kopieren',2000);}</script>
+</body>
+</html>

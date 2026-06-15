@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>scikit-learn-Referenz – PRM V5</title>
+  <meta name="description" content="Die wichtigsten sklearn-Estimatoren aus K1–K7 mit Konstruktor, Parametern und Hyperparametern erklärt: SVC, RandomForest, KMeans, GaussianMixture, GridSearchCV und mehr."/>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-6) var(--space-4) 0;text-align:center}
+    .pruef-hero h1{font-family:var(--font-display);font-size:var(--text-xl);margin-bottom:var(--space-2)}
+    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:64ch;margin:0 auto}
+    .pruef-section{max-width:1120px;margin:0 auto var(--space-10);padding:0 var(--space-4)}
+    .pruef-section h2{
+      display:flex;align-items:center;gap:var(--space-3);
+      margin-bottom:var(--space-4);padding-bottom:var(--space-2);
+      border-bottom:2px solid var(--color-border);
+      scroll-margin-top:4.5rem;
+    }
+    .pruef-num{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:2rem;height:2rem;border-radius:var(--radius-md);
+      background:var(--color-primary-highlight);color:var(--color-primary);
+      font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    .est-import{
+      font-family:var(--font-mono);font-size:var(--text-xs);
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);
+      margin-bottom:var(--space-3);overflow-x:auto;
+    }
+    table code{font-size:var(--text-xs)}
+    .pruef-section h3{font-size:var(--text-md);margin:var(--space-6) 0 var(--space-2)}
+
+    /* ═══ Parameter-Karten: 1-4 pro Zeile, je nach Browserbreite ═══ */
+    .cmd-grid{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+      gap:var(--space-3);margin-bottom:var(--space-3);
+    }
+    .cmd-card{
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      background:var(--color-surface);padding:var(--space-3);
+      display:flex;flex-direction:column;gap:.5rem;
+    }
+    /* breitere Karte für Beispiele mit längeren Code-/Output-Zeilen */
+    .cmd-card--wide{grid-column:span 2}
+    @media (max-width:560px){
+      .cmd-card--wide{grid-column:span 1}
+    }
+    .cmd-head{
+      font-size:var(--text-sm);font-weight:800;color:var(--color-primary);
+      word-break:break-word;text-align:center;
+    }
+    .cmd-desc{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.55;margin:0}
+    .cmd-desc code{font-size:var(--text-xs)}
+
+    /* ═══ Mini-Code + Output direkt in der Karte (pro Methode/Aufruf) ═══ */
+    .cmd-code{
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      border-radius:var(--radius-md);padding:var(--space-2);
+      font-size:.72rem;line-height:1.5;overflow-x:auto;margin:0;
+    }
+    .cmd-out{
+      background:color-mix(in oklab,var(--color-success) 6%,var(--color-surface));
+      border:1px solid var(--color-border);border-radius:var(--radius-md);
+      padding:var(--space-2);font-size:.72rem;line-height:1.5;
+      color:var(--color-text-muted);overflow-x:auto;margin:0;font-family:var(--font-mono);
+    }
+    .cmd-card .cmd-out:before{content:"→ ";color:var(--color-success);font-weight:800}
+    .cmd-out--wrap{white-space:pre-wrap;word-break:break-word;overflow-x:hidden}
+
+    /* ═══ Setup-Karte: Import + Daten + Modell, volle Breite ═══ */
+    .cmd-setup{
+      grid-column:1 / -1;background:var(--color-surface-2);
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      padding:var(--space-3);display:flex;flex-direction:column;gap:.5rem;
+    }
+    .cmd-setup .cmd-head{
+      text-align:left;font-size:var(--text-xs);font-weight:800;
+      color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;
+    }
+    .cmd-setup .cmd-code{font-size:.78rem}
+  </style>
+</head>
+<body>
+  <site-header active="pruefung" title="scikit-learn-Referenz – PRM V5"></site-header>
+
+  <div class="pruef-layout">
+    <nav class="pruef-side">
+      <div class="pruef-side-group">
+        <div class="pruef-side-label">Während der Prüfung</div>
+        <a href="cheatsheet.html">📋 Cheat-Sheet</a>
+        <a href="entscheidungshilfe.html">🧭 Entscheidungshilfe</a>
+        <a href="numpy-referenz.html">🔢 NumPy</a>
+        <a href="sklearn-referenz.html" class="active">🚀 sklearn</a>
+        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
+        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
+        <a href="code-scratch-referenz.html">🛠️ Von Scratch</a>
+      </div>
+      <div class="pruef-side-group" id="section-nav">
+        <div class="pruef-side-label">Auf dieser Seite</div>
+        <a href="#preprocessing">1 · Preprocessing</a>
+        <a href="#lineare-modelle">2 · Lineare Modelle</a>
+        <a href="#svm">3 · SVM</a>
+        <a href="#baumbasiert">4 · Baumbasiert</a>
+        <a href="#clustering">5 · Clustering &amp; PCA</a>
+        <a href="#model-selection">6 · Model Selection</a>
+        <a href="#metrics">7 · Metrics</a>
+      </div>
+    </nav>
+
+    <div class="pruef-hero">
+      <h1>🚀 scikit-learn-Referenz</h1>
+      <p>Konstruktor, zentrale Parameter und Hyperparameter der wichtigsten Estimatoren aus K1–K7 — inkl. Erklärung, was jeder Parameter bewirkt.</p>
+    </div>
+
+  <main id="main-content" class="pruef-main">
+
+    <!-- ═══ 1 · PREPROCESSING ═══ -->
+    <section class="pruef-section" id="preprocessing">
+      <h2><span class="pruef-num">1</span> Preprocessing</h2>
+
+      <h3>StandardScaler</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.preprocessing import StandardScaler
+X = np.array([[1, 200], [2, 300], [3, 400]])
+scaler = StandardScaler()</code></pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">fit(X)</code>
+          <p class="cmd-desc">berechnet Mittelwert &amp; Standardabweichung pro Feature</p>
+          <pre class="cmd-code"><code class="language-python">scaler.fit(X)
+print(scaler.mean_, scaler.scale_)</code></pre>
+          <pre class="cmd-out">[  2. 300.] [ 0.8165 81.6497]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">transform(X)</code>
+          <p class="cmd-desc">wendet Z-Score-Transformation an: (x − μ) / σ</p>
+          <pre class="cmd-code"><code class="language-python">print(scaler.transform(X))</code></pre>
+          <pre class="cmd-out">[[-1.2247 -1.2247]
+ [ 0.      0.    ]
+ [ 1.2247  1.2247]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">fit_transform(X)</code>
+          <p class="cmd-desc">fit + transform in einem Schritt — <strong>nur auf Trainingsdaten!</strong></p>
+          <pre class="cmd-code"><code class="language-python">print(scaler.fit_transform(X))</code></pre>
+          <pre class="cmd-out">[[-1.2247 -1.2247]
+ [ 0.      0.    ]
+ [ 1.2247  1.2247]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">inverse_transform(Xs)</code>
+          <p class="cmd-desc">macht die Skalierung rückgängig — zurück in Originaleinheiten</p>
+          <pre class="cmd-code"><code class="language-python">Xs = scaler.transform(X)
+print(scaler.inverse_transform(Xs))</code></pre>
+          <pre class="cmd-out">[[  1. 200.]
+ [  2. 300.]
+ [  3. 400.]]</pre>
+        </div>
+      </div>
+
+      <h3>MinMaxScaler</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.preprocessing import MinMaxScaler
+X = np.array([[1, 200], [2, 300], [3, 400]])</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">feature_range=(0,1)</code>
+          <p class="cmd-desc">Standard — skaliert linear auf [0, 1]</p>
+          <pre class="cmd-code"><code class="language-python">print(MinMaxScaler(feature_range=(0, 1)).fit_transform(X))</code></pre>
+          <pre class="cmd-out">[[0.  0. ]
+ [0.5 0.5]
+ [1.  1. ]]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">feature_range=(-1,1)</code>
+          <p class="cmd-desc">beliebiges Zielintervall möglich</p>
+          <pre class="cmd-code"><code class="language-python">print(MinMaxScaler(feature_range=(-1, 1)).fit_transform(X))</code></pre>
+          <pre class="cmd-out">[[-1. -1.]
+ [ 0.  0.]
+ [ 1.  1.]]</pre>
+        </div>
+      </div>
+
+      <h3>OneHotEncoder / LabelEncoder</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">OneHotEncoder(sparse_output=False, handle_unknown='ignore')</code>
+          <p class="cmd-desc"><code>handle_unknown='ignore'</code> verhindert Fehler bei unbekannten Kategorien im Test-Set</p>
+          <pre class="cmd-code"><code class="language-python">ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+ohe.fit([['rot'], ['gruen'], ['blau']])
+print(ohe.categories_)
+print(ohe.transform([['rot'], ['gelb']]))  # 'gelb' unbekannt</code></pre>
+          <pre class="cmd-out">[array(['blau', 'gruen', 'rot'], dtype=object)]
+[[0. 0. 1.]
+ [0. 0. 0.]]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">LabelEncoder()</code>
+          <p class="cmd-desc">kodiert Ziel-Variable y als 0..n_classes-1 (kein Konstruktor-Parameter)</p>
+          <pre class="cmd-code"><code class="language-python">y = ['Katze', 'Hund', 'Katze', 'Vogel']
+print(LabelEncoder().fit_transform(y))</code></pre>
+          <pre class="cmd-out">[1 0 1 2]</pre>
+        </div>
+      </div>
+
+      <h3>train_test_split</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.model_selection import train_test_split
+X = np.arange(10).reshape(5, 2)
+y = np.array([0, 1, 0, 1, 0])</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">train_test_split(
+    *arrays,            # X, y, ... beliebig viele gleich lange Arrays
+    test_size=None,     # Anteil/Anzahl Test-Samples (Standard 0.25 wenn beide None)
+    train_size=None,    # Anteil/Anzahl Train-Samples
+    random_state=None,  # Seed für Reproduzierbarkeit
+    shuffle=True,       # vor dem Split mischen
+    stratify=None,      # Array für klassen-proportionalen Split
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">test_size</code>
+          <p class="cmd-desc">Anteil für Test-Set, z.B. 0.4 = 40%</p>
+          <pre class="cmd-code"><code class="language-python">X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.4, random_state=42)
+print(X_train.shape, X_test.shape)</code></pre>
+          <pre class="cmd-out">(3, 2) (2, 2)</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">random_state</code>
+          <p class="cmd-desc">Seed für Reproduzierbarkeit — gleicher Seed = gleicher Split</p>
+          <pre class="cmd-code"><code class="language-python">_, _, ytr1, _ = train_test_split(X, y, test_size=0.4, random_state=42)
+_, _, ytr2, _ = train_test_split(X, y, test_size=0.4, random_state=42)
+print(ytr1, ytr2)</code></pre>
+          <pre class="cmd-out">[0 0 1] [0 0 1]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">stratify=y</code>
+          <p class="cmd-desc">erhält Klassenverteilung in Train/Test (wichtig bei Imbalance)</p>
+          <pre class="cmd-code"><code class="language-python">X2 = np.arange(20).reshape(10, 2)
+y2 = np.array([0,0,0,0,0,0,0,1,1,1])
+_, _, ytr, yte = train_test_split(
+    X2, y2, test_size=0.3, random_state=42, stratify=y2)
+print(ytr, yte)</code></pre>
+          <pre class="cmd-out">[1 0 0 0 0 0 1] [1 0 0]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">shuffle=False</code>
+          <p class="cmd-desc">Standard True — bei Zeitreihen auf False setzen (Reihenfolge bleibt erhalten)</p>
+          <pre class="cmd-code"><code class="language-python">_, _, ytr, yte = train_test_split(X, y, test_size=0.4, shuffle=False)
+print(ytr, yte)</code></pre>
+          <pre class="cmd-out">[0 1 0] [1 0]</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 2 · LINEARE MODELLE ═══ -->
+    <section class="pruef-section" id="lineare-modelle">
+      <h2><span class="pruef-num">2</span> Lineare Modelle</h2>
+
+      <h3>LinearRegression</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.linear_model import LinearRegression
+X = np.array([[1], [2], [3], [4]])
+y = np.array([2, 4, 6, 8])
+model = LinearRegression().fit(X, y)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten — kaum Tuning nötig</p>
+          <pre class="cmd-code"><code class="language-python">LinearRegression(
+    fit_intercept=True,  # Achsenabschnitt mitschätzen
+    copy_X=True,         # X vor Fit kopieren statt überschreiben
+    n_jobs=None,         # Parallelisierung (nur bei vielen Targets relevant)
+    positive=False,      # True erzwingt nicht-negative Koeffizienten
+)</code></pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">.coef_ / .intercept_</code>
+          <p class="cmd-desc">gelernte Steigung(en) und Achsenabschnitt nach <code>fit()</code></p>
+          <pre class="cmd-code"><code class="language-python">print(model.coef_, model.intercept_)</code></pre>
+          <pre class="cmd-out">[2.] 0.0</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">score(X, y)</code>
+          <p class="cmd-desc">R² auf den übergebenen Daten — 1.0 = perfekte Vorhersage</p>
+          <pre class="cmd-code"><code class="language-python">print(model.score(X, y))</code></pre>
+          <pre class="cmd-out">1.0</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">predict([[5]])</code>
+          <p class="cmd-desc">Vorhersage für neue, unbekannte Werte</p>
+          <pre class="cmd-code"><code class="language-python">print(model.predict([[5]]))</code></pre>
+          <pre class="cmd-out">[10.]</pre>
+        </div>
+      </div>
+      <p style="color:var(--color-text-muted);font-size:var(--text-sm)">Keine relevanten Hyperparameter — löst die Normalengleichung (OLS) ohne Regularisierung.</p>
+
+      <h3>Ridge / Lasso</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.linear_model import Ridge, Lasso
+X = np.array([[1, 1], [2, 2.1], [3, 2.9], [4, 4.1]])
+y = np.array([2, 4, 6, 8])</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter — Ridge</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">Ridge(
+    alpha=1.0,          # Regularisierungsstärke (L2)
+    fit_intercept=True,
+    copy_X=True,
+    max_iter=None,      # None → solverabhängiger Default
+    tol=1e-4,
+    solver='auto',      # 'auto','svd','cholesky','lsqr','sag',...
+    positive=False,
+    random_state=None,
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter — Lasso</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">Lasso(
+    alpha=1.0,          # Regularisierungsstärke (L1)
+    fit_intercept=True,
+    copy_X=True,
+    max_iter=1000,
+    tol=1e-4,
+    selection='cyclic', # oder 'random'
+    positive=False,
+    random_state=None,
+)</code></pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">alpha</code>
+          <p class="cmd-desc">Regularisierungsstärke. α=0 → wie OLS. Größer α → stärkere Schrumpfung der Gewichte → weniger Overfitting, mehr Bias</p>
+          <pre class="cmd-code"><code class="language-python">for a in [0.0, 1.0, 10.0]:
+    print(a, Ridge(alpha=a).fit(X, y).coef_)</code></pre>
+          <pre class="cmd-out">0.0 [2. 0.]
+1.0 [0.9119 0.8968]
+10.0 [0.4978 0.5015]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">Ridge (L2)</code>
+          <p class="cmd-desc">schrumpft alle Gewichte, setzt sie aber nie exakt auf 0</p>
+          <pre class="cmd-code"><code class="language-python">print(Ridge(alpha=1.0).fit(X, y).coef_)</code></pre>
+          <pre class="cmd-out">[0.9119 0.8968]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">Lasso (L1)</code>
+          <p class="cmd-desc">kann Gewichte exakt auf 0 setzen → Feature-Selektion</p>
+          <pre class="cmd-code"><code class="language-python">print(Lasso(alpha=1.0).fit(X, y).coef_)</code></pre>
+          <pre class="cmd-out">[0.     1.1897]</pre>
+        </div>
+      </div>
+
+      <h3>LogisticRegression</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.linear_model import LogisticRegression
+from sklearn.datasets import load_iris
+X, y = load_iris(return_X_y=True)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">LogisticRegression(
+    penalty='l2',        # 'l1','l2','elasticnet','none'
+    C=1.0,               # inverse Regularisierungsstärke
+    fit_intercept=True,
+    class_weight=None,   # z.B. 'balanced'
+    random_state=None,
+    solver='lbfgs',      # 'lbfgs','liblinear','newton-cg','sag','saga'
+    max_iter=100,
+    multi_class='auto',  # 'ovr' oder 'multinomial'
+    l1_ratio=None,       # nur bei penalty='elasticnet' (0..1)
+    n_jobs=None,
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">C</code>
+          <p class="cmd-desc">Inverse Regularisierungsstärke (1/λ). <strong>Kleines C</strong> = starke Regularisierung, <strong>großes C</strong> = wenig Regularisierung</p>
+          <pre class="cmd-code"><code class="language-python">m1 = LogisticRegression(max_iter=200, C=1.0).fit(X, y)
+m2 = LogisticRegression(max_iter=200, C=0.01).fit(X, y)
+print(m1.score(X, y), m2.score(X, y))</code></pre>
+          <pre class="cmd-out">0.9733 0.8733</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">penalty</code>
+          <p class="cmd-desc">'l1', 'l2' (Standard), 'elasticnet' oder 'none' — Art der Regularisierung</p>
+          <pre class="cmd-code"><code class="language-python">m = LogisticRegression(max_iter=200, penalty='l1', solver='liblinear').fit(X, y)
+print(m.score(X, y))</code></pre>
+          <pre class="cmd-out">0.96</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">solver</code>
+          <p class="cmd-desc">Optimierungsalgorithmus, z.B. 'lbfgs' (Standard), 'liblinear' (gut für l1)</p>
+          <pre class="cmd-code"><code class="language-python">for s in ['lbfgs', 'liblinear']:
+    m = LogisticRegression(max_iter=200, solver=s).fit(X, y)
+    print(s, m.score(X, y))</code></pre>
+          <pre class="cmd-out">lbfgs 0.9733
+liblinear 0.96</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">max_iter</code>
+          <p class="cmd-desc">maximale Iterationen bis Konvergenz (bei Warnung erhöhen, z.B. 1000)</p>
+          <pre class="cmd-code"><code class="language-python">m = LogisticRegression(max_iter=5).fit(X, y)
+print(m.n_iter_)  # tatsächlich genutzte Iterationen</code></pre>
+          <pre class="cmd-out">[5]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">multi_class</code>
+          <p class="cmd-desc">'auto' wählt automatisch One-vs-Rest oder Multinomial bei &gt;2 Klassen</p>
+          <pre class="cmd-code"><code class="language-python">m = LogisticRegression(max_iter=200).fit(X, y)
+print(m.classes_)
+print(m.predict([[5.1, 3.5, 1.4, 0.2]]))</code></pre>
+          <pre class="cmd-out">[0 1 2]
+[0]</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 3 · SVM ═══ -->
+    <section class="pruef-section" id="svm">
+      <h2><span class="pruef-num">3</span> Support Vector Machine (SVC)</h2>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.svm import SVC
+X = [[0, 0], [1, 1], [1, 0], [0, 1]]   # XOR-Muster
+y = [0, 1, 1, 0]</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">SVC(
+    C=1.0,                # Soft-Margin-Strafterm
+    kernel='rbf',         # 'linear','poly','rbf','sigmoid'
+    degree=3,             # nur für kernel='poly'
+    gamma='scale',        # 'scale','auto' oder float — für rbf/poly/sigmoid
+    coef0=0.0,            # nur für 'poly'/'sigmoid'
+    shrinking=True,
+    probability=False,    # aktiviert predict_proba (langsamer)
+    tol=1e-3,
+    class_weight=None,    # z.B. 'balanced'
+    max_iter=-1,          # -1 = kein Limit
+    decision_function_shape='ovr',  # oder 'ovo'
+    random_state=None,
+)</code></pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">C</code>
+          <p class="cmd-desc">Strafterm für Fehlklassifikationen (Soft-Margin). <strong>Klein</strong> → breite Margin. <strong>Groß</strong> → schmale Margin, mehr Overfitting-Risiko</p>
+          <pre class="cmd-code"><code class="language-python">for c in [0.1, 1, 100]:
+    m = SVC(C=c, kernel='rbf').fit(X, y)
+    print(c, m.score(X, y))</code></pre>
+          <pre class="cmd-out">0.1 1.0
+1 1.0
+100 1.0</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">kernel</code>
+          <p class="cmd-desc">'linear', 'rbf' (Standard), 'poly', 'sigmoid'</p>
+          <pre class="cmd-code"><code class="language-python">for k in ['linear', 'rbf', 'poly']:
+    m = SVC(kernel=k).fit(X, y)
+    print(k, m.predict(X))</code></pre>
+          <pre class="cmd-out">linear [0 1 1 0]
+rbf [0 1 1 0]
+poly [0 1 1 0]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">gamma</code>
+          <p class="cmd-desc">nur bei 'rbf'/'poly'/'sigmoid'. <strong>Klein</strong> → glattere Grenze. <strong>Groß</strong> → komplexere Grenze, mehr Overfitting</p>
+          <pre class="cmd-code"><code class="language-python">for g in ['scale', 0.1, 10]:
+    m = SVC(gamma=g).fit(X, y)
+    print(g, m.score(X, y))</code></pre>
+          <pre class="cmd-out">scale 1.0
+0.1 1.0
+10 1.0</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">degree</code>
+          <p class="cmd-desc">nur bei 'poly': Grad des Polynoms (Standard 3)</p>
+          <pre class="cmd-code"><code class="language-python">m = SVC(kernel='poly', degree=3).fit(X, y)
+print(m.predict(X))</code></pre>
+          <pre class="cmd-out">[0 1 1 0]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">class_weight</code>
+          <p class="cmd-desc">'balanced' gewichtet Klassen umgekehrt proportional zur Häufigkeit</p>
+          <pre class="cmd-code"><code class="language-python">m = SVC(class_weight='balanced').fit(X, y)
+print(m.predict(X))</code></pre>
+          <pre class="cmd-out">[0 1 1 0]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">probability</code>
+          <p class="cmd-desc">True aktiviert <code>predict_proba()</code> (zusätzliche interne CV, langsamer)</p>
+          <pre class="cmd-code"><code class="language-python">m = SVC(probability=True).fit(X, y)
+print(m.predict_proba(X)[:1])</code></pre>
+          <pre class="cmd-out">[[0.0803 0.9197]]</pre>
+        </div>
+      </div>
+      <div class="info-box" style="font-family:var(--font-mono)">
+        Margin = 2 / ‖w‖ &nbsp;→&nbsp; größeres ‖w‖ = schmalere Margin.<br>
+        Soft-Margin-Loss = ‖w‖²/2 + C · Σ max(0, 1 − yᵢ(w·xᵢ+b))
+      </div>
+      <div class="info-box warning">⚠️ C und gamma immer zusammen per GridSearchCV tunen (z.B. C∈{0.1,1,10,100}, gamma∈{0.001,0.01,0.1,1}) — beide beeinflussen die Modellkomplexität.</div>
+    </section>
+
+    <!-- ═══ 4 · BAUMBASIERT ═══ -->
+    <section class="pruef-section" id="baumbasiert">
+      <h2><span class="pruef-num">4</span> Baumbasierte Modelle</h2>
+
+      <h3>DecisionTreeClassifier / Regressor</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_iris
+X, y = load_iris(return_X_y=True)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">DecisionTreeClassifier(
+    criterion='gini',         # 'gini','entropy','log_loss'
+    splitter='best',          # oder 'random'
+    max_depth=None,           # None = bis Blätter rein sind
+    min_samples_split=2,
+    min_samples_leaf=1,
+    min_weight_fraction_leaf=0.0,
+    max_features=None,        # 'sqrt','log2', int, float
+    max_leaf_nodes=None,
+    min_impurity_decrease=0.0,
+    class_weight=None,
+    ccp_alpha=0.0,            # Pruning-Komplexität
+    random_state=None,
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">criterion</code>
+          <p class="cmd-desc">Splitkriterium: 'gini' (Standard) oder 'entropy' für Klassifikation, 'squared_error' für Regression</p>
+          <pre class="cmd-code"><code class="language-python">for crit in ['gini', 'entropy']:
+    t = DecisionTreeClassifier(criterion=crit, max_depth=2, random_state=42).fit(X, y)
+    print(crit, t.score(X, y))</code></pre>
+          <pre class="cmd-out">gini 0.96
+entropy 0.96</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">max_depth</code>
+          <p class="cmd-desc">maximale Baumtiefe. Klein → Underfitting, Groß/None → Overfitting</p>
+          <pre class="cmd-code"><code class="language-python">for md in [1, 3, None]:
+    t = DecisionTreeClassifier(max_depth=md, random_state=42).fit(X, y)
+    print(md, "tiefe=", t.get_depth(), "acc=", t.score(X, y))</code></pre>
+          <pre class="cmd-out">1 tiefe= 1 acc= 0.6667
+3 tiefe= 3 acc= 0.9733
+None tiefe= 5 acc= 1.0</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">min_samples_split</code>
+          <p class="cmd-desc">Mindestanzahl Samples, um einen Knoten weiter zu splitten</p>
+          <pre class="cmd-code"><code class="language-python">for mss in [2, 20]:
+    t = DecisionTreeClassifier(min_samples_split=mss, random_state=42).fit(X, y)
+    print(mss, "blätter=", t.get_n_leaves())</code></pre>
+          <pre class="cmd-out">2 blätter= 9
+20 blätter= 6</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">min_samples_leaf</code>
+          <p class="cmd-desc">Mindestanzahl Samples in einem Blatt — größere Werte glätten das Modell</p>
+          <pre class="cmd-code"><code class="language-python">for msl in [1, 10]:
+    t = DecisionTreeClassifier(min_samples_leaf=msl, random_state=42).fit(X, y)
+    print(msl, "blätter=", t.get_n_leaves())</code></pre>
+          <pre class="cmd-out">1 blätter= 9
+10 blätter= 6</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">max_features</code>
+          <p class="cmd-desc">Anzahl Features pro Split ('sqrt', 'log2', int, float)</p>
+          <pre class="cmd-code"><code class="language-python">for mf in ['sqrt', None]:
+    t = DecisionTreeClassifier(max_features=mf, random_state=42).fit(X, y)
+    print(mf, t.score(X, y))</code></pre>
+          <pre class="cmd-out">sqrt 1.0
+None 1.0</pre>
+        </div>
+      </div>
+
+      <h3>RandomForestClassifier / Regressor</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_iris
+X, y = load_iris(return_X_y=True)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur — vererbt die meisten Tree-Parameter</p>
+          <pre class="cmd-code"><code class="language-python">RandomForestClassifier(
+    n_estimators=100,
+    criterion='gini',
+    max_depth=None,
+    min_samples_split=2,
+    min_samples_leaf=1,
+    max_features='sqrt',     # 'sqrt','log2', int, float, None
+    bootstrap=True,
+    oob_score=False,         # benötigt bootstrap=True
+    n_jobs=None,             # -1 = alle Kerne
+    random_state=None,
+    class_weight=None,       # z.B. 'balanced'
+    ccp_alpha=0.0,
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">n_estimators</code>
+          <p class="cmd-desc">Anzahl Bäume — mehr Bäume = stabiler, aber langsamer (Diminishing Returns)</p>
+          <pre class="cmd-code"><code class="language-python">for n in [1, 10, 100]:
+    rf = RandomForestClassifier(n_estimators=n, random_state=42).fit(X, y)
+    print(n, rf.score(X, y))</code></pre>
+          <pre class="cmd-out">1 0.9867
+10 1.0
+100 1.0</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">max_depth</code>
+          <p class="cmd-desc">wie bei DecisionTree, aber pro Baum im Wald</p>
+          <pre class="cmd-code"><code class="language-python">for md in [1, None]:
+    rf = RandomForestClassifier(max_depth=md, random_state=42).fit(X, y)
+    print(md, rf.score(X, y))</code></pre>
+          <pre class="cmd-out">1 0.9733
+None 1.0</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">max_features</code>
+          <p class="cmd-desc">Features pro Split — 'sqrt' (Standard für Klassifikation) sorgt für Diversität der Bäume</p>
+          <pre class="cmd-code"><code class="language-python">for mf in ['sqrt', 'log2']:
+    rf = RandomForestClassifier(max_features=mf, random_state=42).fit(X, y)
+    print(mf, rf.score(X, y))</code></pre>
+          <pre class="cmd-out">sqrt 1.0
+log2 1.0</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">min_samples_leaf</code>
+          <p class="cmd-desc">größere Werte glätten jeden einzelnen Baum</p>
+          <pre class="cmd-code"><code class="language-python">for msl in [1, 5]:
+    rf = RandomForestClassifier(min_samples_leaf=msl, random_state=42).fit(X, y)
+    print(msl, rf.score(X, y))</code></pre>
+          <pre class="cmd-out">1 1.0
+5 0.9733</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">bootstrap</code>
+          <p class="cmd-desc">True (Standard): jeder Baum auf zufälliger Stichprobe mit Zurücklegen</p>
+          <pre class="cmd-code"><code class="language-python">rf = RandomForestClassifier(bootstrap=True, random_state=42).fit(X, y)
+print(rf.score(X, y))</code></pre>
+          <pre class="cmd-out">1.0</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">oob_score</code>
+          <p class="cmd-desc">True: nutzt nicht gezogene Out-of-Bag-Samples als kostenlose Validierung</p>
+          <pre class="cmd-code"><code class="language-python">rf = RandomForestClassifier(oob_score=True, random_state=42).fit(X, y)
+print(rf.oob_score_)</code></pre>
+          <pre class="cmd-out">0.9533</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">n_jobs=-1</code>
+          <p class="cmd-desc">nutzt alle CPU-Kerne — Bäume sind unabhängig parallelisierbar</p>
+          <pre class="cmd-code"><code class="language-python">rf = RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=42).fit(X, y)
+print(rf.score(X, y))</code></pre>
+          <pre class="cmd-out">1.0</pre>
+        </div>
+      </div>
+
+      <h3>GradientBoostingClassifier</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.datasets import load_iris
+X, y = load_iris(return_X_y=True)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">GradientBoostingClassifier(
+    loss='log_loss',
+    learning_rate=0.1,
+    n_estimators=100,
+    subsample=1.0,            # &lt;1.0 = stochastic boosting
+    criterion='friedman_mse',
+    min_samples_split=2,
+    min_samples_leaf=1,
+    max_depth=3,               # bewusst flach (weak learners)
+    max_features=None,
+    validation_fraction=0.1,   # für early stopping
+    n_iter_no_change=None,     # early stopping aktivieren
+    ccp_alpha=0.0,
+    random_state=None,
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">n_estimators</code>
+          <p class="cmd-desc">Anzahl sequentieller Bäume ("weak learners") — zu viele → Overfitting</p>
+          <pre class="cmd-code"><code class="language-python">for n in [10, 100]:
+    g = GradientBoostingClassifier(n_estimators=n, random_state=42).fit(X, y)
+    print(n, g.score(X, y))</code></pre>
+          <pre class="cmd-out">10 0.9933
+100 1.0</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">learning_rate</code>
+          <p class="cmd-desc">Schrittweite pro Baum. Klein + viele Bäume = robuster, aber langsamer</p>
+          <pre class="cmd-code"><code class="language-python">for lr in [0.01, 0.1, 1.0]:
+    g = GradientBoostingClassifier(n_estimators=5, max_depth=1, learning_rate=lr, random_state=42).fit(X, y)
+    print(lr, g.score(X, y))</code></pre>
+          <pre class="cmd-out">0.01 0.96
+0.1 0.9533
+1.0 0.9733</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">max_depth</code>
+          <p class="cmd-desc">meist klein (2-5) — jeder Baum ist ein 'weak learner'</p>
+          <pre class="cmd-code"><code class="language-python">for md in [1, 3]:
+    g = GradientBoostingClassifier(n_estimators=10, max_depth=md, random_state=42).fit(X, y)
+    print(md, g.score(X, y))</code></pre>
+          <pre class="cmd-out">1 0.9533
+3 0.9933</pre>
+        </div>
+      </div>
+
+      <h3>GradientBoostingRegressor &amp; AdaBoostClassifier</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.ensemble import GradientBoostingRegressor, AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_diabetes, load_iris
+from sklearn.model_selection import train_test_split
+X_tr, X_te, y_tr, y_te = train_test_split(*load_diabetes(return_X_y=True), test_size=0.2, random_state=42)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">GradientBoostingRegressor — learning_rate</code>
+          <p class="cmd-desc">Regression-Bäume (criterion='squared_error') als weak learners; zu großes learning_rate → Overfitting/Divergenz</p>
+          <pre class="cmd-code"><code class="language-python">for lr in [0.01, 0.1, 1.0]:
+    g = GradientBoostingRegressor(n_estimators=50, learning_rate=lr, random_state=42).fit(X_tr, y_tr)
+    print(lr, round(g.score(X_te, y_te), 4))</code></pre>
+          <pre class="cmd-out">0.01 0.2673
+0.1  0.4621
+1.0  -0.4064</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">.staged_predict()</code>
+          <p class="cmd-desc">Generator: Vorhersage nach jeder einzelnen Boosting-Runde — nützlich für Learning Curves &amp; Early Stopping</p>
+          <pre class="cmd-code"><code class="language-python">from sklearn.metrics import mean_squared_error
+g = GradientBoostingRegressor(n_estimators=200, learning_rate=0.05, max_depth=3, random_state=42).fit(X_tr, y_tr)
+test_mse = [mean_squared_error(y_te, pred) for pred in g.staged_predict(X_te)]
+print(round(test_mse[0], 1), round(test_mse[99], 1), round(test_mse[199], 1))</code></pre>
+          <pre class="cmd-out">5154.1 2786.9 2831.0</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">AdaBoostClassifier</code>
+          <p class="cmd-desc">estimator=Stump (max_depth=1) — sequentiell gewichtete schwache Klassifikatoren</p>
+          <pre class="cmd-code"><code class="language-python">X, y = load_iris(return_X_y=True)
+for n in [10, 50, 100]:
+    a = AdaBoostClassifier(estimator=DecisionTreeClassifier(max_depth=1), n_estimators=n, random_state=42).fit(X, y)
+    print(n, round(a.score(X, y), 4))</code></pre>
+          <pre class="cmd-out">10  0.9667
+50  0.98
+100 0.98</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 5 · CLUSTERING ═══ -->
+    <section class="pruef-section" id="clustering">
+      <h2><span class="pruef-num">5</span> Clustering &amp; PCA</h2>
+
+      <h3>KMeans</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.cluster import KMeans
+X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">KMeans(
+    n_clusters=8,            # k — Anzahl Cluster
+    init='k-means++',        # 'k-means++','random' oder Array
+    n_init=10,                # Anzahl unabhängiger Läufe (auto in &gt;=1.4)
+    max_iter=300,             # Lloyd-Iterationen pro Lauf
+    tol=1e-4,                 # Konvergenzschwelle
+    algorithm='lloyd',        # oder 'elkan'
+    random_state=None,
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">n_clusters</code>
+          <p class="cmd-desc">Anzahl Cluster k — muss vorab festgelegt werden</p>
+          <pre class="cmd-code"><code class="language-python">for n in [2, 3]:
+    km = KMeans(n_clusters=n, n_init=10, random_state=42).fit(X)
+    print(n, km.labels_, "inertia=", km.inertia_)</code></pre>
+          <pre class="cmd-out">2 [0 0 0 1 1 1] inertia= 16.0
+3 [0 2 0 1 1 1] inertia= 10.0</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">init</code>
+          <p class="cmd-desc">'k-means++' (Standard, kluge Startpunkte) oder 'random'</p>
+          <pre class="cmd-code"><code class="language-python">for init in ['k-means++', 'random']:
+    km = KMeans(n_clusters=2, init=init, n_init=10, random_state=42).fit(X)
+    print(init, km.labels_)</code></pre>
+          <pre class="cmd-out">k-means++ [0 0 0 1 1 1]
+random [0 0 0 1 1 1]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">n_init</code>
+          <p class="cmd-desc">Anzahl Initialisierungen — bestes Ergebnis (kleinste Inertia) wird behalten</p>
+          <pre class="cmd-code"><code class="language-python">for ni in [1, 10]:
+    km = KMeans(n_clusters=2, n_init=ni, random_state=42).fit(X)
+    print(ni, "inertia=", km.inertia_)</code></pre>
+          <pre class="cmd-out">1 inertia= 16.0
+10 inertia= 16.0</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">max_iter</code>
+          <p class="cmd-desc">maximale Lloyd-Iterationen pro Initialisierung</p>
+          <pre class="cmd-code"><code class="language-python">km = KMeans(n_clusters=2, max_iter=1, n_init=1, random_state=42).fit(X)
+print(km.n_iter_)  # tatsächlich genutzte Iterationen</code></pre>
+          <pre class="cmd-out">1</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">.inertia_</code>
+          <p class="cmd-desc">Attribut nach <code>fit()</code>: WCSS (Within-Cluster-Sum-of-Squares) — für Elbow-Plot</p>
+          <pre class="cmd-code"><code class="language-python">km = KMeans(n_clusters=2, n_init=10, random_state=42).fit(X)
+print(km.inertia_)
+print(km.cluster_centers_)</code></pre>
+          <pre class="cmd-out">16.0
+[[ 1.  2.]
+ [10.  2.]]</pre>
+        </div>
+      </div>
+
+      <h3>DBSCAN</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.cluster import DBSCAN
+X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">DBSCAN(
+    eps=0.5,              # max. Nachbarschaftsradius
+    min_samples=5,        # Mindestpunkte für Core-Point
+    metric='euclidean',   # auch 'manhattan', 'cosine', ...
+    algorithm='auto',     # 'auto','ball_tree','kd_tree','brute'
+    leaf_size=30,         # für ball_tree/kd_tree
+    n_jobs=None,
+)</code></pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">eps</code>
+          <p class="cmd-desc">maximaler Abstand zwischen zwei Punkten, um als Nachbarn zu gelten. Zu klein → alles Noise, zu groß → ein Cluster</p>
+          <pre class="cmd-code"><code class="language-python">for eps in [1.5, 3, 6]:
+    db = DBSCAN(eps=eps, min_samples=2).fit(X)
+    print(eps, db.labels_)</code></pre>
+          <pre class="cmd-out">1.5 [-1 -1 -1 -1 -1 -1]
+3 [0 0 0 1 1 1]
+6 [0 0 0 1 1 1]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">min_samples</code>
+          <p class="cmd-desc">Mindestanzahl Punkte (inkl. sich selbst) für einen Core-Point</p>
+          <pre class="cmd-code"><code class="language-python">for ms in [1, 2, 3]:
+    db = DBSCAN(eps=3, min_samples=ms).fit(X)
+    print(ms, db.labels_)</code></pre>
+          <pre class="cmd-out">1 [0 0 0 1 1 1]
+2 [0 0 0 1 1 1]
+3 [0 0 0 1 1 1]</pre>
+        </div>
+        <div class="cmd-card">
+          <code class="cmd-head">.labels_</code>
+          <p class="cmd-desc">Cluster-IDs nach <code>fit()</code>, <strong>-1 = Noise/Ausreißer</strong> — kein vorgegebenes k nötig</p>
+          <pre class="cmd-code"><code class="language-python">db = DBSCAN(eps=3, min_samples=2).fit(X)
+print(db.labels_)</code></pre>
+          <pre class="cmd-out">[0 0 0 1 1 1]</pre>
+        </div>
+      </div>
+
+      <h3>Weitere Clustering-Algorithmen</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.cluster import AgglomerativeClustering, MeanShift, SpectralClustering
+from sklearn.datasets import make_blobs, make_moons
+X, y = make_blobs(n_samples=300, centers=4, cluster_std=0.8, random_state=42)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Überblick</code>
+          <p class="cmd-desc">Wann welchen Algorithmus nutzen?</p>
+          <table>
+            <thead><tr><th>Algorithmus</th><th>Idee</th><th>k vorgeben?</th><th>wann nutzen</th></tr></thead>
+            <tbody>
+              <tr><td>AgglomerativeClustering</td><td>Hierarchisches Mergen (bottom-up) nach Linkage-Kriterium</td><td>Ja (oder Dendrogramm-Schnitt)</td><td>Hierarchie/Dendrogramm gewünscht</td></tr>
+              <tr><td>SpectralClustering</td><td>Graph-Laplacian + KMeans im Eigenvektor-Raum</td><td>Ja</td><td>nicht-konvexe Cluster (Monde, Ringe)</td></tr>
+              <tr><td>MeanShift</td><td>Verschiebt Punkte iterativ zu lokalen Dichte-Maxima</td><td>Nein (bandwidth steuert)</td><td>k unbekannt, dichte-basiert</td></tr>
+              <tr><td>OPTICS</td><td>Wie DBSCAN, aber variable Dichte über Reachability-Plot</td><td>Nein</td><td>Cluster mit unterschiedlicher Dichte</td></tr>
+              <tr><td>Birch</td><td>Baumstruktur (CF-Tree), inkrementell</td><td>Optional</td><td>sehr große Datenmengen</td></tr>
+              <tr><td>k-Median (KMedoids)</td><td>Wie k-Means, aber Medoid (echter Punkt) statt Mittelwert</td><td>Ja</td><td>robust gegenüber Ausreißern</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">AgglomerativeClustering — linkage</code>
+          <p class="cmd-desc">'ward' (Standard, minimiert Varianz), 'complete' (max. Distanz), 'average', 'single' (min. Distanz, anfällig für Chaining-Effekt)</p>
+          <pre class="cmd-code"><code class="language-python">from sklearn.metrics import silhouette_score
+for linkage in ['ward', 'complete', 'average', 'single']:
+    ac = AgglomerativeClustering(n_clusters=4, linkage=linkage).fit(X)
+    print(linkage, round(silhouette_score(X, ac.labels_), 4))</code></pre>
+          <pre class="cmd-out">ward     0.8335
+complete 0.8335
+average  0.8335
+single   0.8335</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">MeanShift — kein k nötig</code>
+          <p class="cmd-desc"><code>bandwidth</code> steuert die Suchradius-Größe (analog zu eps bei DBSCAN); Anzahl Cluster ergibt sich automatisch</p>
+          <pre class="cmd-code"><code class="language-python">ms = MeanShift(bandwidth=2).fit(X)
+print("Gefundene Cluster:", len(set(ms.labels_)))
+print("Silhouette:", round(silhouette_score(X, ms.labels_), 4))</code></pre>
+          <pre class="cmd-out">Gefundene Cluster: 4
+Silhouette: 0.8335</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">SpectralClustering — nicht-konvexe Cluster</code>
+          <p class="cmd-desc">Nutzt <code>affinity='nearest_neighbors'</code> statt euklidischer Distanz → erkennt Mond-/Ring-Formen, an denen KMeans scheitert</p>
+          <pre class="cmd-code"><code class="language-python">from sklearn.cluster import KMeans
+Xm, ym = make_moons(n_samples=200, noise=0.05, random_state=42)
+
+sc = SpectralClustering(n_clusters=2, affinity='nearest_neighbors', n_neighbors=10, random_state=42).fit(Xm)
+km = KMeans(n_clusters=2, random_state=42, n_init=10).fit(Xm)
+
+print("SpectralClustering Übereinstimmung:", max((sc.labels_ == ym).mean(), (sc.labels_ != ym).mean()))
+print("KMeans Übereinstimmung:           ", max((km.labels_ == ym).mean(), (km.labels_ != ym).mean()))</code></pre>
+          <pre class="cmd-out">SpectralClustering Übereinstimmung: 1.0
+KMeans Übereinstimmung:            0.735</pre>
+        </div>
+      </div>
+
+      <h3>GaussianMixture</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.mixture import GaussianMixture
+X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">GaussianMixture(
+    n_components=1,           # Anzahl Gauß-Komponenten
+    covariance_type='full',   # 'full','tied','diag','spherical'
+    tol=1e-3,
+    max_iter=100,              # EM-Iterationen
+    n_init=1,                  # Anzahl Initialisierungen
+    init_params='kmeans',      # oder 'k-means++','random',...
+    random_state=None,
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">n_components</code>
+          <p class="cmd-desc">Anzahl Gauß-Verteilungen (analog zu k bei KMeans)</p>
+          <pre class="cmd-code"><code class="language-python">for n in [2, 3]:
+    gm = GaussianMixture(n_components=n, random_state=42).fit(X)
+    print(n, gm.predict(X))</code></pre>
+          <pre class="cmd-out">2 [0 0 0 1 1 1]
+3 [0 2 0 1 1 1]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">covariance_type</code>
+          <p class="cmd-desc">'full' (Standard, flexibel), 'diag', 'tied', 'spherical' — beeinflusst Modellkomplexität</p>
+          <pre class="cmd-code"><code class="language-python">for ct in ['full', 'diag', 'spherical', 'tied']:
+    gm = GaussianMixture(n_components=2, covariance_type=ct, random_state=42).fit(X)
+    print(ct, "aic=", round(gm.aic(X), 2))</code></pre>
+          <pre class="cmd-out">full aic= -18.64
+diag aic= -22.64
+spherical aic= 59.82
+tied aic= -24.64</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">predict_proba(X)</code>
+          <p class="cmd-desc">Soft-Assignment: Wahrscheinlichkeit pro Cluster (im Gegensatz zu KMeans hartem Label)</p>
+          <pre class="cmd-code"><code class="language-python">gm = GaussianMixture(n_components=2, random_state=42).fit(X)
+print(gm.predict_proba(X))</code></pre>
+          <pre class="cmd-out">[[1. 0.]
+ [1. 0.]
+ [1. 0.]
+ [0. 1.]
+ [0. 1.]
+ [0. 1.]]</pre>
+        </div>
+      </div>
+
+      <h3>PCA (Principal Component Analysis)</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.decomposition import PCA
+X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">PCA(
+    n_components=None,   # int, float in (0,1) = Ziel-Varianzanteil, 'mle' oder None (=alle)
+    svd_solver='auto',   # 'auto','full','arpack','randomized'
+    whiten=False,        # True: Komponenten auf Einheitsvarianz skalieren
+    random_state=None,   # nur für 'arpack'/'randomized'
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">n_components</code>
+          <p class="cmd-desc">Anzahl der zu behaltenden Hauptkomponenten (≤ Anzahl Features)</p>
+          <pre class="cmd-code"><code class="language-python">for n in [1, 2]:
+    pca = PCA(n_components=n).fit(X)
+    print(n, "ratio=", pca.explained_variance_ratio_)</code></pre>
+          <pre class="cmd-out">1 ratio= [0.8836]
+2 ratio= [0.8836 0.1164]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">.components_ / .explained_variance_ratio_</code>
+          <p class="cmd-desc">Attribute nach <code>fit()</code>: Hauptachsen (Zeilen) und ihr Anteil an der Gesamtvarianz</p>
+          <pre class="cmd-code"><code class="language-python">pca = PCA(n_components=2).fit(X)
+print(pca.components_)
+print(pca.explained_variance_ratio_)</code></pre>
+          <pre class="cmd-out">[[1. 0.]
+ [0. 1.]]
+[0.8836 0.1164]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">.transform() / .inverse_transform()</code>
+          <p class="cmd-desc">Projektion auf die Hauptkomponenten und Rücktransformation (Rekonstruktion)</p>
+          <pre class="cmd-code"><code class="language-python">pca = PCA(n_components=1).fit(X)
+X_proj = pca.transform(X)
+print(X_proj.ravel())
+print(pca.inverse_transform(X_proj))</code></pre>
+          <pre class="cmd-out">[-4.5 -4.5 -4.5  4.5  4.5  4.5]
+[[ 1.  2.]
+ [ 1.  2.]
+ [ 1.  2.]
+ [10.  2.]
+ [10.  2.]
+ [10.  2.]]</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 6 · MODEL SELECTION ═══ -->
+    <section class="pruef-section" id="model-selection">
+      <h2><span class="pruef-num">6</span> Model Selection &amp; Tuning</h2>
+
+      <h3>cross_val_score / StratifiedKFold</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_iris
+X, y = load_iris(return_X_y=True)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">cv</code>
+          <p class="cmd-desc">Anzahl Folds für die Kreuzvalidierung</p>
+          <pre class="cmd-code"><code class="language-python">for cv in [3, 5]:
+    scores = cross_val_score(DecisionTreeClassifier(random_state=42), X, y, cv=cv)
+    print(cv, scores)</code></pre>
+          <pre class="cmd-out">3 [0.98 0.94 0.96]
+5 [0.9667 0.9667 0.9    0.9333 1.    ]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">scoring</code>
+          <p class="cmd-desc">Metrik zur Bewertung jeder Kombination</p>
+          <pre class="cmd-code"><code class="language-python">for sc in ['accuracy', 'f1_macro']:
+    scores = cross_val_score(DecisionTreeClassifier(random_state=42), X, y, cv=5, scoring=sc)
+    print(sc, scores)</code></pre>
+          <pre class="cmd-out">accuracy [0.9667 0.9667 0.9    0.9333 1.    ]
+f1_macro [0.9666 0.9666 0.8997 0.9333 1.    ]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">StratifiedKFold</code>
+          <p class="cmd-desc">erhält Klassenverteilung in jedem Fold — Standard für Klassifikation</p>
+          <pre class="cmd-code"><code class="language-python">skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+scores = cross_val_score(DecisionTreeClassifier(random_state=42), X, y, cv=skf)
+print(scores)</code></pre>
+          <pre class="cmd-out">[1.     0.9667 0.9333 0.9667 0.9   ]</pre>
+        </div>
+      </div>
+
+      <h3>GridSearchCV / RandomizedSearchCV</h3>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from sklearn.svm import SVC
+from sklearn.datasets import load_iris
+X, y = load_iris(return_X_y=True)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter — GridSearchCV</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">GridSearchCV(
+    estimator,                # Modell mit fit/predict
+    param_grid,               # Dict oder Liste von Dicts
+    scoring=None,             # z.B. 'accuracy', 'f1_macro', None=estimator.score
+    n_jobs=None,              # -1 = alle Kerne (parallele Kombinationen)
+    refit=True,               # bestes Modell auf gesamten Daten neu fitten
+    cv=None,                  # Anzahl Folds (None = 5)
+    verbose=0,
+    return_train_score=False,
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">Alle Parameter — RandomizedSearchCV</code>
+          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
+          <pre class="cmd-code"><code class="language-python">RandomizedSearchCV(
+    estimator,
+    param_distributions,      # Dict mit Listen ODER Verteilungen
+    n_iter=10,                # Anzahl zufällig gezogener Kombinationen
+    scoring=None,
+    n_jobs=None,
+    refit=True,
+    cv=None,
+    random_state=None,        # für reproduzierbares Sampling
+    verbose=0,
+)</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">estimator</code>
+          <p class="cmd-desc">das Modell, dessen Hyperparameter optimiert werden</p>
+          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]}, cv=3)
+print(grid.estimator)</code></pre>
+          <pre class="cmd-out">SVC()</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">param_grid</code>
+          <p class="cmd-desc">Dict mit Parameter-Namen → Liste der zu testenden Werte (alle Kombinationen werden geprüft)</p>
+          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]}, cv=3)
+grid.fit(X, y)
+print(len(grid.cv_results_['params']))  # 3*2 Kombinationen</code></pre>
+          <pre class="cmd-out">6</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">cv</code>
+          <p class="cmd-desc">Anzahl Folds für die innere Kreuzvalidierung</p>
+          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]}, cv=3)
+grid.fit(X, y)
+print(round(grid.best_score_, 4))</code></pre>
+          <pre class="cmd-out">0.9733</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">scoring</code>
+          <p class="cmd-desc">Metrik zur Bewertung jeder Kombination (Standard: <code>estimator.score</code>)</p>
+          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]},
+                    cv=3, scoring='f1_macro')
+grid.fit(X, y)
+print(grid.best_params_)</code></pre>
+          <pre class="cmd-out">{'C': 10, 'gamma': 0.1}</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">.best_params_ / .best_estimator_</code>
+          <p class="cmd-desc">Attribute nach <code>fit()</code>: beste Hyperparameter bzw. bereits darauf trainiertes Modell</p>
+          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]}, cv=3)
+grid.fit(X, y)
+print(grid.best_params_)
+print(grid.best_estimator_)</code></pre>
+          <pre class="cmd-out">{'C': 10, 'gamma': 0.1}
+SVC(C=10, gamma=0.1)</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">RandomizedSearchCV</code>
+          <p class="cmd-desc">zieht <code>n_iter</code> zufällige Kombinationen statt aller — effizienter bei großem Suchraum</p>
+          <pre class="cmd-code"><code class="language-python">from scipy.stats import uniform
+rgrid = RandomizedSearchCV(
+    SVC(), param_distributions={'C': uniform(0.1, 10), 'gamma': ['scale','auto']},
+    n_iter=5, cv=3, random_state=42)
+rgrid.fit(X, y)
+print(rgrid.best_params_)</code></pre>
+          <pre class="cmd-out">{'C': 6.0866, 'gamma': 'scale'}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 7 · METRICS ═══ -->
+    <section class="pruef-section" id="metrics">
+      <h2><span class="pruef-num">7</span> Metrics</h2>
+      <div class="cmd-grid">
+        <div class="cmd-card cmd-setup">
+          <code class="cmd-head">Setup</code>
+          <pre class="cmd-code"><code class="language-python">from sklearn.metrics import (confusion_matrix, classification_report, roc_auc_score,
+    f1_score, mean_squared_error, r2_score, silhouette_score)
+y_true = [0, 1, 1, 0, 1, 2, 2, 0]
+y_pred = [0, 1, 0, 0, 1, 2, 1, 0]</code></pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">confusion_matrix(y_true, y_pred)</code>
+          <p class="cmd-desc">Matrix der Vorhersagen vs. tatsächlichen Klassen</p>
+          <pre class="cmd-code"><code class="language-python">print(confusion_matrix(y_true, y_pred))</code></pre>
+          <pre class="cmd-out">[[3 0 0]
+ [1 2 0]
+ [0 1 1]]</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">roc_auc_score(y_true, y_proba)</code>
+          <p class="cmd-desc">Fläche unter der ROC-Kurve, braucht Wahrscheinlichkeiten via <code>predict_proba()[:,1]</code></p>
+          <pre class="cmd-code"><code class="language-python">y_true_b = [0, 0, 1, 1]
+y_proba = [0.1, 0.4, 0.35, 0.8]
+print(roc_auc_score(y_true_b, y_proba))</code></pre>
+          <pre class="cmd-out">0.75</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">f1_score(y_true, y_pred, average='macro')</code>
+          <p class="cmd-desc"><code>average</code>: 'macro' (ungewichtet), 'weighted' (nach Klassenhäufigkeit)</p>
+          <pre class="cmd-code"><code class="language-python">print(f1_score(y_true, y_pred, average='macro'))
+print(f1_score(y_true, y_pred, average='weighted'))</code></pre>
+          <pre class="cmd-out">0.7301587301587301
+0.738095238095238</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">mean_squared_error / r2_score</code>
+          <p class="cmd-desc">Standardmetriken für Regression</p>
+          <pre class="cmd-code"><code class="language-python">y_reg_true = [3.0, -0.5, 2.0, 7.0]
+y_reg_pred = [2.5, 0.0, 2.0, 8.0]
+print(mean_squared_error(y_reg_true, y_reg_pred))
+print(r2_score(y_reg_true, y_reg_pred))</code></pre>
+          <pre class="cmd-out">0.375
+0.9486081370449679</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">silhouette_score(X, labels)</code>
+          <p class="cmd-desc">Cluster-Qualität ohne Ground-Truth-Labels (-1 bis 1, höher = besser)</p>
+          <pre class="cmd-code"><code class="language-python">X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])
+print(silhouette_score(X, [0,0,0,1,1,1]))</code></pre>
+          <pre class="cmd-out">0.7133477791749615</pre>
+        </div>
+        <div class="cmd-card cmd-card--wide">
+          <code class="cmd-head">classification_report(y_true, y_pred)</code>
+          <p class="cmd-desc">Precision/Recall/F1 pro Klasse + Macro/Weighted-Avg</p>
+          <pre class="cmd-code"><code class="language-python">print(classification_report(y_true, y_pred))</code></pre>
+          <pre class="cmd-out cmd-out--wrap">              precision    recall  f1-score   support
+
+           0       0.75      1.00      0.86         3
+           1       0.67      0.67      0.67         3
+           2       1.00      0.50      0.67         2
+
+    accuracy                           0.75         8
+   macro avg       0.81      0.72      0.73         8
+weighted avg       0.78      0.75      0.74         8</pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  </div>
+
+  <site-footer caption="PRM · Während der Prüfung · scikit-learn-Referenz"></site-footer>
+
+  <script>
+    const sideLinks = document.querySelectorAll('#section-nav a');
+    const sections = document.querySelectorAll('.pruef-section');
+    const setActive = () => {
+      let current = sections[0]?.id;
+      const probe = window.scrollY + 140;
+      sections.forEach(sec => {
+        if (sec.offsetTop <= probe) current = sec.id;
+      });
+      sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    };
+    document.addEventListener('scroll', setActive, { passive: true });
+    setActive();
+  </script>
+</body>
+</html>

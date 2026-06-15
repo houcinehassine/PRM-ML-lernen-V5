@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz K4 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <site-header active="k4" title="Quiz K4 · Clustering – PRM V5"></site-header>
+  <div class="layout">
+    <site-sidebar active="k4/quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K4 · Quiz · 25 Fragen</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🧠 Quiz: Clustering &amp; PCA</h1>
+        <p style="color:var(--color-text-muted)">Klicke auf eine Frage um die Antwort aufzudecken. Beantworte sie erst selbst!</p>
+      </section>
+
+      <section id="k-means-algorithmus">
+        <h2>k-means Algorithmus</h2>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q1</span> Was minimiert k-means? Schreibe die Zielfunktion auf.</summary>
+          <div class="frage-antwort"><strong>WCSS (Within-Cluster Sum of Squares)</strong> / Inertia:<br><code>WCSS = Σₖ Σᵢ∈Cₖ ||xᵢ − μₖ||²</code><br>μₖ = Centroid (Mittelpunkt) von Cluster k. WCSS misst die Kompaktheit der Cluster.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q2</span> Beschreibe den Lloyd-Algorithmus (k-means) in 4 Schritten.</summary>
+          <div class="frage-antwort">1. k Centroids initialisieren (zufällig oder k-means++)<br>2. Assignment: jeden Punkt dem nächsten Centroid zuweisen<br>3. Update: Centroids als Mittelpunkt ihrer Cluster neu berechnen<br>4. Wiederholen bis Konvergenz (keine Änderungen mehr)</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q3</span> Warum braucht k-means immer Feature-Skalierung?</summary>
+          <div class="frage-antwort">k-means basiert auf euklidischen Distanzen. Features mit großer Varianz (z.B. Einkommen in Euro) dominieren gegenüber Features mit kleiner Varianz (z.B. Alter 20-60). StandardScaler gleicht die Wichtung an — ohne Scaling sind die Cluster sinnlos.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q4</span> Was ist k-means++ und warum ist es besser als zufällige Initialisierung?</summary>
+          <div class="frage-antwort">k-means++ wählt Centroids so, dass sie weit voneinander entfernt sind: erster Centroid zufällig, jeder weitere proportional zu seinem Abstand² zum nächsten Centroid. Verhindert, dass Centroids zusammenfallen → weniger Iterationen, bessere WCSS, weniger lokale Minima.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q5</span> Konvergiert k-means immer zu einem globalen Minimum?</summary>
+          <div class="frage-antwort">Nein! k-means konvergiert garantiert — aber nur zu einem <em>lokalen</em> Minimum. Abhängig von der zufälligen Initialisierung können verschiedene Läufe verschiedene Lösungen finden. Deshalb: <code>n_init=10</code> (10 Starts, bestes Ergebnis wählen).</div>
+        </details>
+      </section>
+
+      <section id="elbow-methode-silhouette">
+        <h2>Elbow-Methode &amp; Silhouette</h2>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q6</span> Erkläre die Elbow-Methode zur k-Bestimmung.</summary>
+          <div class="frage-antwort">Plotte WCSS gegen k (von 1 bis K_max). Die Kurve sinkt anfangs stark, dann flacher. Der "Ellbogen" — der Knick — deutet auf das optimale k hin. Danach bringt mehr k kaum mehr WCSS-Verbesserung, aber höhere Komplexität.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q7</span> Erkläre den Silhouette Score. Was bedeuten die Werte +1, 0, −1?</summary>
+          <div class="frage-antwort">s(i) = (b(i) − a(i)) / max(a(i), b(i))<br>a(i) = mittl. Distanz zum eigenen Cluster, b(i) = mittl. Distanz zum nächsten anderen Cluster.<br>+1 → gut im richtigen Cluster · 0 → Grenzpunkt · −1 → falsch geclustert</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q8</span> Bei welchem k ist der Silhouette Score per Definition nicht berechenbar?</summary>
+          <div class="frage-antwort">Bei k=1 (nur ein Cluster, kein "anderes Cluster" für b(i)) und bei k=n (jeder Punkt sein eigener Cluster, kein a(i) berechenbar). Silhouette Score sinnvoll für k ∈ [2, n-1].</div>
+        </details>
+      </section>
+
+      <section id="dbscan">
+        <h2>DBSCAN</h2>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q9</span> Was sind die drei Punkttypen bei DBSCAN?</summary>
+          <div class="frage-antwort">
+            <strong>Kernpunkt:</strong> hat ≥ min_samples Nachbarn im ε-Radius<br>
+            <strong>Randpunkt:</strong> im ε-Radius eines Kernpunkts, selbst &lt; min_samples Nachbarn<br>
+            <strong>Rauschen:</strong> weder Kern- noch Randpunkt → Label −1 (Ausreißer)
+          </div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q10</span> Nenne 3 Vorteile von DBSCAN gegenüber k-means.</summary>
+          <div class="frage-antwort">1. Findet Cluster beliebiger Form (nicht nur sphärisch)<br>2. Erkennt Ausreißer automatisch (Label −1)<br>3. Braucht kein k als Input — Anzahl Cluster emergiert</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q11</span> Was passiert mit kleinem vs. großem ε?</summary>
+          <div class="frage-antwort">
+            <strong>Kleines ε:</strong> Kleine Nachbarschaften → viele kleine Cluster, mehr Rausch-Punkte<br>
+            <strong>Großes ε:</strong> Große Nachbarschaften → wenige große Cluster, fast kein Rauschen (extremfall: ein Cluster alles)<br>
+            Optimales ε via k-Distanz-Plot schätzen.
+          </div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q12</span> Wann versagt DBSCAN?</summary>
+          <div class="frage-antwort">
+            Bei sehr unterschiedlicher Cluster-Dichte — ein ε funktioniert nicht für dichte UND dünne Cluster gleichzeitig.<br>
+            Bei hochdimensionalen Daten (Fluch der Dimensionalität: alle Abstände ähnlich groß).<br>
+            Bei sehr großen Datensätzen ohne räumlichen Index (O(n²)).
+          </div>
+        </details>
+      </section>
+
+      <section id="clustering-professionell">
+        <h2>Clustering professionell</h2>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q13</span> Was ist MiniBatchKMeans und wann nutzt man es?</summary>
+          <div class="frage-antwort">Variante von KMeans, die in jedem Schritt nur einen Mini-Batch (Teilmenge) verarbeitet. Viel schneller für sehr große Datensätze (online-lernfähig). Leicht schlechtere WCSS als Full-Batch. Nutzen ab ~100k Samples.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q14</span> Nenne 3 interne Bewertungsmetriken für Clustering (ohne Ground Truth).</summary>
+          <div class="frage-antwort">
+            <strong>Silhouette Score:</strong> Kohäsion vs. Separation [-1,1], höher = besser<br>
+            <strong>Davies-Bouldin Index:</strong> Verhältnis intra-/inter-Cluster-Distanz, niedriger = besser<br>
+            <strong>Calinski-Harabasz Index:</strong> Verhältnis inter-/intra-Varianz, höher = besser
+          </div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q15</span> Wie nutzt man Clustering als Preprocessing für Supervised Learning?</summary>
+          <div class="frage-antwort">KMeans.fit_predict(X_train) → Cluster-Labels als zusätzliches Feature zu X hinzufügen. Oder KMeans.transform(X) → Distanzen zu allen k Centroids als Features. Kann nützlich sein wenn Cluster-Zugehörigkeit prädiktiv für das Label ist.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q16</span> Was gibt km.transform(X) zurück?</summary>
+          <div class="frage-antwort">Eine Matrix der Form (n_samples, k) — für jeden Punkt die Distanzen zu allen k Centroids. Kann für Anomalie-Erkennung genutzt werden: Punkte mit großen Distanzen zu allen Centroids sind Ausreißer.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q17</span> Prüfungsfrage: k-means erreicht WCSS=0 — ist das gut?</summary>
+          <div class="frage-antwort">Nein! WCSS=0 bedeutet k=n (jeder Punkt sein eigener Cluster). Das ist trivial und sinnlos — kein Clustering mehr. Gutes Clustering hat niedrige WCSS im Verhältnis zur Gesamtvarianz, aber immer noch k ≪ n.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q18</span> Was ist der Adjusted Rand Index (ARI)?</summary>
+          <div class="frage-antwort">Externe Bewertungsmetrik — vergleicht Clustering-Labels mit Ground-Truth-Labels. ARI=1: perfekte Übereinstimmung. ARI≈0: zufällig. ARI&lt;0: schlechter als zufällig. "Adjusted" bedeutet: korrigiert für zufällige Übereinstimmung.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q19</span> Warum n_init=10 bei KMeans? Was passiert mit n_init=1?</summary>
+          <div class="frage-antwort">Mit n_init=10 wird k-means 10-mal mit verschiedenen Zufalls-Initialisierungen gestartet; die beste Lösung (niedrigste WCSS) wird behalten. Mit n_init=1 riskiert man, in einem schlechten lokalen Minimum steckenzubleiben — Ergebnisse können stark variieren.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q20</span> Welchen Algorithmus würdest du für Anomalie-Erkennung in Sensordaten wählen: k-means oder DBSCAN?</summary>
+          <div class="frage-antwort"><strong>DBSCAN</strong>. Sensordaten haben oft unregelmäßige Cluster (kein k bekannt, keine sphärische Form). DBSCAN klassifiziert Ausreißer automatisch als Rauschen (−1). k-means würde jeden Ausreißer einem Cluster zuweisen und ihn nicht als Anomalie erkennen.</div>
+        </details>
+      </section>
+
+      <section id="pca-dimensionsreduktion">
+        <h2>PCA / Dimensionsreduktion</h2>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q21</span> Was ist das Ziel von PCA — und ist PCA überwacht oder unüberwacht?</summary>
+          <div class="frage-antwort">PCA sucht neue, orthogonale Achsen ("Hauptkomponenten"), die die <strong>Varianz der Daten maximal erklären</strong>, und projiziert die Daten auf die wichtigsten davon → Dimensionsreduktion. PCA ist <strong>unüberwacht</strong>: es nutzt nur X, kennt y nicht.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q22</span> Was beschreibt die Kovarianzmatrix Σ? Was bedeuten Diagonale und Nicht-Diagonal-Einträge?</summary>
+          <div class="frage-antwort">Σ ist eine d×d-Matrix (d = Anzahl Features) der zentrierten Daten: <code>Σ = (1/(n−1))·Xᶜᵀ·Xᶜ</code>. Diagonal-Einträge Σᵢᵢ = Varianz von Feature i. Nicht-Diagonal-Einträge Σᵢⱼ = Kovarianz zwischen Feature i und j — zeigen, ob und wie stark zwei Features gemeinsam variieren.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q23</span> Wie hängen Eigenvektoren/Eigenwerte der Kovarianzmatrix mit den Hauptkomponenten zusammen?</summary>
+          <div class="frage-antwort"><code>Σ·v = λ·v</code>. Die Eigenvektoren v sind die <strong>Richtungen</strong> der Hauptkomponenten (orthogonal zueinander), die Eigenwerte λ geben an, <strong>wie viel Varianz</strong> entlang dieser Richtung liegt. Größter Eigenwert → PC1, zweitgrößter → PC2, usw.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q24</span> Wie bestimmt man, wie viele Hauptkomponenten k man behält? Was zeigt ein Scree-Plot?</summary>
+          <div class="frage-antwort">erklärte Varianz (Anteil)ᵢ = λᵢ / Σⱼλⱼ. Der <strong>Scree-Plot</strong> zeigt die erklärte Varianz pro Komponente, absteigend sortiert. Man sucht den "Ellbogen" (analog zur Elbow-Methode bei k-means) oder wählt k so, dass die <strong>kumulative</strong> erklärte Varianz z.B. ≥ 95 % erreicht.</div>
+        </details>
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q25</span> Prüfungsfrage: Du wendest PCA auf Rohdaten an — ein Feature ist "Einkommen in Euro" (0-100000), die anderen sind Scores zwischen 0 und 1. Was passiert ohne StandardScaler?</summary>
+          <div class="frage-antwort">PCA ist <strong>varianz-basiert</strong> und damit skalierungsabhängig. "Einkommen" hat allein wegen seiner Skala eine riesige Varianz → PC1 wird fast ausschließlich von "Einkommen" dominiert, egal ob es inhaltlich relevant ist. Lösung: <strong>immer <code>StandardScaler</code> vor PCA anwenden</strong>.</div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="T05-pca.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Letztes Thema</div><div class="nav-arrow-title">🧭 PCA &amp; Dimensionsreduktion</div></div></a>
+        <a href="Uebung.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">✏️ Übungsaufgaben</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K4 · Quiz · PRM V5"></site-footer>
+</body>
+</html>

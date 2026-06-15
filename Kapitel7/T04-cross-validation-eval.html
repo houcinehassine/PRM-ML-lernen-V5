@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CV &amp; Fehleranalyse – K7 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .mark-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s}
+    .mark-btn:hover{border-color:var(--color-success);color:var(--color-success)}
+    .stufe-footer{margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end}
+  </style>
+</head>
+<body>
+  <site-header active="k7" title="CV &amp; Fehleranalyse – K7 · PRM V5"></site-header>
+  <lern-pfad topic="k7/t04"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k7/t04"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K7 · Thema 4 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🔄 CV &amp; Fehleranalyse</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Cross-Validation in der Evaluation: Konfidenzintervalle für Metriken, Lernkurven und systematische Fehlerdiagnose.</p>
+      </section>
+
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header"><span class="stufe-label">Stufe 1</span><h2 class="stufe-title">🎯 Ziel: Verlässliche Metriken</h2></div>
+        <div class="stufe-body">
+          <h3>Warum ein einzelner Test-Split nicht reicht</h3>
+          <p>Ein einzelner Train/Test-Split ist risikoreich — zufällig günstige oder ungünstige Aufteilung kann Ergebnisse verzerren. Cross-Validation gibt Konfidenzintervalle:</p>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            CV Score = μ ± σ  (aus K-Fold-Ergebnissen)<br>
+            Konfidenzintervall ≈ μ ± 2σ/√K
+          </div>
+          <div class="info-box warning">
+            <strong>Data Leakage:</strong> Preprocessing (Skalierung, Imputation) muss im CV-Loop sitzen — nicht vor dem Loop. Sonst: optimistische Overfitting-Schätzung.
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button></div>
+      </div>
+
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header"><span class="stufe-label">Stufe 2</span><h2 class="stufe-title">🧠 Fehleranalyse-Framework</h2></div>
+        <div class="stufe-body">
+          <h3>Diagnose: Overfitting vs. Underfitting</h3>
+          <table>
+            <thead><tr><th>Symptom</th><th>Diagnose</th><th>Lösung</th></tr></thead>
+            <tbody>
+              <tr><td>Train-Acc ≈ Test-Acc (beide niedrig)</td><td>Underfitting (High Bias)</td><td>Komplexeres Modell, mehr Features, weniger Regularisierung</td></tr>
+              <tr><td>Train-Acc hoch, Test-Acc niedrig</td><td>Overfitting (High Variance)</td><td>Regularisierung, mehr Daten, Dropout, Bagging</td></tr>
+              <tr><td>Hohe CV-Standardabweichung</td><td>Instabiles Modell oder kleine Datenmenge</td><td>Mehr Daten, stabileres Modell, mehr CV-Splits</td></tr>
+            </tbody>
+          </table>
+          <h3>Lernkurven lesen</h3>
+          <ul>
+            <li><strong>Lücke zwischen Train &amp; Val:</strong> Overfitting — mehr Daten oder Regularisierung</li>
+            <li><strong>Beide konvergieren zu niedrig:</strong> Underfitting — größeres Modell</li>
+            <li><strong>Beide konvergieren angemessen:</strong> Gut — genug Daten, gutes Modell</li>
+          </ul>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button></div>
+      </div>
+
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header"><span class="stufe-label">Stufe 3</span><h2 class="stufe-title">⚙️ Systematischer Evaluations-Workflow</h2></div>
+        <div class="stufe-body">
+          <div class="algo-steps">
+            <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Baseline etablieren</strong><p>DummyClassifier (stratified) als Untergrenze.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>Primärmetrik festlegen</strong><p>F1, Recall, oder AUC — je nach Problemstellung. Vor dem Training entscheiden!</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Nested CV für Hyperparameter</strong><p>Outer Loop: Performance schätzen. Inner Loop: Hyperparameter suchen. Verhindert Optimismus-Bias.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">4</div><div class="algo-step-body"><strong>Fehleranalyse</strong><p>Welche Punkte werden falsch klassifiziert? Gibt es Muster? (bestimmte Klassen, Feature-Bereiche?)</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">5</div><div class="algo-step-body"><strong>Final auf gehaltenem Test-Set evaluieren</strong><p>Nur einmal! Kein weiteres Tuning nach dieser Evaluation.</p></div></div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="algo">✓ Workflow klar</button></div>
+      </div>
+
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ Bootstrapped Konfidenzintervalle</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell">
+            <div class="code-cell-header"><span>Python · Bootstrap-CI für Metriken von Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+from sklearn.metrics import roc_auc_score, f1_score
+
+def bootstrap_ci(y_true, y_score, metric_fn, n_bootstrap=1000,
+                 alpha=0.05, random_state=42):
+    """Bootstrap-Konfidenzintervall für eine Klassifikationsmetrik."""
+    rng = np.random.default_rng(random_state)
+    n = len(y_true)
+    scores = []
+    for _ in range(n_bootstrap):
+        idx = rng.choice(n, n, replace=True)
+        try:
+            s = metric_fn(y_true[idx], y_score[idx])
+            scores.append(s)
+        except Exception:
+            pass  # Manchmal nur eine Klasse im Bootstrap
+    scores = np.array(scores)
+    lower = np.percentile(scores, 100 * alpha / 2)
+    upper = np.percentile(scores, 100 * (1 - alpha / 2))
+    return np.mean(scores), lower, upper
+
+
+# Test
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+
+X, y = load_breast_cancer(return_X_y=True)
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42)
+rf = RandomForestClassifier(n_estimators=100, random_state=42).fit(X_tr, y_tr)
+
+y_prob = rf.predict_proba(X_te)[:, 1]
+y_pred = rf.predict(X_te)
+
+# AUC mit Bootstrap-CI
+auc_mean, auc_lo, auc_hi = bootstrap_ci(y_te, y_prob, roc_auc_score)
+print(f"AUC: {auc_mean:.4f} [95%-CI: {auc_lo:.4f}, {auc_hi:.4f}]")
+
+# F1 mit Bootstrap-CI
+def f1(yt, yp): return f1_score(yt, (yp >= 0.5).astype(int))
+f1_mean, f1_lo, f1_hi = bootstrap_ci(y_te, y_prob, f1)
+print(f"F1:  {f1_mean:.4f} [95%-CI: {f1_lo:.4f}, {f1_hi:.4f}]")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>AUC: 0.9952 [95%-CI: 0.9858, 1.0000]
+F1:  0.9718 [95%-CI: 0.9412, 0.9935]</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
+      </div>
+
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 Vollständige CV-basierte Evaluation</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell">
+            <div class="code-cell-header"><span>Python · Nested CV + Pipeline + Fehleranalyse</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import (cross_val_score, StratifiedKFold,
+                                      GridSearchCV, learning_curve)
+from sklearn.metrics import make_scorer, f1_score
+from sklearn.dummy import DummyClassifier
+from sklearn.datasets import load_breast_cancer
+import numpy as np
+
+X, y = load_breast_cancer(return_X_y=True)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+f1_scorer = make_scorer(f1_score)
+
+# ─── 1. Baseline ─────────────────────────────────────
+dummy = DummyClassifier(strategy='stratified', random_state=42)
+baseline = cross_val_score(dummy, X, y, cv=cv, scoring='f1').mean()
+print(f"Baseline F1:       {baseline:.4f}")
+
+# ─── 2. Modelle mit Pipeline ─────────────────────────
+pipe_lr = Pipeline([('sc', StandardScaler()), ('lr', LogisticRegression(max_iter=1000))])
+pipe_rf = Pipeline([('rf', RandomForestClassifier(n_estimators=100, random_state=42))])
+
+for name, pipe in [('Logistic Reg', pipe_lr), ('Random Forest', pipe_rf)]:
+    scores = cross_val_score(pipe, X, y, cv=cv, scoring='f1')
+    print(f"{name}: {scores.mean():.4f} ± {scores.std():.4f}")
+
+# ─── 3. Nested CV für RF Hyperparameter ──────────────
+param_grid = {'rf__n_estimators': [50, 100], 'rf__max_depth': [None, 5]}
+inner_cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+gs = GridSearchCV(pipe_rf, param_grid, cv=inner_cv, scoring='f1', n_jobs=-1)
+nested_scores = cross_val_score(gs, X, y, cv=cv, scoring='f1')
+print(f"Nested CV F1: {nested_scores.mean():.4f} ± {nested_scores.std():.4f}")
+
+# ─── 4. Lernkurve ────────────────────────────────────
+train_sizes, train_s, val_s = learning_curve(
+    pipe_rf, X, y, cv=cv, scoring='f1',
+    train_sizes=[0.1, 0.3, 0.5, 0.7, 0.9, 1.0])
+print("\nLernkurve (F1):")
+for size, ts, vs in zip(train_sizes, train_s.mean(1), val_s.mean(1)):
+    print(f"  n={size:>4}: Train={ts:.3f}, Val={vs:.3f}, Gap={ts-vs:.3f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Baseline F1:       0.6731
+Logistic Reg: 0.9794 ± 0.0127
+Random Forest: 0.9651 ± 0.0097
+Nested CV F1: 0.9639 ± 0.0098
+
+Lernkurve (F1):
+  n=  45: Train=1.000, Val=0.844, Gap=0.156
+  n= 136: Train=1.000, Val=0.946, Gap=0.054
+  n= 227: Train=1.000, Val=0.958, Gap=0.042
+  n= 318: Train=1.000, Val=0.966, Gap=0.034
+  n= 409: Train=1.000, Val=0.972, Gap=0.028
+  n= 455: Train=1.000, Val=0.965, Gap=0.035</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T03-precision-recall.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges</div><div class="nav-arrow-title">⚖️ Precision &amp; Recall</div></div></a>
+        <a href="Quiz.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Kapitel-Quiz</div><div class="nav-arrow-title">🧠 Quiz K7</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K7 · T4 · CV &amp; Fehleranalyse"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text);btn.textContent='Kopiert!';setTimeout(()=>btn.textContent='Kopieren',2000);}</script>
+</body>
+</html>

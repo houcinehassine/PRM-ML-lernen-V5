@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz K2 – PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <site-header active="k2" title="Quiz K2 · ML Grundlagen – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="k2/quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K2 · Quiz · 20 Fragen</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🧠 Quiz: ML Grundlagen</h1>
+        <p style="color:var(--color-text-muted)">Klicke auf eine Frage um die Antwort aufzudecken. Beantworte sie erst selbst!</p>
+      </section>
+
+      <section id="was-ist-ml">
+        <h2>Was ist ML?</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q1</span> Was ist der fundamentale Unterschied zwischen klassischer Programmierung und ML?</summary>
+          <div class="frage-antwort">
+            <strong>Klassisch:</strong> Eingabe + Regeln → Ausgabe (Mensch schreibt die Regeln)<br>
+            <strong>ML:</strong> Eingabe + Ausgabe → Modell lernt die Regeln selbst<br>
+            ML dreht das Paradigma um: Statt Regeln zu explizieren, zeigt man Beispiele.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q2</span> Nenne die drei Hauptparadigmen des Maschinellen Lernens.</summary>
+          <div class="frage-antwort">
+            <strong>1. Supervised Learning:</strong> Gelabelte Daten → Klassifikation/Regression<br>
+            <strong>2. Unsupervised Learning:</strong> Keine Labels → Clustering, Dimensionsreduktion<br>
+            <strong>3. Reinforcement Learning:</strong> Agent lernt durch Belohnungen/Strafen in einer Umgebung
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q3</span> Nenne 4 Schritte des ML-Workflows in der richtigen Reihenfolge.</summary>
+          <div class="frage-antwort">
+            1. Problem definieren (Klassifikation? Regression? Features?)<br>
+            2. Daten sammeln &amp; explorieren (EDA)<br>
+            3. Daten aufbereiten (Split → Encoding → Scaling → Feature Selection)<br>
+            4. Modell wählen, trainieren &amp; evaluieren<br>
+            5. Hyperparameter optimieren (GridSearch, CV)
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q4</span> Was ist ein "Lazy Learner"? Nenne ein Beispiel.</summary>
+          <div class="frage-antwort">
+            Ein Lazy Learner hat keinen echten Trainingsschritt — er merkt sich alle Trainingsdaten und macht die eigentliche Arbeit erst bei der Vorhersage. Beispiel: <strong>k-Nearest Neighbors (KNN)</strong>. Bei jedem Predict werden Distanzen zu allen Trainingspunkten berechnet.
+          </div>
+        </details>
+      </section>
+
+      <section id="overfitting-underfitting">
+        <h2>Overfitting &amp; Underfitting</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q5</span> Wie erkennst du Overfitting anhand von Train- und Test-Accuracy?</summary>
+          <div class="frage-antwort">
+            <strong>Overfitting:</strong> Train Accuracy sehr hoch (z.B. 99%), Test Accuracy deutlich niedriger (z.B. 72%) → Großer Gap zwischen Train und Test.<br>
+            Das Modell hat sich die Trainingsdaten "gemerkt" statt das zugrundeliegende Muster zu lernen.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q6</span> Wie erkennst du Underfitting?</summary>
+          <div class="frage-antwort">
+            <strong>Underfitting:</strong> Sowohl Train Accuracy als auch Test Accuracy sind niedrig und ähnlich (z.B. 60% / 59%).<br>
+            Das Modell ist zu simpel — es kann die Struktur in den Daten nicht erfassen.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q7</span> Nenne je 2 Lösungsansätze für Overfitting und Underfitting.</summary>
+          <div class="frage-antwort">
+            <strong>Overfitting beheben:</strong><br>
+            • Regularisierung (L1/L2, max_depth, min_samples)<br>
+            • Mehr Trainingsdaten<br>
+            • Ensemble-Methoden (Random Forest)<br><br>
+            <strong>Underfitting beheben:</strong><br>
+            • Komplexeres Modell wählen<br>
+            • Mehr / bessere Features<br>
+            • Weniger Regularisierung
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q8</span> Was zeigt eine Learning Curve beim Overfitting?</summary>
+          <div class="frage-antwort">
+            Beim Overfitting zeigt die Learning Curve einen <strong>großen Gap</strong>: die Train-Kurve bleibt hoch, die Validation-Kurve deutlich niedriger. Mit mehr Daten nähern sich die Kurven an — mehr Daten heilen Overfitting. Bleiben sie auch mit vielen Daten getrennt, liegt ein Modellproblem vor.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q9</span> Was macht L1-Regularisierung (Lasso) besonders?</summary>
+          <div class="frage-antwort">
+            L1 bestraft die Summe der absoluten Gewichtswerte: <code>Loss + λ·Σ|wᵢ|</code><br>
+            Besonders: L1 setzt viele Gewichte auf exakt 0 → <strong>automatische Feature Selection</strong>. L2 (Ridge) verkleinert alle Gewichte gleichmäßig, setzt aber nichts auf 0.
+          </div>
+        </details>
+      </section>
+
+      <section id="bias-variance-tradeoff">
+        <h2>Bias-Variance Tradeoff</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q10</span> Schreibe die Bias-Variance Zerlegung des Expected Prediction Error auf.</summary>
+          <div class="frage-antwort">
+            <code>E[(y − ŷ)²] = Bias² + Variance + Irreducible Noise</code><br><br>
+            • <strong>Bias²:</strong> Systematischer Fehler (Modell zu simpel)<br>
+            • <strong>Variance:</strong> Empfindlichkeit auf Trainingsdaten-Schwankungen<br>
+            • <strong>Irreducible Noise:</strong> Unvermeidliches Rauschen in den Daten
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q11</span> Warum kann man Bias und Variance nicht gleichzeitig minimieren?</summary>
+          <div class="frage-antwort">
+            Erhöht man die Modellkomplexität: Bias sinkt (Modell kann komplexere Muster lernen), aber Variance steigt (Modell reagiert stärker auf zufällige Schwankungen im Trainingsset). Dies ist der fundamentale <strong>Bias-Variance Tradeoff</strong> — der optimale Punkt liegt in der Mitte.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q12</span> Welche Eigenschaft haben Ensemble-Methoden bezüglich Bias-Variance?</summary>
+          <div class="frage-antwort">
+            Ensemble-Methoden wie <strong>Random Forest</strong> oder <strong>Bagging</strong> reduzieren die <strong>Variance</strong>. Indem viele verschiedene Modelle auf verschiedenen Datenstichproben trainiert werden, mitteln sich die zufälligen Fehler raus. Bias bleibt ähnlich wie bei einem Einzelmodell.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q13</span> Du trainierst einen Decision Tree mit max_depth=20. Train Acc = 100%, Test Acc = 65%. Was ist das Problem und wie behebst du es?</summary>
+          <div class="frage-antwort">
+            <strong>Problem:</strong> Massives Overfitting — High Variance, Low Bias. Der Baum hat sich jedes Trainingsbeispiel gemerkt.<br>
+            <strong>Lösung:</strong> max_depth verringern (z.B. 5-10), min_samples_leaf erhöhen, oder Random Forest statt einzelnem Baum verwenden.
+          </div>
+        </details>
+      </section>
+
+      <section id="cross-validation">
+        <h2>Cross-Validation</h2>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q14</span> Was ist das Problem mit einem einzelnen 80/20 Train/Test-Split?</summary>
+          <div class="frage-antwort">
+            Die Schätzung der Modellperformance hängt stark davon ab, <em>welche</em> Datenpunkte zufällig in Test-Set landen. Mit nur 20 Testpunkten kann die Accuracy stark schwanken — sie könnte zu gut oder zu schlecht sein. CV gibt durch Mittelung über K Splits eine robustere Schätzung.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q15</span> Beschreibe den Ablauf von 5-Fold Cross-Validation.</summary>
+          <div class="frage-antwort">
+            1. Datensatz in 5 gleich große Teile (Folds) aufteilen<br>
+            2. Fold 1 → Test, Folds 2-5 → Training → Score₁<br>
+            3. Fold 2 → Test, Folds 1,3-5 → Training → Score₂<br>
+            4. ... (insgesamt 5 Durchgänge)<br>
+            5. CV-Score = Mittelwert(Score₁...Score₅)<br>
+            Jeder Datenpunkt war genau einmal im Test-Set.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q16</span> Warum muss der Scaler innerhalb der CV-Pipeline sein?</summary>
+          <div class="frage-antwort">
+            Wenn der Scaler <em>vor</em> der CV auf allen Daten gefittet wird, enthalten seine Parameter (μ, σ) Information aus dem jeweiligen Test-Fold → Data Leakage. Die CV-Scores wären zu optimistisch. Mit <code>Pipeline([scaler, model])</code> wird der Scaler in jedem Fold nur auf den Train-Daten gefittet.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q17</span> Was ist der Unterschied zwischen K-Fold und Stratified K-Fold?</summary>
+          <div class="frage-antwort">
+            <strong>K-Fold:</strong> Zufällige Aufteilung. Bei unbalancierten Datensätzen kann ein Fold zufällig keine Vertreter einer Klasse enthalten → verzerrte Scores.<br>
+            <strong>Stratified K-Fold:</strong> Die Klassenverteilung des Originaldatensatzes wird in jedem Fold erhalten. <strong>Pflicht bei Klassifikation!</strong>
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q18</span> Was ist Nested Cross-Validation und wofür braucht man es?</summary>
+          <div class="frage-antwort">
+            <strong>Nested CV</strong> besteht aus zwei verschachtelten CV-Schleifen:<br>
+            • <strong>Innere CV:</strong> Hyperparameter-Tuning (GridSearchCV mit cv=5)<br>
+            • <strong>Äußere CV:</strong> Performance-Schätzung des Gesamtprozesses<br>
+            Ohne Nested CV würde die Hyperparameter-Auswahl die Test-Scores überschätzen (Selection Bias). Nested CV gibt eine ehrliche Schätzung.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q19</span> Wann nutzt man TimeSeriesSplit statt K-Fold?</summary>
+          <div class="frage-antwort">
+            Bei <strong>Zeitreihendaten</strong>. Normale K-Fold kann zukünftige Daten in den Train-Set stecken (Data Leakage). TimeSeriesSplit garantiert: Train-Daten liegen immer <em>zeitlich vor</em> den Test-Daten. Jeder Split erweitert das Training-Fenster.
+          </div>
+        </details>
+
+        <details class="frage">
+          <summary><span class="quiz-q-num">Q20</span> CV-Score = 91.2% ± 3.5%, ein anderes Modell hat 90.1% ± 0.3%. Welches wählst du?</summary>
+          <div class="frage-antwort">
+            Das <strong>zweite Modell</strong> (90.1% ± 0.3%). Die hohe Standardabweichung des ersten (±3.5%) zeigt High Variance — je nach Datensplit funktioniert es sehr unterschiedlich. Das zweite ist konsistenter und zuverlässiger, obwohl der Mittelwert minimal kleiner ist. <em>Stabilität ist oft wichtiger als marginaler Accuracy-Gewinn.</em>
+          </div>
+        </details>
+      </section>
+
+      <div class="nav-arrows">
+        <a href="T04-cross-validation.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Letztes Thema</div><div class="nav-arrow-title">🔄 Cross-Validation</div></div></a>
+        <a href="Uebung.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Weiter</div><div class="nav-arrow-title">✏️ Übungsaufgaben</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K2 · Quiz · PRM V5"></site-footer>
+</body>
+</html>

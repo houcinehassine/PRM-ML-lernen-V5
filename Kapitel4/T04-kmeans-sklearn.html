@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KMeans professionell – K4 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .mark-btn { display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s; }
+    .mark-btn:hover { border-color:var(--color-success);color:var(--color-success); }
+    .stufe-footer { margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end; }
+  </style>
+</head>
+<body>
+  <site-header active="k4" title="KMeans professionell – K4 · PRM V5"></site-header>
+  <lern-pfad topic="k4/t04"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k4/t04"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K4 · Thema 4 von 5</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🚀 Clustering professionell mit sklearn</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Vollständiger Clustering-Workflow: KMeans für Kundensegmentierung, MiniBatchKMeans für große Daten, Clustering als Preprocessing.</p>
+      </section>
+
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header"><span class="stufe-label">Stufe 1</span><h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2></div>
+        <div class="stufe-body">
+          <h3>Clustering in der Praxis</h3>
+          <p>Clustering wird in drei Hauptkontexten verwendet:</p>
+          <table>
+            <thead><tr><th>Kontext</th><th>Beispiel</th><th>Ansatz</th></tr></thead>
+            <tbody>
+              <tr><td>Explorative Analyse</td><td>Welche Kundengruppen gibt es?</td><td>KMeans + Elbow + Visualisierung</td></tr>
+              <tr><td>Preprocessing</td><td>Cluster-Label als Feature für Classifier</td><td>KMeans.fit_transform()</td></tr>
+              <tr><td>Anomalie-Erkennung</td><td>Punkte weit von allen Centroids</td><td>KMeans.transform() → Distanz</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box">
+            <strong>Clustering-Algorithmen im Überblick:</strong><br>
+            • KMeans: schnell, skalierbar, sphärische Cluster<br>
+            • DBSCAN: beliebige Form, Ausreißer, kein k nötig<br>
+            • AgglomerativeClustering: hierarchisch, Dendrogram<br>
+            • GaussianMixture: probabilistisch (K5!)
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button></div>
+      </div>
+
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header"><span class="stufe-label">Stufe 2</span><h2 class="stufe-title">🧠 MiniBatchKMeans und Bewertungsmetriken</h2></div>
+        <div class="stufe-body">
+          <h3>MiniBatchKMeans für große Datensätze</h3>
+          <p>Statt alle Punkte in jedem Schritt zu verarbeiten, zieht MiniBatchKMeans in jedem Schritt eine zufällige Teilmenge (Mini-Batch):</p>
+          <table>
+            <thead><tr><th></th><th>KMeans</th><th>MiniBatchKMeans</th></tr></thead>
+            <tbody>
+              <tr><td>Zeitkomplexität pro Iteration</td><td>O(n·k)</td><td>O(batch_size·k)</td></tr>
+              <tr><td>Qualität</td><td>Besser</td><td>Leicht schlechter (~1-2%)</td></tr>
+              <tr><td>Skalierung</td><td>Bis ~10M Punkte</td><td>Milliarden Punkte möglich</td></tr>
+            </tbody>
+          </table>
+          <h3>Bewertungsmetriken für Clustering</h3>
+          <table>
+            <thead><tr><th>Metrik</th><th>Braucht Labels?</th><th>Wann nutzen</th></tr></thead>
+            <tbody>
+              <tr><td>Silhouette Score</td><td>❌ Nein</td><td>Cluster-Qualität ohne Ground Truth</td></tr>
+              <tr><td>Davies-Bouldin Index</td><td>❌ Nein</td><td>Niedrig = besser</td></tr>
+              <tr><td>Calinski-Harabasz Index</td><td>❌ Nein</td><td>Hoch = besser</td></tr>
+              <tr><td>Adjusted Rand Index (ARI)</td><td>✅ Ja</td><td>Vergleich mit Ground Truth</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button></div>
+      </div>
+
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header"><span class="stufe-label">Stufe 3</span><h2 class="stufe-title">⚙️ Clustering-Workflow</h2></div>
+        <div class="stufe-body">
+          <div class="algo-steps">
+            <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Features auswählen und skalieren (StandardScaler)</strong></div></div>
+            <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>k bestimmen (Elbow + Silhouette)</strong></div></div>
+            <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>KMeans mit n_init=10 trainieren</strong><p>Mehrere Starts vermeiden schlechte lokale Minima.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">4</div><div class="algo-step-body"><strong>Cluster analysieren: Centroid-Koordinaten, Größen</strong></div></div>
+            <div class="algo-step"><div class="algo-step-num">5</div><div class="algo-step-body"><strong>Cluster interpretieren und benennen</strong><p>Was unterscheidet Cluster 0 von Cluster 1? Welche Features sind dominant?</p></div></div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="algo">✓ Workflow klar</button></div>
+      </div>
+
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ Mini-Batch Update von Scratch</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span>Python · Mini-Batch k-means Update von Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+
+class MiniBatchKMeansScratch:
+    """
+    Mini-Batch k-means — Online-Lernvariante von k-means.
+    Update-Regel: laufender Durchschnitt statt voller Neuberechnung.
+    """
+
+    def __init__(self, k=3, batch_size=100, n_iter=100, random_state=42):
+        self.k = k
+        self.batch_size = batch_size
+        self.n_iter = n_iter
+        self.rng = np.random.default_rng(random_state)
+
+    def fit(self, X):
+        X = np.array(X)
+        n, d = X.shape
+
+        # k-means++ Initialisierung
+        idx = self.rng.integers(n)
+        self.centroids_ = [X[idx]]
+        for _ in range(self.k - 1):
+            dists = np.min([np.sum((X - c)**2, axis=1) for c in self.centroids_], axis=0)
+            probs = dists / dists.sum()
+            self.centroids_.append(X[self.rng.choice(n, p=probs)])
+        self.centroids_ = np.array(self.centroids_)
+
+        # Counts für laufenden Durchschnitt
+        counts = np.zeros(self.k)
+
+        for _ in range(self.n_iter):
+            # Mini-Batch ziehen
+            batch_idx = self.rng.choice(n, self.batch_size, replace=False)
+            batch = X[batch_idx]
+
+            # Assignments für Batch
+            dists = np.array([np.sum((batch - c)**2, axis=1) for c in self.centroids_])
+            batch_labels = np.argmin(dists, axis=0)
+
+            # Online-Update: laufender Durchschnitt
+            for j, xi in enumerate(batch):
+                c = batch_labels[j]
+                counts[c] += 1
+                lr = 1.0 / counts[c]
+                self.centroids_[c] = (1 - lr) * self.centroids_[c] + lr * xi
+
+        # Finale Labels
+        dists = np.array([np.sum((X - c)**2, axis=1) for c in self.centroids_])
+        self.labels_ = np.argmin(dists, axis=0)
+        self.inertia_ = sum(
+            np.sum((X[self.labels_ == k] - self.centroids_[k])**2)
+            for k in range(self.k)
+        )
+        return self
+
+
+# Vergleich
+from sklearn.datasets import make_blobs
+from sklearn.preprocessing import StandardScaler
+
+X, _ = make_blobs(n_samples=1000, centers=4, random_state=42)
+X = StandardScaler().fit_transform(X)
+
+mb = MiniBatchKMeansScratch(k=4, batch_size=100, n_iter=200)
+mb.fit(X)
+print(f"Scratch MiniBatch Inertia: {mb.inertia_:.2f}")
+
+from sklearn.cluster import MiniBatchKMeans
+sk_mb = MiniBatchKMeans(n_clusters=4, batch_size=100, random_state=42)
+sk_mb.fit(X)
+print(f"sklearn MiniBatch Inertia: {sk_mb.inertia_:.2f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Scratch MiniBatch Inertia: 59.53
+sklearn MiniBatch Inertia: 59.68</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
+      </div>
+
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 Vollständiger Clustering-Workflow</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell">
+            <div class="code-cell-header"><span>Python · Kundensegmentierung mit KMeans</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.cluster import KMeans, DBSCAN
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import (silhouette_score, davies_bouldin_score,
+                              calinski_harabasz_score)
+from sklearn.datasets import make_blobs
+import numpy as np
+
+# Simulierte Kundendaten: Alter, Jahreseinkommen, Ausgaben-Score
+np.random.seed(42)
+n = 200
+means_alter = np.repeat([25, 35, 55, 45], n//4)
+means_eink  = np.repeat([30, 80, 60, 40], n//4)
+means_ausg  = np.repeat([20, 70, 80, 40], n//4)
+X = np.column_stack([
+    np.random.normal(means_alter, 5),    # Alter
+    np.random.normal(means_eink, 10),    # Einkommen (k€)
+    np.random.normal(means_ausg, 8),     # Ausgaben 0-100
+])
+
+scaler = StandardScaler()
+X_s = scaler.fit_transform(X)
+
+# Optimales k finden
+print("k-Analyse:")
+print(f"{'k':>4} | {'Inertia':>10} | {'Silhouette':>12} | {'DB-Index':>10}")
+print("-" * 45)
+for k in range(2, 7):
+    km = KMeans(n_clusters=k, n_init=10, random_state=42)
+    labels = km.fit_predict(X_s)
+    sil = silhouette_score(X_s, labels)
+    db  = davies_bouldin_score(X_s, labels)
+    print(f"{k:>4} | {km.inertia_:>10.2f} | {sil:>12.4f} | {db:>10.4f}")
+
+# Finales Modell mit k=4
+km = KMeans(n_clusters=4, n_init=10, random_state=42)
+labels = km.fit_predict(X_s)
+
+# Cluster-Profile: Rücktransformieren für Interpretation
+centroids_orig = scaler.inverse_transform(km.cluster_centers_)
+feature_names = ['Alter', 'Einkommen(k€)', 'Ausgaben']
+
+print("\n--- Cluster-Profile ---")
+print(f"{'Cluster':<10} {'Größe':>6} {'Alter':>8} {'Einkommen':>11} {'Ausgaben':>9}")
+print("-" * 48)
+for i in range(4):
+    size = np.sum(labels == i)
+    c = centroids_orig[i]
+    print(f"Cluster {i:<3} {size:>6}   {c[0]:>7.1f}   {c[1]:>9.1f}   {c[2]:>8.1f}")
+
+# Clustering als Preprocessing: Labels als Feature hinzufügen
+X_with_clusters = np.column_stack([X_s, labels])
+print(f"\nX_with_clusters shape: {X_with_clusters.shape}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>k-Analyse:
+   k |    Inertia |   Silhouette |   DB-Index
+---------------------------------------------
+   2 |     274.15 |       0.4677 |     0.8781
+   3 |     178.78 |       0.4498 |     0.8229
+   4 |      91.55 |       0.5405 |     0.6355
+   5 |      79.96 |       0.4929 |     0.8438
+   6 |      72.22 |       0.4330 |     0.9641
+
+--- Cluster-Profile ---
+Cluster     Größe    Alter   Einkommen  Ausgaben
+------------------------------------------------
+Cluster 0       49      35.2        80.4       69.6
+Cluster 1       52      44.9        42.1       40.6
+Cluster 2       49      23.7        31.1       19.3
+Cluster 3       50      54.8        60.3       77.9
+
+X_with_clusters shape: (200, 4)</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ Clustering beherrscht</button></div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T03-dbscan.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">🌊 DBSCAN</div></div></a>
+        <a href="T05-pca.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">🧭 PCA &amp; Dimensionsreduktion</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K4 · T4 · KMeans sklearn"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text);btn.textContent='Kopiert!';setTimeout(()=>btn.textContent='Kopieren',2000);}</script>
+</body>
+</html>

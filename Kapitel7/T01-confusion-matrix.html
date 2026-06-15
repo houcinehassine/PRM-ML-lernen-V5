@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confusion Matrix – K7 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s}
+    .mark-btn:hover{border-color:var(--color-success);color:var(--color-success)}
+    .stufe-footer{margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end}
+    .cm-grid{display:grid;grid-template-columns:auto auto auto;gap:4px;width:fit-content;margin:var(--space-4) auto;font-family:var(--font-mono);font-size:var(--text-sm)}
+    .cm-cell{padding:12px 16px;border-radius:var(--radius-md);text-align:center;min-width:80px}
+    .cm-tp{background:#d1fae5;color:#065f46}
+    .cm-tn{background:#dbeafe;color:#1e40af}
+    .cm-fp{background:#fee2e2;color:#991b1b}
+    .cm-fn{background:#fef3c7;color:#92400e}
+    .cm-label{background:var(--color-surface-3);font-weight:700;color:var(--color-text-muted)}
+  </style>
+</head>
+<body>
+  <site-header active="k7" title="Confusion Matrix – K7 · PRM V5"></site-header>
+  <lern-pfad topic="k7/t01"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k7/t01"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K7 · Thema 1 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🔢 Confusion Matrix</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Das Fundament der Klassifikationsevaluation: Accuracy, Precision, Recall, F1 — alles leitet sich von der Confusion Matrix ab.</p>
+      </section>
+
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header"><span class="stufe-label">Stufe 1</span><h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2></div>
+        <div class="stufe-body">
+          <h3>Warum Accuracy allein trügt</h3>
+          <p>Bei einem Datensatz mit 99% negativen Fällen sagt ein Modell, das immer "negativ" vorhersagt, 99% Accuracy — und ist trotzdem nutzlos. Die Confusion Matrix zeigt das vollständige Bild.</p>
+          <div class="info-box warning">
+            <strong>Prüfungspunkt:</strong> Accuracy ist bei class-imbalanced Daten ein schlechtes Maß. Precision, Recall und F1 sind kontextabhängig wichtiger.
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button></div>
+      </div>
+
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header"><span class="stufe-label">Stufe 2</span><h2 class="stufe-title">🧠 TP, TN, FP, FN und abgeleitete Metriken</h2></div>
+        <div class="stufe-body">
+          <h3>Confusion Matrix (Binär)</h3>
+          <div class="cm-grid">
+            <div class="cm-label"></div>
+            <div class="cm-label">Pred: Positiv</div>
+            <div class="cm-label">Pred: Negativ</div>
+            <div class="cm-label">Actual: Positiv</div>
+            <div class="cm-tp">TP<br><small>True Positive</small></div>
+            <div class="cm-fn">FN<br><small>False Negative</small></div>
+            <div class="cm-label">Actual: Negativ</div>
+            <div class="cm-fp">FP<br><small>False Positive</small></div>
+            <div class="cm-tn">TN<br><small>True Negative</small></div>
+          </div>
+          <h3>Abgeleitete Metriken</h3>
+          <table>
+            <thead><tr><th>Metrik</th><th>Formel</th><th>Frage</th></tr></thead>
+            <tbody>
+              <tr><td>Accuracy</td><td>(TP+TN)/(TP+TN+FP+FN)</td><td>Wie oft bin ich gesamt korrekt?</td></tr>
+              <tr><td>Precision</td><td>TP/(TP+FP)</td><td>Wie viele positive Vorhersagen stimmen?</td></tr>
+              <tr><td>Recall (Sensitivity)</td><td>TP/(TP+FN)</td><td>Wie viele echte Positive finde ich?</td></tr>
+              <tr><td>Specificity</td><td>TN/(TN+FP)</td><td>Wie viele echte Negative erkenne ich?</td></tr>
+              <tr><td>F1-Score</td><td>2·(P·R)/(P+R)</td><td>Harmonisches Mittel aus Precision &amp; Recall</td></tr>
+              <tr><td>F_β</td><td>(1+β²)·P·R/(β²·P+R)</td><td>β&gt;1: Recall wichtiger; β&lt;1: Precision wichtiger</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box">
+            <strong>Eselsbrücke für Precision vs. Recall:</strong><br>
+            Precision = "Wenn ich alarm schlage, habe ich recht" (FP vermeiden)<br>
+            Recall = "Wenn eine Gefahr da ist, erkenne ich sie" (FN vermeiden)
+          </div>
+
+          <div class="compare-grid">
+            <div class="compare-card compare-card-a">
+              <div class="compare-card-label">Precision</div>
+              <p><code>TP/(TP+FP)</code> — Anteil der als positiv vorhergesagten Fälle, die
+              tatsächlich positiv sind. Hoch, wenn <strong>False Positives teuer</strong> sind
+              (z.B. Spam-Filter: legitime Mails dürfen nicht im Spam landen).</p>
+            </div>
+            <div class="compare-card-arrow">↔</div>
+            <div class="compare-card compare-card-b">
+              <div class="compare-card-label">Recall</div>
+              <p><code>TP/(TP+FN)</code> — Anteil der tatsächlich positiven Fälle, die
+              gefunden wurden. Hoch, wenn <strong>False Negatives teuer</strong> sind
+              (z.B. Krebserkennung: kein Fall darf übersehen werden).</p>
+            </div>
+          </div>
+          <div class="note note-xref"><div class="note-label">🔗 Querverweis</div><p style="margin:0;font-size:var(--text-sm)">Das Split-Kriterium, mit dem Entscheidungsbäume während des Trainings "Unreinheit" messen (Gini-Index), ist nicht dasselbe wie diese Bewertungsmetriken — siehe <a href="../Kapitel5/T01-entscheidungsbaum.html">K5-T01 · Entscheidungsbaum</a> für den Unterschied.</p></div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button></div>
+      </div>
+
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header"><span class="stufe-label">Stufe 3</span><h2 class="stufe-title">⚙️ Wann welche Metrik?</h2></div>
+        <div class="stufe-body">
+          <table>
+            <thead><tr><th>Anwendung</th><th>Wichtig</th><th>Warum</th></tr></thead>
+            <tbody>
+              <tr><td>Spam-Filter</td><td>Precision</td><td>Kein legitimer Mail soll als Spam enden (FP-Kosten hoch)</td></tr>
+              <tr><td>Krebserkennung</td><td>Recall</td><td>Keine Krebs-Fälle verpassen (FN-Kosten hoch)</td></tr>
+              <tr><td>Fraud Detection</td><td>F1 / F_β (β&gt;1)</td><td>Beides wichtig, Recall leicht wichtiger</td></tr>
+              <tr><td>Suche (IR)</td><td>Precision@k</td><td>Top-k Ergebnisse sollen relevant sein</td></tr>
+              <tr><td>Klassen unbalanciert</td><td>F1 oder MCC</td><td>Accuracy trügt</td></tr>
+            </tbody>
+          </table>
+          <div class="algo-steps">
+            <div class="algo-step"><div class="algo-step-num">1</div><div class="algo-step-body"><strong>Problem analysieren:</strong> Was ist teurer — FP oder FN?</div></div>
+            <div class="algo-step"><div class="algo-step-num">2</div><div class="algo-step-body"><strong>Primärmetrik wählen:</strong> z.B. Recall für Krebserkennung.</div></div>
+            <div class="algo-step"><div class="algo-step-num">3</div><div class="algo-step-body"><strong>Sekundärmetrik als Constraint:</strong> Precision muss ≥ 0.7 sein.</div></div>
+            <div class="algo-step"><div class="algo-step-num">4</div><div class="algo-step-body"><strong>Classification Threshold anpassen:</strong> Default 0.5 ist oft nicht optimal.</div></div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="algo">✓ Algorithmus klar</button></div>
+      </div>
+
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ Metriken von Scratch</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 1/2a — Funktionen: confusion_matrix_scratch &amp; metrics_from_cm</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+
+def confusion_matrix_scratch(y_true, y_pred, positive=1):
+    """Binäre Confusion Matrix."""
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    TP = ((y_pred == positive) & (y_true == positive)).sum()
+    TN = ((y_pred != positive) & (y_true != positive)).sum()
+    FP = ((y_pred == positive) & (y_true != positive)).sum()
+    FN = ((y_pred != positive) & (y_true == positive)).sum()
+    return {'TP': TP, 'TN': TN, 'FP': FP, 'FN': FN}
+
+def metrics_from_cm(cm):
+    TP, TN, FP, FN = cm['TP'], cm['TN'], cm['FP'], cm['FN']
+    total = TP + TN + FP + FN
+    accuracy  = (TP + TN) / total
+    precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
+    recall    = TP / (TP + FN) if (TP + FN) > 0 else 0.0
+    f1        = 2*precision*recall / (precision+recall) if (precision+recall) > 0 else 0.0
+    specificity = TN / (TN + FP) if (TN + FP) > 0 else 0.0
+    return dict(accuracy=accuracy, precision=precision,
+                recall=recall, f1=f1, specificity=specificity)
+</code></pre>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 1/2b — Test: Krebs-Screening</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">y_true = np.array([1,0,1,1,0,1,0,0,1,0,1,1,0,0,1])
+y_pred = np.array([1,0,0,1,0,1,1,0,1,0,0,1,0,1,1])
+
+cm = confusion_matrix_scratch(y_true, y_pred)
+m  = metrics_from_cm(cm)
+
+print(f"TP={cm['TP']}, TN={cm['TN']}, FP={cm['FP']}, FN={cm['FN']}")
+print(f"Accuracy:    {m['accuracy']:.2%}")
+print(f"Precision:   {m['precision']:.2%}")
+print(f"Recall:      {m['recall']:.2%}  ← bei Krebs am wichtigsten!")
+print(f"F1:          {m['f1']:.2%}")
+print(f"Specificity: {m['specificity']:.2%}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>TP=6, TN=5, FP=2, FN=2
+Accuracy:    73.33%
+Precision:   75.00%
+Recall:      75.00%  ← bei Krebs am wichtigsten!
+F1:          75.00%
+Specificity: 71.43%</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 2/2 — Vergleich mit sklearn classification_report</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.metrics import classification_report
+
+print("sklearn classification_report:")
+print(classification_report(y_true, y_pred, target_names=['Gesund','Krebs']))</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>sklearn classification_report:
+              precision    recall  f1-score   support
+
+      Gesund       0.71      0.71      0.71         7
+       Krebs       0.75      0.75      0.75         8
+
+    accuracy                           0.73        15
+   macro avg       0.73      0.73      0.73        15
+weighted avg       0.73      0.73      0.73        15</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Confusion Matrix als Heatmap</div>
+            <p>
+              Die Confusion Matrix lässt sich als 2×2-Heatmap darstellen: Zeilen sind die echten
+              Klassen, Spalten die Vorhersagen. Hier (Krebs-Screening, TP=6, FN=2, FP=2, TN=5)
+              sind die Diagonal-Felder (TP, TN) dunkler eingefärbt — sie zeigen die korrekten
+              Vorhersagen. Je dunkler die Diagonale im Vergleich zu den Nebendiagonalen,
+              desto besser das Modell.
+            </p>
+            <img src="../assets/img/inhalt/k7-t01-confusion-heatmap.png" alt="Heatmap der Confusion Matrix mit TP, FN, FP, TN als 2x2-Raster, Diagonale dunkler eingefärbt">
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
+      </div>
+
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 Confusion Matrix &amp; Metriken mit sklearn</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 1 — Modell trainieren &amp; classification_report</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.metrics import classification_report
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+
+X, y = load_breast_cancer(return_X_y=True)
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+rf = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+rf.fit(X_tr, y_tr)
+y_pred = rf.predict(X_te)
+
+print(classification_report(y_te, y_pred, target_names=['Malignant','Benign']))</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>              precision    recall  f1-score   support
+
+   Malignant       0.98      0.93      0.95        43
+      Benign       0.96      0.99      0.97        71
+
+    accuracy                           0.96       114
+   macro avg       0.97      0.96      0.96       114
+weighted avg       0.97      0.96      0.96       114</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 2 — Threshold anpassen (Standard: 0.5)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.metrics import precision_score, recall_score, f1_score
+
+y_prob = rf.predict_proba(X_te)[:, 1]
+thresholds = [0.3, 0.4, 0.5, 0.6, 0.7]
+print(f"{'Threshold':>10} | {'Precision':>10} | {'Recall':>10} | {'F1':>8}")
+print("-" * 46)
+for t in thresholds:
+    y_t = (y_prob >= t).astype(int)
+    print(f"{t:>10.1f} | {precision_score(y_te,y_t):>10.4f} | "
+          f"{recall_score(y_te,y_t):>10.4f} | {f1_score(y_te,y_t):>8.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre> Threshold |  Precision |     Recall |       F1
+----------------------------------------------
+       0.3 |     0.9595 |     1.0000 |   0.9793
+       0.4 |     0.9589 |     0.9859 |   0.9722
+       0.5 |     0.9589 |     0.9859 |   0.9722
+       0.6 |     0.9583 |     0.9718 |   0.9650
+       0.7 |     0.9583 |     0.9718 |   0.9650</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 3 — Macro vs. Weighted F1 (Multiclass)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.datasets import load_iris
+
+Xm, ym = load_iris(return_X_y=True)
+Xm_tr, Xm_te, ym_tr, ym_te = train_test_split(
+    Xm,
+    ym,
+    test_size=0.2,
+    random_state=42
+)
+rf_m = RandomForestClassifier(random_state=42).fit(Xm_tr, ym_tr)
+ym_pred = rf_m.predict(Xm_te)
+
+print(f"Macro F1:    {f1_score(ym_te, ym_pred, average='macro'):.4f}")
+print(f"Weighted F1: {f1_score(ym_te, ym_pred, average='weighted'):.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Macro F1:    1.0000
+Weighted F1: 1.0000</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="../Kapitel6/Quiz.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges</div><div class="nav-arrow-title">K6 · Quiz</div></div></a>
+        <a href="T02-roc-auc.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes</div><div class="nav-arrow-title">📈 ROC &amp; AUC</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K7 · T1 · Confusion Matrix"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text);btn.textContent='Kopiert!';setTimeout(()=>btn.textContent='Kopieren',2000);}</script>
+</body>
+</html>

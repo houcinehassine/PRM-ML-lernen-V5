@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SVC mit sklearn – K3 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .35rem .9rem; border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      font-size: var(--text-xs); font-weight: 700; cursor: pointer;
+      color: var(--btn-color, var(--color-text-faint));
+      transition: all .15s;
+    }
+    .mark-btn:hover { border-color: var(--color-success); color: var(--color-success); }
+    .stufe-footer {
+      margin-top: var(--space-6); padding-top: var(--space-4);
+      border-top: 1px solid var(--color-border);
+      display: flex; justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k3" title="SVC mit sklearn – K3 · PRM V5"></site-header>
+  <lern-pfad topic="k3/t04"></lern-pfad>
+
+  <div class="layout">
+    <site-sidebar active="k3/t04"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K3 · Thema 4 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🚀 SVC professionell mit sklearn</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">
+          Alles zusammen: Vollständiger SVM-Workflow für Klassifikation — von Preprocessing über Hyperparameter-Tuning bis zu Multi-Class-Problemen.
+        </p>
+      </section>
+
+      <!-- STUFE 1 -->
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 1</span>
+          <h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Was du jetzt kannst</h3>
+          <p>Nach den drei Vorgänger-Themen verstehst du alle Konzepte. Jetzt geht es um die professionelle Anwendung:</p>
+          <ul>
+            <li>SVM-Workflow mit korrektem Preprocessing</li>
+            <li>C und gamma systematisch tunen</li>
+            <li>Multi-Class SVM (mehr als 2 Klassen)</li>
+            <li>SVR — Support Vector Regression</li>
+            <li>Häufige Fehler vermeiden</li>
+          </ul>
+          <div class="info-box">
+            <strong>Wann ist SVM die richtige Wahl?</strong><br>
+            ✅ Hochdimensionale Feature-Räume (Text, Bioinformatik)<br>
+            ✅ Klare Klassentrennung<br>
+            ✅ Mittelgroße Datensätze (&lt;100k Samples)<br>
+            ❌ Sehr große Datensätze (langsam: O(n²) bis O(n³))<br>
+            ❌ Wenn Interpretierbarkeit wichtig ist
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button>
+        </div>
+      </div>
+
+      <!-- STUFE 2 -->
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 2</span>
+          <h2 class="stufe-title">🧠 Multi-Class SVM und SVR</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Multi-Class Klassifikation</h3>
+          <p>SVM ist nativ ein Binary Classifier. Für K Klassen gibt es zwei Strategien:</p>
+          <table>
+            <thead><tr><th>Strategie</th><th>Modelle</th><th>Vorhersage</th><th>sklearn</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>One-vs-Rest (OvR)</strong></td>
+                <td>K Modelle (jede Klasse vs. alle anderen)</td>
+                <td>Höchste Konfidenz gewinnt</td>
+                <td><code>decision_function_shape='ovr'</code></td>
+              </tr>
+              <tr>
+                <td><strong>One-vs-One (OvO)</strong></td>
+                <td>K(K-1)/2 Modelle (jedes Paar)</td>
+                <td>Voting (wer gewinnt die meisten Duelle?)</td>
+                <td><code>decision_function_shape='ovo'</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <p>sklearn's SVC nutzt intern OvO (genauer, schneller bei wenigen Klassen).</p>
+
+          <h3>SVR — Support Vector Regression</h3>
+          <p>SVR passt die SVM für Regressionsprobleme an: Statt Margin-Maximierung sucht man eine Funktion, die alle Punkte innerhalb eines ε-Schlauchs erklärt:</p>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            SVR Ziel: |y − f(x)| ≤ ε für alle Punkte<br>
+            Punkte außerhalb des Schlauchs → Slack-Strafe (wie Soft-Margin)
+          </div>
+          <table>
+            <thead><tr><th>Parameter</th><th>Bedeutung</th></tr></thead>
+            <tbody>
+              <tr><td><code>C</code></td><td>Strafe für Punkte außerhalb des ε-Schlauchs</td></tr>
+              <tr><td><code>epsilon</code></td><td>Breite des Schlauchs — kein Fehler innerhalb</td></tr>
+              <tr><td><code>kernel</code></td><td>Gleiche Kernels wie SVC</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button>
+        </div>
+      </div>
+
+      <!-- STUFE 3 -->
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 3</span>
+          <h2 class="stufe-title">⚙️ SVM-Workflow Checkliste</h2>
+        </div>
+        <div class="stufe-body">
+          <div class="algo-steps">
+            <div class="algo-step">
+              <div class="algo-step-num">1</div>
+              <div class="algo-step-body">
+                <strong>IMMER skalieren (StandardScaler oder MinMaxScaler)</strong>
+                <p>SVM ist extrem empfindlich gegenüber Skalierung. Ohne Scaling dominiert die Feature mit der größten Varianz.</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">2</div>
+              <div class="algo-step-body">
+                <strong>Kernel wählen: Erst linear versuchen</strong>
+                <p>Bei n_features &gt;&gt; n_samples → linear oft besser. Sonst RBF als Standard.</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">3</div>
+              <div class="algo-step-body">
+                <strong>C und gamma grob suchen (log-skaliert: 0.001, 0.01, ..., 1000)</strong>
+                <p>GridSearchCV oder RandomizedSearchCV mit Pipeline.</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">4</div>
+              <div class="algo-step-body">
+                <strong>Feinere Suche um den besten Bereich</strong>
+                <p>Nach grobem Grid: feineres Grid im besten Bereich.</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">5</div>
+              <div class="algo-step-body">
+                <strong>Finales Modell auf Trainingsdaten fitten, auf Testdaten evaluieren</strong>
+                <p>Testdaten nur einmal anfassen!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="algo">✓ Checkliste verinnerlicht</button>
+        </div>
+      </div>
+
+      <!-- STUFE 4 -->
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 4</span>
+          <h2 class="stufe-title">🛠️ Von Scratch: LinearSVC via SGD</h2>
+        </div>
+        <div class="stufe-body">
+          <p>Für sehr große Datensätze ist kernelbasierter SVC zu langsam. <code>SGDClassifier(loss='hinge')</code> löst dasselbe Problem, aber mit stochastischem Gradient Descent:</p>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 4/5a — Klasse: LinearSVM_SGD</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import numpy as np
+
+class LinearSVM_SGD:
+    """
+    Lineare SVM via Stochastischem Gradient Descent.
+    Skaliert auf große Datensätze (äquivalent zu LinearSVC).
+    """
+
+    def __init__(self, C=1.0, lr=0.01, n_epochs=100, random_state=42):
+        self.C = C
+        self.lr = lr
+        self.n_epochs = n_epochs
+        self.rng = np.random.default_rng(random_state)
+
+    def fit(self, X, y):
+        y_ = np.where(y <= 0, -1, 1)
+        n, d = X.shape
+        self.w = np.zeros(d)
+        self.b = 0.0
+
+        for epoch in range(self.n_epochs):
+            # Lernrate abkühlen lassen (Learning Rate Schedule)
+            lr_t = self.lr / (1 + epoch * 0.1)
+
+            # Zufällige Reihenfolge
+            indices = self.rng.permutation(n)
+            for i in indices:
+                xi, yi = X[i], y_[i]
+                if yi * (np.dot(self.w, xi) + self.b) < 1:
+                    # Hinge-Verlust: Update Richtung
+                    self.w = (1 - lr_t) * self.w + lr_t * self.C * yi * xi
+                    self.b += lr_t * self.C * yi
+                else:
+                    # Nur Gewichts-Decay
+                    self.w = (1 - lr_t) * self.w
+
+    def decision_function(self, X):
+        return np.dot(X, self.w) + self.b
+
+    def predict(self, X):
+        return np.sign(self.decision_function(X)).astype(int)
+
+    def score(self, X, y):
+        y_ = np.where(y <= 0, -1, 1)
+        return np.mean(self.predict(X) == y_)</code></pre>
+          </div>
+
+          <p>Test: Vergleich der Scratch-Implementierung mit sklearns <code>LinearSVC</code> auf dem Breast-Cancer-Datensatz:</p>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 4/5b — Test: LinearSVM_SGD vs. sklearn LinearSVC</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.svm import LinearSVC
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+
+X, y = load_breast_cancer(return_X_y=True)
+y_pm = np.where(y == 0, -1, 1)
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y_pm,
+    test_size=0.2,
+    random_state=42
+)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+# Scratch
+scratch = LinearSVM_SGD(C=1.0, n_epochs=100)
+scratch.fit(X_train_s, y_train)
+print(f"Scratch LinearSVM: {scratch.score(X_test_s, y_test):.2%}")
+
+# sklearn LinearSVC
+lsvc = LinearSVC(
+    C=1.0,
+    max_iter=2000
+)
+lsvc.fit(X_train_s, y_train)
+print(f"sklearn LinearSVC: {accuracy_score(y_test, lsvc.predict(X_test_s)):.2%}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Scratch LinearSVM: 96.49%
+sklearn LinearSVC: 95.61%</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Gewichtsvektor Scratch vs. sklearn</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (scratch, lsvc)
+import matplotlib.pyplot as plt
+import numpy as np
+
+idx = np.argsort(-np.abs(lsvc.coef_[0]))[:10]
+
+fig, ax = plt.subplots(figsize=(6, 3.4))
+x = np.arange(len(idx))
+width = 0.35
+ax.bar(x - width/2, scratch.w[idx], width, label='Scratch (SGD)', color='#3a7ca5')
+ax.bar(x + width/2, lsvc.coef_[0][idx], width, label='sklearn LinearSVC', color='#2e8b57')
+ax.set_xticks(x)
+ax.set_xticklabels(idx)
+ax.set_xlabel("Feature-Index (Top-10 |Gewicht|)")
+ax.set_ylabel("Gewicht")
+ax.set_title("Gewichtsvektor: Scratch vs. sklearn LinearSVC")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button>
+        </div>
+      </div>
+
+      <!-- STUFE 5 -->
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 5</span>
+          <h2 class="stufe-title">🚀 Vollständiger SVM-Workflow</h2>
+        </div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 1 — Multi-Class SVC mit GridSearchCV (Iris)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+import numpy as np
+
+X, y = load_iris(return_X_y=True)
+
+pipe = Pipeline([
+    ('scaler', StandardScaler()),
+    ('svc',    SVC(
+        decision_function_shape='ovr',
+        probability=True
+    ))
+])
+
+param_grid = {
+    'svc__C':      [0.1, 1, 10, 100],
+    'svc__kernel': ['linear', 'rbf'],
+    'svc__gamma':  ['scale', 0.1, 0.01],
+}
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+gs = GridSearchCV(
+    pipe,
+    param_grid,
+    cv=cv,
+    scoring='accuracy',
+    n_jobs=-1
+)
+gs.fit(X, y)
+
+print(f"Beste Parameter: {gs.best_params_}")
+print(f"CV Accuracy:     {gs.best_score_:.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Beste Parameter: {'svc__C': 10, 'svc__gamma': 'scale', 'svc__kernel': 'linear'}
+CV Accuracy:     0.9733</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 2 — Klassenwahrscheinlichkeiten &amp; Classification Report</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.metrics import classification_report
+
+# Klassenwahrscheinlichkeiten
+proba = gs.predict_proba(X[:3])
+print("Klassen-Wahrsch. (erste 3 Punkte):")
+print(np.round(proba, 3))
+
+# Detaillierter Report
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+gs.best_estimator_.fit(X_tr, y_tr)
+print("\nClassification Report:")
+print(classification_report(
+    y_te,
+    gs.best_estimator_.predict(X_te),
+    target_names=['Setosa', 'Versicolor', 'Virginica']
+))</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Klassen-Wahrsch. (erste 3 Punkte):
+[[0.978 0.014 0.008]
+ [0.961 0.028 0.011]
+ [0.978 0.013 0.008]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+      Setosa       1.00      1.00      1.00        10
+  Versicolor       1.00      0.89      0.94         9
+   Virginica       0.92      1.00      0.96        11
+
+    accuracy                           0.97        30
+   macro avg       0.97      0.96      0.97        30
+weighted avg       0.97      0.97      0.97        30</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Multi-Class Entscheidungsgrenzen (Iris)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (gs, X, y)
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+
+X2 = X[:, 2:4]  # Petal Length & Width
+best_params = gs.best_params_
+model2d = Pipeline([
+    ('scaler', StandardScaler()),
+    ('svc', SVC(C=best_params['svc__C'], kernel=best_params['svc__kernel'], gamma=best_params['svc__gamma']))
+]).fit(X2, y)
+
+xx, yy = np.meshgrid(
+    np.linspace(X2[:, 0].min() - 0.5, X2[:, 0].max() + 0.5, 200),
+    np.linspace(X2[:, 1].min() - 0.5, X2[:, 1].max() + 0.5, 200)
+)
+Z = model2d.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+
+fig, ax = plt.subplots(figsize=(5.5, 4))
+ax.contourf(xx, yy, Z, alpha=0.3, cmap='viridis')
+ax.scatter(X2[:, 0], X2[:, 1], c=y, cmap='viridis', s=25, edgecolors='k', linewidths=0.3)
+ax.set_xlabel("Petal Length")
+ax.set_ylabel("Petal Width")
+ax.set_title("Multi-Class Entscheidungsgrenzen (Iris)")
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Multi-Class Entscheidungsgrenzen (One-vs-One)</div>
+            <p>
+              Bei drei Klassen (Setosa, Versicolor, Virginica) bildet sklearns SVC intern
+              3 binäre Klassifikatoren (One-vs-One: jedes Klassenpaar). Der Plot oben zeigt die
+              Iris-Daten projiziert auf zwei Features (Petal-Länge und -Breite) mit drei
+              Farbregionen — Setosa ist linear sehr gut von den anderen beiden trennbar,
+              während Versicolor und Virginica leicht überlappen
+              (das spiegelt sich im niedrigeren Recall von 0.89 für Versicolor).
+            </p>
+          </div>
+
+          <p>Als zweites Beispiel: SVR (Support Vector Regression) mit GridSearchCV auf dem Diabetes-Datensatz:</p>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 3 — SVR mit GridSearchCV (Diabetes)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.svm import SVR
+from sklearn.datasets import load_diabetes
+
+X_r, y_r = load_diabetes(return_X_y=True)
+
+svr_pipe = Pipeline([
+    ('scaler', StandardScaler()),
+    ('svr',    SVR(kernel='rbf'))
+])
+svr_params = {
+    'svr__C':       [1, 10, 100],
+    'svr__epsilon': [0.1, 0.5, 1.0],
+    'svr__gamma':   ['scale', 0.01],
+}
+gs_r = GridSearchCV(
+    svr_pipe,
+    svr_params,
+    cv=5,
+    scoring='r2',
+    n_jobs=-1
+)
+gs_r.fit(X_r, y_r)
+print(f"Beste SVR Parameter: {gs_r.best_params_}")
+print(f"Bestes R² (CV):      {gs_r.best_score_:.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Beste SVR Parameter: {'svr__C': 100, 'svr__epsilon': 1.0, 'svr__gamma': 0.01}
+Bestes R² (CV):      0.4936</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: SVR Vorhersage vs. Wahre Werte (Diabetes)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (gs_r, X_r, y_r)
+import matplotlib.pyplot as plt
+
+y_pred = gs_r.best_estimator_.predict(X_r)
+
+fig, ax = plt.subplots(figsize=(4.5, 4))
+ax.scatter(y_r, y_pred, alpha=0.4, color='#3a7ca5', s=20)
+lims = [min(y_r.min(), y_pred.min()), max(y_r.max(), y_pred.max())]
+ax.plot(lims, lims, 'k--', label='Ideal')
+ax.set_xlabel("Wahre Werte")
+ax.set_ylabel("Vorhersage")
+ax.set_title(f"SVR — Diabetes (R²={gs_r.best_score_:.2f})")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+
+          <h3>Häufige Fehler</h3>
+          <table>
+            <thead><tr><th>Fehler</th><th>Folge</th><th>Lösung</th></tr></thead>
+            <tbody>
+              <tr><td>Kein Scaling vor SVM</td><td>Falsche Gewichtung der Features</td><td>Immer StandardScaler in Pipeline</td></tr>
+              <tr><td>C und gamma unabhängig suchen</td><td>Falsches Optimum (sie interagieren!)</td><td>Grid über beide gleichzeitig</td></tr>
+              <tr><td>C linear skalieren (1,2,3,4…)</td><td>Wichtige Bereiche werden ausgelassen</td><td>Log-Skalierung: 0.01, 0.1, 1, 10, 100</td></tr>
+              <tr><td>SVC auf sehr großen Datensätzen</td><td>Extrem langsam (O(n³))</td><td>LinearSVC oder SGDClassifier(loss='hinge')</td></tr>
+              <tr><td>probability=False, dann predict_proba</td><td>Fehler zur Laufzeit</td><td><code>SVC(probability=True)</code> setzen</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="sklearn">✓ SVM beherrscht</button>
+        </div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T03-kernel-trick.html" class="nav-arrow">
+          <div class="nav-arrow-icon">←</div>
+          <div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">🌀 Kernel-Trick</div></div>
+        </a>
+        <a href="Quiz.html" class="nav-arrow next">
+          <div class="nav-arrow-icon">→</div>
+          <div><div class="nav-arrow-sub">Kapitel-Quiz</div><div class="nav-arrow-title">🧠 Quiz K3</div></div>
+        </a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K3 · T4 · SVC mit sklearn"></site-footer>
+
+  <script>
+    function copyCode(btn) {
+      const cell = btn.closest('.code-cell');
+      const code = cell.querySelector('code').textContent;
+      const out = cell.querySelector('.code-cell-output-body pre');
+      const text = out ? code + '\n\n# Ausgabe:\n' + out.textContent : code;
+      navigator.clipboard.writeText(text);
+      btn.textContent = 'Kopiert!';
+      setTimeout(() => btn.textContent = 'Kopieren', 2000);
+    }
+  </script>
+</body>
+</html>

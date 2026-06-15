@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Während der Prüfung – PRM V5</title>
+  <meta name="description" content="Schnellzugriff für die Prüfung: Cheat-Sheet, Entscheidungshilfen, NumPy- und sklearn-Referenz sowie Code-from-Scratch-Übersicht."/>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .pruef-hero{max-width:880px;margin:0 auto var(--space-8);padding:var(--space-6) var(--space-4) 0;text-align:center}
+    .pruef-hero h1{font-family:var(--font-display);font-size:var(--text-xl);margin-bottom:var(--space-2)}
+    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:64ch;margin:0 auto}
+  </style>
+</head>
+<body>
+  <site-header active="pruefung" title="Während der Prüfung – PRM V5"></site-header>
+
+  <main id="main-content">
+    <div class="pruef-hero">
+      <h1>🆘 Während der Prüfung</h1>
+      <p>Schnellzugriff auf alle Hilfsmittel, die unter Zeitdruck wirklich weiterhelfen — Formeln, Entscheidungshilfen und Referenzen für Code, NumPy und sklearn. Mit <kbd>Strg+K</kbd> findest du zusätzlich jeden Begriff per Volltextsuche.</p>
+    </div>
+
+    <div class="kapitel-grid">
+
+      <a class="kcard" href="cheatsheet.html">
+        <div class="kcard-header">
+          <div class="kcard-num">📋</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Formeln &amp; Algorithmen</div>
+            <div class="kcard-title">Cheat-Sheet ·<br>Formelsammlung</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Alle Formeln aus K1–K7 auf einen Blick: Gini, Entropie, ROC/AUC, Bootstrap-CI, GMM-Update-Regeln. Mit Live-Rechner für Confusion-Matrix-Metriken und In-Page-Filter.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">Gini · Entropie</span>
+          <span class="kcard-topic">ROC/AUC</span>
+          <span class="kcard-topic">Bootstrap-CI</span>
+          <span class="kcard-topic">EM-Update</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">7 Kapitel</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="entscheidungshilfe.html">
+        <div class="kcard-header">
+          <div class="kcard-num">🧭</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Entscheidungshilfe</div>
+            <div class="kcard-title">Welche Metrik /<br>Methode wann?</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Flowcharts &amp; Entscheidungstabellen: Welche Metrik bei Klassenungleichgewicht? Welches Modell für welches Problem? Scaling nötig? Welche CV-Strategie?</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">Metrik-Wahl</span>
+          <span class="kcard-topic">Modell-Wahl</span>
+          <span class="kcard-topic">Scaling</span>
+          <span class="kcard-topic">CV-Strategie</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">5 Entscheidungen</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="numpy-referenz.html">
+        <div class="kcard-header">
+          <div class="kcard-num">🔢</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">NumPy</div>
+            <div class="kcard-title">Befehle &amp;<br>Funktionen</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Die wichtigsten NumPy-Funktionen für ML-Aufgaben: Arrays erstellen, Indexing/Slicing, Aggregation, lineare Algebra, Broadcasting, Zufallszahlen.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">Arrays &amp; Shapes</span>
+          <span class="kcard-topic">Aggregation</span>
+          <span class="kcard-topic">Lineare Algebra</span>
+          <span class="kcard-topic">Broadcasting</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">6 Bereiche</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="sklearn-referenz.html">
+        <div class="kcard-header">
+          <div class="kcard-num">🚀</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">scikit-learn</div>
+            <div class="kcard-title">Estimatoren &amp;<br>Hyperparameter</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Alle wichtigen sklearn-Klassen aus K1–K7 mit Konstruktor, zentralen Parametern und Hyperparametern inkl. Erklärung — SVC, RandomForest, KMeans, GaussianMixture und mehr.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">SVC</span>
+          <span class="kcard-topic">RandomForest</span>
+          <span class="kcard-topic">KMeans / DBSCAN</span>
+          <span class="kcard-topic">GridSearchCV</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">10 Klassen</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <a class="kcard" href="code-scratch-referenz.html">
+        <div class="kcard-header">
+          <div class="kcard-num">🛠️</div>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Von Scratch</div>
+            <div class="kcard-title">Code-Referenz ·<br>Kernlogik</div>
+          </div>
+        </div>
+        <p class="kcard-desc">Die Kernlogik aller selbst implementierten Algorithmen kompakt als Code-Snippets: Gini/Entropie-Funktionen, k-Means-Loop, EM-Update, Scaler, Metriken-Funktionen.</p>
+        <div class="kcard-topics">
+          <span class="kcard-topic">Scaler &amp; Split</span>
+          <span class="kcard-topic">k-Means</span>
+          <span class="kcard-topic">Entscheidungsbaum</span>
+          <span class="kcard-topic">EM-Algorithmus</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge themen">7 Snippets</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </main>
+
+  <site-footer caption="PRM · Während der Prüfung · Schnellzugriff"></site-footer>
+</body>
+</html>

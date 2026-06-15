@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EM-Algorithmus – K6 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface-2);font-size:var(--text-xs);font-weight:700;cursor:pointer;color:var(--btn-color,var(--color-text-faint));transition:all .15s}
+    .mark-btn:hover{border-color:var(--color-success);color:var(--color-success)}
+    .stufe-footer{margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--color-border);display:flex;justify-content:flex-end}
+  </style>
+</head>
+<body>
+  <site-header active="k6" title="EM-Algorithmus – K6 · PRM V5"></site-header>
+  <lern-pfad topic="k6/t02"></lern-pfad>
+  <div class="layout">
+    <site-sidebar active="k6/t02"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K6 · Thema 2 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🔄 EM-Algorithmus</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Expectation-Maximization: Das allgemeine Framework für latente-Variable-Modelle — iterativ bis zur Konvergenz.</p>
+      </section>
+
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header"><span class="stufe-label">Stufe 1</span><h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2></div>
+        <div class="stufe-body">
+          <h3>Das Problem mit latenten Variablen</h3>
+          <p>Viele Modelle haben latente (verborgene) Variablen. Bei GMM: wir sehen die Datenpunkte X, aber nicht aus welcher Gaußkomponente sie kamen (z = Komponentenzugehörigkeit).</p>
+          <div class="info-box warning">
+            <strong>Henne-Ei-Problem:</strong> Wenn wir wüssten, welcher Punkt zu welcher Komponente gehört, könnten wir die Parameter schätzen. Wenn wir die Parameter kennen, könnten wir die Zugehörigkeiten bestimmen. EM löst das durch Iteration.
+          </div>
+          <div class="info-box">
+            <strong>Garantie:</strong> Jede EM-Iteration erhöht (oder hält gleich) die Log-Likelihood. EM konvergiert — aber möglicherweise zu einem lokalen Maximum!
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button></div>
+      </div>
+
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header"><span class="stufe-label">Stufe 2</span><h2 class="stufe-title">🧠 ELBO &amp; die zwei Schritte</h2></div>
+        <div class="stufe-body">
+          <h3>Ziel: Log-Likelihood maximieren</h3>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            log p(X|θ) = Σᵢ log Σₖ πₖ N(xᵢ|μₖ,Σₖ)
+          </div>
+          <p>Das log-of-sum ist analytisch schwer zu maximieren. EM nutzt die <strong>Evidence Lower BOund (ELBO)</strong>:</p>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            log p(X|θ) ≥ ELBO = Σᵢ Σₖ rᵢₖ log[πₖ N(xᵢ|μₖ,Σₖ)] + H(r)
+          </div>
+          <p>wobei rᵢₖ = Responsibility (weiche Zuweisung von Punkt i zu Komponente k).</p>
+          <h3>Die zwei Schritte</h3>
+          <table>
+            <thead><tr><th>Schritt</th><th>Aktion</th><th>Was wird optimiert?</th></tr></thead>
+            <tbody>
+              <tr><td><strong>E-Schritt</strong></td><td>rᵢₖ berechnen (Responsibilities)</td><td>ELBO über q(z) = posterior p(z|X,θ)</td></tr>
+              <tr><td><strong>M-Schritt</strong></td><td>θ = {π,μ,Σ} aktualisieren</td><td>ELBO über θ, mit festen rᵢₖ</td></tr>
+            </tbody>
+          </table>
+          <h3>Konvergenz</h3>
+          <ul>
+            <li>Monotone Verbesserung: ELBO(t+1) ≥ ELBO(t) garantiert</li>
+            <li>Konvergenz zu lokalem Maximum (nicht globalem)</li>
+            <li>Mehrere zufällige Startpunkte (n_init) nötig</li>
+            <li>Konvergenzkritierium: |ELBO(t) − ELBO(t−1)| &lt; tol</li>
+          </ul>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button></div>
+      </div>
+
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header"><span class="stufe-label">Stufe 3</span><h2 class="stufe-title">⚙️ EM Schritt für Schritt</h2></div>
+        <div class="stufe-body">
+          <div class="algo-steps">
+            <div class="algo-step"><div class="algo-step-num">0</div><div class="algo-step-body"><strong>Initialisierung</strong><p>Wähle zufällige {πₖ, μₖ, Σₖ} für k=1..K. Oft: k-Means zur Initialisierung der μₖ (stabiler).</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">E</div><div class="algo-step-body"><strong>E-Schritt: Responsibilities berechnen</strong><p style="font-family:var(--font-mono)">rᵢₖ = πₖ N(xᵢ|μₖ,Σₖ) / Σⱼ πⱼ N(xᵢ|μⱼ,Σⱼ)</p><p>rᵢₖ ∈ [0,1] und Σₖ rᵢₖ = 1 für jeden Punkt i.</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">M</div><div class="algo-step-body"><strong>M-Schritt: Parameter aktualisieren</strong><p style="font-family:var(--font-mono)">Nₖ = Σᵢ rᵢₖ  (effektive Punktanzahl)<br>πₖ = Nₖ/N<br>μₖ = (1/Nₖ) Σᵢ rᵢₖ xᵢ<br>Σₖ = (1/Nₖ) Σᵢ rᵢₖ (xᵢ−μₖ)(xᵢ−μₖ)ᵀ</p></div></div>
+            <div class="algo-step"><div class="algo-step-num">∞</div><div class="algo-step-body"><strong>Konvergenz prüfen</strong><p>Log-Likelihood berechnen. Wenn Änderung &lt; tol → Stop. Sonst → zurück zu E-Schritt.</p></div></div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="algo">✓ Algorithmus klar</button></div>
+      </div>
+
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ EM von Scratch (GMM)</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 1/2a — Klasse: GMMScratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">import numpy as np
+from scipy.stats import multivariate_normal
+from sklearn.cluster import KMeans
+
+class GMMScratch:
+    """GMM via EM-Algorithmus."""
+
+    def __init__(self, K=2, max_iter=200, tol=1e-6, random_state=42):
+        self.K = K
+        self.max_iter = max_iter
+        self.tol = tol
+        self.rng = np.random.default_rng(random_state)
+
+    def fit(self, X):
+        n, d = X.shape
+        K = self.K
+
+        # Initialisierung per k-Means
+        km = KMeans(K, n_init=3, random_state=42).fit(X)
+        self.mu_ = km.cluster_centers_.copy()
+        self.sigma_ = [np.eye(d) for _ in range(K)]
+        self.pi_ = np.full(K, 1/K)
+
+        self.log_likelihoods_ = []
+
+        for it in range(self.max_iter):
+            # ─── E-Step: Responsibilities ───────────────────
+            R = np.zeros((n, K))
+            for k in range(K):
+                R[:, k] = self.pi_[k] * multivariate_normal.pdf(
+                    X, mean=self.mu_[k], cov=self.sigma_[k])
+            R_sum = R.sum(axis=1, keepdims=True)
+            R /= R_sum          # normalisieren → rᵢₖ ∈ [0,1]
+
+            # Log-Likelihood berechnen
+            ll = np.log(R_sum).sum()
+            self.log_likelihoods_.append(ll)
+
+            # ─── M-Step: Parameter aktualisieren ────────────
+            Nk = R.sum(axis=0)   # effektive Punktanzahl pro Komponente
+
+            for k in range(K):
+                self.mu_[k] = (R[:, k:k+1] * X).sum(axis=0) / Nk[k]
+                diff = X - self.mu_[k]
+                self.sigma_[k] = (R[:, k] * diff.T @ diff) / Nk[k]
+                # Numerische Stabilität: kleine Diagonale
+                self.sigma_[k] += 1e-6 * np.eye(d)
+            self.pi_ = Nk / n
+
+            # Konvergenz?
+            if it > 0 and abs(self.log_likelihoods_[-1] - self.log_likelihoods_[-2]) < self.tol:
+                print(f"Konvergiert nach {it+1} Iterationen")
+                break
+
+        return self
+
+    def predict_proba(self, X):
+        """Weiche Zuweisung (Responsibilities)."""
+        n, K = len(X), self.K
+        R = np.zeros((n, K))
+        for k in range(K):
+            R[:, k] = self.pi_[k] * multivariate_normal.pdf(
+                X, mean=self.mu_[k], cov=self.sigma_[k])
+        return R / R.sum(axis=1, keepdims=True)
+
+    def predict(self, X):
+        return self.predict_proba(X).argmax(axis=1)
+</code></pre>
+          </div>
+
+          <p>Test auf synthetischen Daten mit zwei klar getrennten Clustern:</p>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 1/2b — Test: GMMScratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from scipy.optimize import linear_sum_assignment
+from sklearn.metrics import confusion_matrix
+
+np.random.seed(42)
+X1 = np.random.multivariate_normal([0, 0], [[1, .5],[.5, 1]], 100)
+X2 = np.random.multivariate_normal([5, 2], [[1, -.3],[-.3, .8]], 80)
+X  = np.vstack([X1, X2])
+y_true = np.array([0]*100 + [1]*80)
+
+gmm = GMMScratch(K=2)
+gmm.fit(X)
+labels = gmm.predict(X)
+
+# Accuracy (Label-Matching nötig, da Cluster-IDs beliebig)
+cm = confusion_matrix(y_true, labels)
+row, col = linear_sum_assignment(-cm)
+acc = cm[row, col].sum() / len(y_true)
+print(f"Genauigkeit: {acc:.2%}")
+print(f"Gelernte Mittelwerte: {gmm.mu_}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Konvergiert nach 13 Iterationen
+Genauigkeit: 98.89%
+Gelernte Mittelwerte: [[0.12650212 0.15786879]
+ [4.9463813  2.06734353]]</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — EM-Konvergenz der Log-Likelihood</div>
+            <p>
+              Trägt man <code>gmm.log_likelihoods_</code> über die Iterationen auf, zeigt sich eine
+              <strong>monoton steigende Kurve</strong>, die sich nach wenigen Iterationen abflacht —
+              das ist die EM-Konvergenzgarantie in Aktion: jede Iteration verbessert (oder hält) die
+              Log-Likelihood, bis die Änderung unter <code>tol</code> fällt und der Algorithmus stoppt.
+            </p>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
+      </div>
+
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 GMM mit sklearn</h2></div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 1 — Daten &amp; GaussianMixture fitten</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python">from sklearn.mixture import GaussianMixture
+import numpy as np
+
+# Daten
+np.random.seed(42)
+X1 = np.random.multivariate_normal([0, 0], [[1,.5],[.5,1]], 100)
+X2 = np.random.multivariate_normal([5, 2], [[1,-.3],[-.3,.8]], 80)
+X  = np.vstack([X1, X2])
+
+# GaussianMixture mit n_init für Robustheit
+gmm = GaussianMixture(
+    n_components=2,
+    covariance_type='full',
+    n_init=10,
+    random_state=42
+)
+gmm.fit(X)
+
+print("Gelernte Mittelwerte:")
+print(gmm.means_)
+print("\nLog-Likelihood:", gmm.score(X))</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Gelernte Mittelwerte:
+[[0.11943309 0.15105928]
+ [4.9358202  2.06836253]]
+
+Log-Likelihood: -3.2281602288749744</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Schritt 2 — Weiche Zuweisung &amp; Sampling</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># Weiche Zuweisung
+probs = gmm.predict_proba(X)
+print(f"Mittlere Unsicherheit: {1 - probs.max(axis=1).mean():.3f}")
+
+# Neue Punkte samplen
+X_new, labels_new = gmm.sample(50)
+print(f"Generierte Punkte: {X_new.shape}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Mittlere Unsicherheit: 0.004
+Generierte Punkte: (50, 2)</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T01-gaussverteilung.html" class="nav-arrow"><div class="nav-arrow-icon">←</div><div><div class="nav-arrow-sub">Vorheriges</div><div class="nav-arrow-title">🔔 Gaußverteilung</div></div></a>
+        <a href="T03-e-step-m-step.html" class="nav-arrow next"><div class="nav-arrow-icon">→</div><div><div class="nav-arrow-sub">Nächstes</div><div class="nav-arrow-title">⚙️ E-Step &amp; M-Step</div></div></a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K6 · T2 · EM-Algorithmus"></site-footer>
+  <script>function copyCode(btn){const cell=btn.closest('.code-cell');const code=cell.querySelector('code').textContent;const out=cell.querySelector('.code-cell-output-body pre');const text=out?code+'\n\n# Ausgabe:\n'+out.textContent:code;navigator.clipboard.writeText(text);btn.textContent='Kopiert!';setTimeout(()=>btn.textContent='Kopieren',2000);}</script>
+</body>
+</html>

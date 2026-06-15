@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kernel-Trick – K3 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="../assets/pyrunner.js"></script>
+  <style>
+    .mark-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .35rem .9rem; border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      font-size: var(--text-xs); font-weight: 700; cursor: pointer;
+      color: var(--btn-color, var(--color-text-faint));
+      transition: all .15s;
+    }
+    .mark-btn:hover { border-color: var(--color-success); color: var(--color-success); }
+    .stufe-footer {
+      margin-top: var(--space-6); padding-top: var(--space-4);
+      border-top: 1px solid var(--color-border);
+      display: flex; justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k3" title="Kernel-Trick – K3 · PRM V5"></site-header>
+  <lern-pfad topic="k3/t03"></lern-pfad>
+
+  <div class="layout">
+    <site-sidebar active="k3/t03"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K3 · Thema 3 von 4</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🌀 Der Kernel-Trick</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">
+          Wie kann eine SVM nichtlineare Entscheidungsgrenzen finden — ohne die Daten explizit in höhere Dimensionen zu transformieren?
+        </p>
+      </section>
+
+      <!-- STUFE 1 -->
+      <div class="stufe stufe-ziel" id="stufe-ziel">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 1</span>
+          <h2 class="stufe-title">🎯 Ziel &amp; Kontext</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Das XOR-Problem: Nicht linear trennbar</h3>
+          <p>Manche Datensätze sind in 2D nicht linear trennbar:</p>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            x₁=0, x₂=0 → Klasse −1 (○)<br>
+            x₁=0, x₂=1 → Klasse +1 (×)<br>
+            x₁=1, x₂=0 → Klasse +1 (×)<br>
+            x₁=1, x₂=1 → Klasse −1 (○)<br>
+            → Keine Gerade kann ○ von × trennen!
+          </div>
+          <p>Idee: Transformiere die Daten in eine höhere Dimension, wo sie linear trennbar sind. Das ist der <strong>Feature-Map-Ansatz</strong>.</p>
+          <div class="info-box warning">
+            <strong>Problem:</strong> Explizite Transformation in sehr hohe Dimensionen (z.B. Polynome Grad 10 mit 100 Features → tausende Features) ist rechentechnisch teuer.<br>
+            <strong>Lösung: Kernel-Trick</strong> — berechne das Skalarprodukt im höherdimensionalen Raum, ohne die Transformation explizit durchzuführen!
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="ziel">✓ Verstanden</button>
+        </div>
+      </div>
+
+      <!-- STUFE 2 -->
+      <div class="stufe stufe-theorie" id="stufe-theorie">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 2</span>
+          <h2 class="stufe-title">🧠 Was ist ein Kernel?</h2>
+        </div>
+        <div class="stufe-body">
+          <h3>Die Kernidee</h3>
+          <p>In der dualen SVM-Formulierung brauchen wir nur <strong>Skalarprodukte</strong> ⟨xᵢ, xⱼ⟩ — nie die einzelnen Koordinaten. Ein Kernel ist eine Funktion:</p>
+          <div class="info-box" style="font-family:var(--font-mono);text-align:center">
+            K(xᵢ, xⱼ) = ⟨φ(xᵢ), φ(xⱼ)⟩
+          </div>
+          <p>wobei φ die Feature-Map ist. Der Kernel berechnet das Skalarprodukt <em>implizit</em> im höherdimensionalen Raum, ohne φ(x) explizit auszurechnen.</p>
+
+          <h3>Die wichtigsten Kernels</h3>
+          <table>
+            <thead><tr><th>Kernel</th><th>Formel</th><th>Parameter</th><th>Wann nutzen</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Linear</strong></td>
+                <td><code>K(x,z) = xᵀz</code></td>
+                <td>—</td>
+                <td>Hoch-dimensionale Daten, Text, lineare Trennbarkeit</td>
+              </tr>
+              <tr>
+                <td><strong>Polynomial</strong></td>
+                <td><code>K(x,z) = (γxᵀz + r)ᵈ</code></td>
+                <td>degree, gamma, coef0</td>
+                <td>Polynomiale Beziehungen</td>
+              </tr>
+              <tr>
+                <td><strong>RBF / Gauß</strong></td>
+                <td><code>K(x,z) = exp(−γ||x-z||²)</code></td>
+                <td>gamma</td>
+                <td>Standard-Choice, nichtlinear, unbekannte Struktur</td>
+              </tr>
+              <tr>
+                <td><strong>Sigmoid</strong></td>
+                <td><code>K(x,z) = tanh(γxᵀz + r)</code></td>
+                <td>gamma, coef0</td>
+                <td>Neural-Network-ähnlich</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Der RBF-Kernel im Detail</h3>
+          <p><code>K(x,z) = exp(−γ||x−z||²)</code> — γ steuert wie schnell der Einfluss eines Support Vectors abfällt:</p>
+          <table>
+            <thead><tr><th>γ-Wert</th><th>Effekt</th><th>Modell</th></tr></thead>
+            <tbody>
+              <tr><td>Kleines γ (0.001)</td><td>Weite Gaussian-Glocke → jeder SV hat großen Einfluss</td><td>Glattere Entscheidungsgrenze → Underfitting</td></tr>
+              <tr><td>Mittleres γ ('scale')</td><td>Ausgewogener Einflussbereich</td><td>Good Fit</td></tr>
+              <tr><td>Großes γ (100)</td><td>Enge Gaussian-Glocke → nur nahe Punkte beeinflussen</td><td>Komplexe, gezackte Grenze → Overfitting</td></tr>
+            </tbody>
+          </table>
+          <div class="info-box">
+            <strong>gamma='scale'</strong> (Standard in sklearn): γ = 1/(n_features · X.var()) — automatisch skaliert.<br>
+            <strong>gamma='auto'</strong>: γ = 1/n_features — ältere Default.
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="theorie">✓ Theorie klar</button>
+        </div>
+      </div>
+
+      <!-- STUFE 3 -->
+      <div class="stufe stufe-algo" id="stufe-algo">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 3</span>
+          <h2 class="stufe-title">⚙️ Kernel-SVM Vorhersage</h2>
+        </div>
+        <div class="stufe-body">
+          <p>Die Vorhersage für einen neuen Punkt x basiert auf den Support Vectors:</p>
+          <div class="info-box" style="font-family:var(--font-mono)">
+            f(x) = sign(Σᵢ αᵢ · yᵢ · K(xᵢ, x) + b)
+          </div>
+          <div class="algo-steps">
+            <div class="algo-step">
+              <div class="algo-step-num">1</div>
+              <div class="algo-step-body">
+                <strong>Kernel zwischen Testpunkt x und jedem Support Vector xᵢ berechnen</strong>
+                <p>K(xᵢ, x) = exp(−γ||xᵢ − x||²) für RBF</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">2</div>
+              <div class="algo-step-body">
+                <strong>Gewichtete Summe der Kernel-Werte</strong>
+                <p>Jeder Support Vector steuert mit Gewicht αᵢ · yᵢ bei.</p>
+              </div>
+            </div>
+            <div class="algo-step">
+              <div class="algo-step-num">3</div>
+              <div class="algo-step-body">
+                <strong>Vorzeichen → Klasse</strong>
+                <p>f(x) &gt; 0 → Klasse +1, f(x) &lt; 0 → Klasse −1</p>
+              </div>
+            </div>
+          </div>
+          <div class="info-box">
+            <strong>Beachte:</strong> Nie die Transformation φ(x) berechnen — nur die Kernel-Funktion K(xᵢ, x). Das ist der "Trick".
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="algo">✓ Algorithmus klar</button>
+        </div>
+      </div>
+
+      <!-- STUFE 4 -->
+      <div class="stufe stufe-scratch" id="stufe-scratch">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 4</span>
+          <h2 class="stufe-title">🛠️ Von Scratch: RBF-Kernel Vorhersage</h2>
+        </div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 4/5a — Funktionen: Kernel-Funktionen &amp; Kernel-Matrix</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">import numpy as np
+
+# Kernel-Funktionen von Scratch
+def linear_kernel(x1, x2):
+    return np.dot(x1, x2)
+
+def polynomial_kernel(x1, x2, degree=3, gamma=1.0, coef0=0.0):
+    return (gamma * np.dot(x1, x2) + coef0) ** degree
+
+def rbf_kernel(x1, x2, gamma=1.0):
+    diff = x1 - x2
+    return np.exp(-gamma * np.dot(diff, diff))
+
+def sigmoid_kernel(x1, x2, gamma=1.0, coef0=0.0):
+    return np.tanh(gamma * np.dot(x1, x2) + coef0)
+
+
+# Kernel-Matrix (Gram-Matrix) berechnen
+def kernel_matrix(X1, X2, kernel_fn, **kwargs):
+    """K[i,j] = kernel(X1[i], X2[j])"""
+    n1, n2 = len(X1), len(X2)
+    K = np.zeros((n1, n2))
+    for i in range(n1):
+        for j in range(n2):
+            K[i, j] = kernel_fn(X1[i], X2[j], **kwargs)
+    return K</code></pre>
+          </div>
+
+          <p>Test: Kernel-Trick für das XOR-Problem — mit RBF-Kernel und sklearn-Verifikation:</p>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 4/5b — Test: RBF-Kernel-Matrix für XOR</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.svm import SVC
+
+X_xor = np.array([[0,0], [0,1], [1,0], [1,1]], dtype=float)
+y_xor = np.array([-1, 1, 1, -1])
+
+# In 2D nicht linear trennbar — RBF-Kernel macht es lösbar
+K = kernel_matrix(X_xor, X_xor, rbf_kernel, gamma=1.0)
+print("RBF Kernel-Matrix für XOR:")
+print(np.round(K, 3))
+# Ähnliche Klassen haben hohe Kernel-Werte
+# K[0,3] (beide −1) sollte > K[0,1] (verschiedene Klassen) sein
+
+# Verifiziere mit sklearn
+svm = SVC(
+    kernel='rbf',
+    gamma=1.0,
+    C=10
+)
+svm.fit(X_xor, y_xor)
+print(f"\nXOR Predictions: {svm.predict(X_xor)}")
+print(f"Expected:        {y_xor}")
+print(f"Korrekt: {np.all(svm.predict(X_xor) == y_xor)}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>RBF Kernel-Matrix für XOR:
+[[1.    0.368 0.368 0.135]
+ [0.368 1.    0.135 0.368]
+ [0.368 0.135 1.    0.368]
+ [0.135 0.368 0.368 1.   ]]
+
+XOR Predictions: [-1  1  1 -1]
+Expected:        [-1  1  1 -1]
+Korrekt: True</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Kernel-Trick 2D → höherdimensional</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X_xor, y_xor)
+import matplotlib.pyplot as plt
+
+phi = X_xor[:, 0] * X_xor[:, 1]  # Feature-Map: x1·x2 als dritte Dimension
+
+fig = plt.figure(figsize=(8, 3.6))
+ax1 = fig.add_subplot(1, 2, 1)
+ax1.scatter(X_xor[:, 0], X_xor[:, 1], c=y_xor, cmap='coolwarm', s=120, edgecolors='k')
+ax1.set_title("2D: XOR — nicht linear trennbar")
+ax1.set_xlabel("x1"); ax1.set_ylabel("x2")
+
+ax2 = fig.add_subplot(1, 2, 2, projection='3d')
+ax2.scatter(X_xor[:, 0], X_xor[:, 1], phi, c=y_xor, cmap='coolwarm', s=120, edgecolors='k')
+ax2.set_title("3D: φ(x1,x2) = (x1, x2, x1·x2)")
+ax2.set_xlabel("x1"); ax2.set_ylabel("x2"); ax2.set_zlabel("x1·x2")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Kernel-Trick: 2D → höherdimensional</div>
+            <p>
+              Beim XOR-Problem liegen die Punkte (0,0) und (1,1) (Klasse −1) sowie (0,1) und (1,0)
+              (Klasse +1) so, dass keine Gerade sie trennt (links). Die Feature-Map
+              <code>φ(x₁,x₂) = (x₁, x₂, x₁·x₂)</code> hebt die Punkte in eine dritte Dimension (rechts) —
+              dort trennt eine flache Ebene die beiden Klassen perfekt. Der RBF-Kernel macht
+              etwas Ähnliches implizit: Die Kernel-Matrix oben zeigt, dass Punkte derselben
+              Klasse (z.B. (0,0) und (1,1), <code>K=0.135</code>) einen anderen "Ähnlichkeitswert"
+              haben als Punkte verschiedener Klassen — genug, damit die SVM eine trennende
+              Hyperebene im (impliziten) höherdimensionalen Raum findet.
+            </p>
+          </div>
+
+          <p>
+            Jetzt rekonstruieren wir die SVM-Vorhersage manuell mit den von sklearn gelernten
+            Gewichten — das macht sichtbar, wie <code>f(x) = sign(Σ αᵢyᵢ·K(SVᵢ,x) + b)</code>
+            konkret berechnet wird:
+          </p>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 5/5a — Klasse: KernelSVMPredictor</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">class KernelSVMPredictor:
+    """
+    Rekonstruiert SVM-Vorhersage von Scratch mit sklearn-Gewichten.
+    Zeigt wie die Vorhersage intern funktioniert.
+    """
+
+    def __init__(self, svm_model):
+        self.alphas = svm_model.dual_coef_[0]      # αᵢ · yᵢ
+        self.svs    = svm_model.support_vectors_    # Support Vectors
+        self.b      = svm_model.intercept_[0]
+        self.gamma  = svm_model._gamma
+
+    def predict_manual(self, x):
+        """f(x) = sign(Σ αᵢyᵢ · K(SVᵢ, x) + b)"""
+        kernel_vals = np.array([
+            rbf_kernel(sv, x, gamma=self.gamma)
+            for sv in self.svs
+        ])
+        decision = np.dot(self.alphas, kernel_vals) + self.b
+        return int(np.sign(decision))</code></pre>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 5/5b — Test: KernelSVMPredictor vs. sklearn</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.datasets import make_moons
+from sklearn.preprocessing import StandardScaler
+
+X, y = make_moons(
+    n_samples=100,
+    noise=0.2,
+    random_state=42
+)
+y_svm = np.where(y == 0, -1, 1)
+Xs = StandardScaler().fit_transform(X)
+
+svm = SVC(
+    kernel='rbf',
+    C=1.0,
+    gamma=1.0
+)
+svm.fit(Xs, y_svm)
+
+predictor = KernelSVMPredictor(svm)
+# Vergleiche sklearn vs. manuelle Vorhersage
+matches = sum(
+    predictor.predict_manual(Xs[i]) == svm.predict([Xs[i]])[0]
+    for i in range(20)
+)
+print(f"Übereinstimmung (erste 20): {matches}/20")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Übereinstimmung (erste 20): 20/20</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: RBF-Kernel-Entscheidungsgrenze (Moons)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (Xs, y_svm, svm)
+import matplotlib.pyplot as plt
+import numpy as np
+
+xx, yy = np.meshgrid(
+    np.linspace(Xs[:, 0].min() - 0.5, Xs[:, 0].max() + 0.5, 200),
+    np.linspace(Xs[:, 1].min() - 0.5, Xs[:, 1].max() + 0.5, 200)
+)
+Z = svm.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.contourf(xx, yy, Z, alpha=0.3, cmap='coolwarm')
+ax.scatter(Xs[:, 0], Xs[:, 1], c=y_svm, cmap='coolwarm', s=25, edgecolors='k', linewidths=0.3)
+ax.scatter(svm.support_vectors_[:, 0], svm.support_vectors_[:, 1], s=100,
+           facecolors='none', edgecolors='green', linewidths=1.5, label='Support Vectors')
+ax.set_title("RBF-Kernel SVM — Entscheidungsgrenze (Moons)")
+ax.legend()
+plt.show()
+</code></pre>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button>
+        </div>
+      </div>
+
+      <!-- STUFE 5 -->
+      <div class="stufe stufe-sklearn" id="stufe-sklearn">
+        <div class="stufe-header">
+          <span class="stufe-label">Stufe 5</span>
+          <h2 class="stufe-title">🚀 Kernel-Auswahl mit sklearn</h2>
+        </div>
+        <div class="stufe-body">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 1 — Kernel-Vergleich auf drei Datensätzen</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.svm import SVC
+from sklearn.datasets import make_moons, make_circles, make_classification
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+import numpy as np
+
+# Drei verschiedene Datensätze
+datasets = {
+    'Moons (nichtlinear)':   make_moons(n_samples=200, noise=0.2, random_state=42),
+    'Circles (nichtlinear)': make_circles(n_samples=200, noise=0.1, random_state=42),
+    'Linear separierbar':    make_classification(
+        n_samples=200,
+        n_features=2,
+        n_redundant=0,
+        class_sep=2.0,
+        random_state=42
+    ),
+}
+
+kernels = ['linear', 'poly', 'rbf', 'sigmoid']
+
+for ds_name, (X, y) in datasets.items():
+    print(f"\n=== {ds_name} ===")
+    print(f"{'Kernel':<12} | {'CV Acc':>8} | {'Std':>6}")
+    print("-" * 35)
+    for k in kernels:
+        pipe = Pipeline([
+            ('scaler', StandardScaler()),
+            ('svm',    SVC(kernel=k, C=1.0, gamma='scale'))
+        ])
+        scores = cross_val_score(pipe, X, y, cv=5, scoring='accuracy')
+        print(f"{k:<12} | {scores.mean():>8.2%} | {scores.std():>6.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>=== Moons (nichtlinear) ===
+Kernel       |   CV Acc |    Std
+-----------------------------------
+linear       |   85.00% | 0.0418
+poly         |   86.00% | 0.0339
+rbf          |   95.50% | 0.0292
+sigmoid      |   71.50% | 0.0436
+
+=== Circles (nichtlinear) ===
+Kernel       |   CV Acc |    Std
+-----------------------------------
+linear       |   42.00% | 0.0245
+poly         |   50.50% | 0.0534
+rbf          |   78.00% | 0.0510
+sigmoid      |   55.50% | 0.0510
+
+=== Linear separierbar ===
+Kernel       |   CV Acc |    Std
+-----------------------------------
+linear       |   98.50% | 0.0200
+poly         |   97.00% | 0.0485
+rbf          |   98.00% | 0.0400
+sigmoid      |   98.00% | 0.0245</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Entscheidungsgrenzen verschiedener Kernels (Moons)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (datasets)
+import matplotlib.pyplot as plt
+import numpy as np
+
+X_m, y_m = datasets['Moons (nichtlinear)']
+Xm_s = StandardScaler().fit_transform(X_m)
+
+xx, yy = np.meshgrid(
+    np.linspace(Xm_s[:, 0].min() - 0.5, Xm_s[:, 0].max() + 0.5, 200),
+    np.linspace(Xm_s[:, 1].min() - 0.5, Xm_s[:, 1].max() + 0.5, 200)
+)
+
+fig, axes = plt.subplots(1, 2, figsize=(8, 3.6), sharey=True)
+for ax, k in zip(axes, ['linear', 'rbf']):
+    model = SVC(kernel=k, C=1.0, gamma='scale').fit(Xm_s, y_m)
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+    ax.contourf(xx, yy, Z, alpha=0.3, cmap='coolwarm')
+    ax.scatter(Xm_s[:, 0], Xm_s[:, 1], c=y_m, cmap='coolwarm', s=15, edgecolors='k', linewidths=0.3)
+    ax.set_title(f"kernel='{k}'")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
+          <div class="vis-box">
+            <div class="vis-box-label">📊 Visualisierung — Entscheidungsgrenzen verschiedener Kernels</div>
+            <p>
+              Auf dem "Moons"-Datensatz (zwei ineinander verschlungene Halbmonde) zeigt der
+              <strong>lineare Kernel</strong> eine gerade Trenngrenze, die viele Punkte falsch
+              klassifiziert (85 %). Der <strong>RBF-Kernel</strong> zeichnet eine geschwungene,
+              an die Mondform angepasste Grenze und erreicht 95.5 %. Beim "Circles"-Datensatz
+              (ein Kreis innerhalb eines Rings) versagt der lineare Kernel fast komplett (42 %,
+              kaum besser als Raten), während RBF die kreisförmige Struktur korrekt erfasst (78 %).
+            </p>
+          </div>
+
+          <p>Anschließend eine Grid-Search über C und gamma für den RBF-Kernel auf einem realen Datensatz:</p>
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header">
+              <span class="cell-lang">🐍 Schritt 2 — Grid-Search für RBF: C &amp; gamma</span>
+              <button class="copy-btn" onclick="copyCode(this)">Kopieren</button>
+            </div>
+            <pre><code class="language-python">from sklearn.model_selection import GridSearchCV
+from sklearn.datasets import load_breast_cancer
+
+X, y = load_breast_cancer(return_X_y=True)
+pipe = Pipeline([
+    ('sc', StandardScaler()),
+    ('svm', SVC(kernel='rbf'))
+])
+param_grid = {
+    'svm__C':     [0.1, 1, 10, 100],
+    'svm__gamma': [0.001, 0.01, 0.1, 'scale'],
+}
+gs = GridSearchCV(
+    pipe,
+    param_grid,
+    cv=5,
+    scoring='accuracy',
+    n_jobs=-1
+)
+gs.fit(X, y)
+print(f"Breast Cancer — Beste Parameter: {gs.best_params_}")
+print(f"Beste CV Accuracy: {gs.best_score_:.4f}")</code></pre>
+            <div class="code-cell-output">
+              <div class="code-cell-output-header">▶ Ausgabe</div>
+              <div class="code-cell-output-body">
+                <pre>Breast Cancer — Beste Parameter: {'svm__C': 10, 'svm__gamma': 0.01}
+Beste CV Accuracy: 0.9789</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: GridSearchCV-Heatmap (C &amp; gamma)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (gs, param_grid)
+import matplotlib.pyplot as plt
+import numpy as np
+
+scores = gs.cv_results_['mean_test_score'].reshape(
+    len(param_grid['svm__C']), len(param_grid['svm__gamma'])
+)
+
+fig, ax = plt.subplots(figsize=(5, 3.6))
+im = ax.imshow(scores, cmap='viridis', aspect='auto')
+ax.set_xticks(range(len(param_grid['svm__gamma'])))
+ax.set_xticklabels([str(g) for g in param_grid['svm__gamma']])
+ax.set_yticks(range(len(param_grid['svm__C'])))
+ax.set_yticklabels([str(c) for c in param_grid['svm__C']])
+ax.set_xlabel("gamma")
+ax.set_ylabel("C")
+ax.set_title("GridSearchCV — CV Accuracy (RBF-Kernel)")
+fig.colorbar(im, ax=ax, label="CV Accuracy")
+plt.show()
+</code></pre>
+          </div>
+        </div>
+        <div class="stufe-footer">
+          <button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button>
+        </div>
+      </div>
+
+      <div class="nav-arrows">
+        <a href="T02-soft-margin-c.html" class="nav-arrow">
+          <div class="nav-arrow-icon">←</div>
+          <div><div class="nav-arrow-sub">Vorheriges Thema</div><div class="nav-arrow-title">🔧 Soft Margin &amp; C</div></div>
+        </a>
+        <a href="T04-svc-sklearn.html" class="nav-arrow next">
+          <div class="nav-arrow-icon">→</div>
+          <div><div class="nav-arrow-sub">Nächstes Thema</div><div class="nav-arrow-title">🚀 SVC mit sklearn</div></div>
+        </a>
+      </div>
+
+    </main>
+  </div>
+  <site-footer caption="K3 · T3 · Kernel-Trick"></site-footer>
+
+  <script>
+    function copyCode(btn) {
+      const cell = btn.closest('.code-cell');
+      const code = cell.querySelector('code').textContent;
+      const out = cell.querySelector('.code-cell-output-body pre');
+      const text = out ? code + '\n\n# Ausgabe:\n' + out.textContent : code;
+      navigator.clipboard.writeText(text);
+      btn.textContent = 'Kopiert!';
+      setTimeout(() => btn.textContent = 'Kopieren', 2000);
+    }
+  </script>
+</body>
+</html>
