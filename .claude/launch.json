@@ -4,7 +4,7 @@
     {
       "name": "prm-v5",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "4209"],
+      "runtimeArgs": ["-m", "http.server", "4209", "--directory", "/Users/husinhassin/Library/Mobile Documents/com~apple~CloudDocs/Downloads/PRM - Alles/Webseite/PRM-ML-lernen-V5"],
       "port": 4209
     }
   ]
