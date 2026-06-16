@@ -82,7 +82,7 @@
       <div class="stufe stufe-scratch" id="stufe-scratch">
         <div class="stufe-header"><span class="stufe-label">Stufe 4</span><h2 class="stufe-title">🛠️ Bootstrapped Konfidenzintervalle</h2></div>
         <div class="stufe-body">
-          <div class="code-cell">
+          <div class="code-cell" data-runnable="true">
             <div class="code-cell-header"><span>Python · Bootstrap-CI für Metriken von Scratch</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
             <pre><code class="language-python">import numpy as np
 from sklearn.metrics import roc_auc_score, f1_score
@@ -134,6 +134,27 @@ F1:  0.9718 [95%-CI: 0.9412, 0.9935]</pre>
               </div>
             </div>
           </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Bootstrap-Konfidenzintervalle</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (auc_mean, auc_lo, auc_hi, f1_mean, f1_lo, f1_hi)
+import matplotlib.pyplot as plt
+
+metrics = ['AUC', 'F1']
+means = [auc_mean, f1_mean]
+lowers = [auc_mean - auc_lo, f1_mean - f1_lo]
+uppers = [auc_hi - auc_mean, f1_hi - f1_mean]
+
+plt.figure(figsize=(5, 4))
+plt.errorbar(metrics, means, yerr=[lowers, uppers], fmt='o', markersize=8,
+             capsize=6, linestyle='none')
+plt.ylim(0.9, 1.01)
+plt.title("Bootstrap-95%-Konfidenzintervalle")
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
       </div>
@@ -141,7 +162,7 @@ F1:  0.9718 [95%-CI: 0.9412, 0.9935]</pre>
       <div class="stufe stufe-sklearn" id="stufe-sklearn">
         <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 Vollständige CV-basierte Evaluation</h2></div>
         <div class="stufe-body">
-          <div class="code-cell">
+          <div class="code-cell" data-runnable="true">
             <div class="code-cell-header"><span>Python · Nested CV + Pipeline + Fehleranalyse</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
             <pre><code class="language-python">from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -202,6 +223,24 @@ Lernkurve (F1):
   n= 455: Train=1.000, Val=0.965, Gap=0.035</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Lernkurve</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (train_sizes, train_s, val_s)
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(6, 4))
+plt.plot(train_sizes, train_s.mean(axis=1), marker='o', label='Train-F1')
+plt.plot(train_sizes, val_s.mean(axis=1), marker='o', label='Val-F1')
+plt.xlabel("Anzahl Trainingsbeispiele")
+plt.ylabel("F1-Score")
+plt.title("Lernkurve (Random Forest)")
+plt.legend()
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>

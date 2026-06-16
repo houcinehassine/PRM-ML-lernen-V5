@@ -202,16 +202,39 @@ weighted avg       0.73      0.73      0.73        15</pre>
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Confusion Matrix als Heatmap</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (cm)
+import matplotlib.pyplot as plt
+import numpy as np
+
+matrix = np.array([[cm['TP'], cm['FN']],
+                    [cm['FP'], cm['TN']]])
+
+fig, ax = plt.subplots(figsize=(4, 4))
+im = ax.imshow(matrix, cmap='Blues')
+for i in range(2):
+    for j in range(2):
+        ax.text(j, i, matrix[i, j], ha='center', va='center', fontsize=14)
+
+ax.set_xticks([0, 1]); ax.set_xticklabels(['Pred. Krebs', 'Pred. Gesund'])
+ax.set_yticks([0, 1]); ax.set_yticklabels(['True Krebs', 'True Gesund'])
+ax.set_title("Confusion Matrix (Krebs-Screening)")
+fig.colorbar(im, ax=ax)
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
           <div class="vis-box">
             <div class="vis-box-label">📊 Visualisierung — Confusion Matrix als Heatmap</div>
             <p>
-              Die Confusion Matrix lässt sich als 2×2-Heatmap darstellen: Zeilen sind die echten
+              Die Confusion Matrix als 2×2-Heatmap: Zeilen sind die echten
               Klassen, Spalten die Vorhersagen. Hier (Krebs-Screening, TP=6, FN=2, FP=2, TN=5)
               sind die Diagonal-Felder (TP, TN) dunkler eingefärbt — sie zeigen die korrekten
               Vorhersagen. Je dunkler die Diagonale im Vergleich zu den Nebendiagonalen,
               desto besser das Modell.
             </p>
-            <img src="../assets/img/inhalt/k7-t01-confusion-heatmap.png" alt="Heatmap der Confusion Matrix mit TP, FN, FP, TN als 2x2-Raster, Diagonale dunkler eingefärbt">
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
@@ -307,6 +330,40 @@ print(f"Weighted F1: {f1_score(ym_te, ym_pred, average='weighted'):.4f}")</code>
 Weighted F1: 1.0000</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Confusion Matrix &amp; Threshold-Kurven</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (y_te, y_pred, y_prob, thresholds)
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+
+cm_sk = confusion_matrix(y_te, y_pred)
+im = axes[0].imshow(cm_sk, cmap='Blues')
+for i in range(2):
+    for j in range(2):
+        axes[0].text(j, i, cm_sk[i, j], ha='center', va='center', fontsize=14)
+axes[0].set_xticks([0, 1]); axes[0].set_xticklabels(['Malignant', 'Benign'])
+axes[0].set_yticks([0, 1]); axes[0].set_yticklabels(['Malignant', 'Benign'])
+axes[0].set_title("Confusion Matrix (Breast Cancer)")
+
+precisions = [precision_score(y_te, (y_prob >= t).astype(int)) for t in thresholds]
+recalls    = [recall_score(y_te, (y_prob >= t).astype(int)) for t in thresholds]
+f1s        = [f1_score(y_te, (y_prob >= t).astype(int)) for t in thresholds]
+
+axes[1].plot(thresholds, precisions, marker='o', label='Precision')
+axes[1].plot(thresholds, recalls, marker='o', label='Recall')
+axes[1].plot(thresholds, f1s, marker='o', label='F1')
+axes[1].set_xlabel("Threshold")
+axes[1].set_title("Metriken vs. Threshold")
+axes[1].legend()
+axes[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>

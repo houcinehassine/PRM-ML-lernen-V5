@@ -180,6 +180,25 @@ sklearn RF CV:  95.61% ± 0.0228</pre>
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Einzelbaum vs. Random Forest</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (dt, rf_scratch, rf, X_te, y_te)
+import matplotlib.pyplot as plt
+
+models = ['Einzelner Baum', 'Scratch RF', 'sklearn RF']
+scores = [dt.score(X_te, y_te), rf_scratch.score(X_te, y_te), rf.score(X_te, y_te)]
+
+fig, ax = plt.subplots(figsize=(5, 3.6))
+ax.bar(models, scores, color=['#888', '#3a7ca5', '#2e8b57'])
+ax.set_ylim(0.9, 1.0)
+ax.set_ylabel("Test Accuracy")
+ax.set_title("Einzelbaum vs. Random Forest")
+for i, s in enumerate(scores):
+    ax.text(i, s + 0.002, f"{s:.2%}", ha='center')
+plt.show()
+</code></pre>
+          </div>
+
           <div class="compare-grid">
             <div class="compare-card compare-card-a">
               <div class="compare-card-label">🌳 Bagging — alle Features pro Split</div>
@@ -260,6 +279,30 @@ print(f"RF OOB Score: {rf_oob.oob_score_:.4f}")</code></pre>
 RF OOB Score: 0.9596</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: GridSearchCV &amp; Extra Trees vs. RF OOB</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (gs, param_grid, et_cv, rf_oob)
+import matplotlib.pyplot as plt
+import numpy as np
+
+results = gs.cv_results_
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6))
+
+n_est = param_grid['n_estimators']
+means = [results['mean_test_score'][results['param_n_estimators'] == n].mean() for n in n_est]
+axes[0].plot(n_est, means, 'o-')
+axes[0].set_xlabel("n_estimators"); axes[0].set_ylabel("Mean CV Accuracy")
+axes[0].set_title("GridSearchCV: n_estimators")
+
+axes[1].bar(['Extra Trees CV', 'RF OOB'], [et_cv.mean(), rf_oob.oob_score_], color=['#3a7ca5', '#2e8b57'])
+axes[1].set_ylim(0.9, 1.0)
+axes[1].set_title("Extra Trees vs. RF OOB")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>

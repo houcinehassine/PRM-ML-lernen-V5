@@ -197,6 +197,25 @@ F2 (sklearn): 0.6250</pre>
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Precision-Recall-Kurve</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (recalls_s, precs_s, ap_s, y_te)
+import matplotlib.pyplot as plt
+
+baseline = y_te.mean()
+
+plt.figure(figsize=(5.5, 4.5))
+plt.plot(recalls_s, precs_s, label=f"PR-Kurve (AP = {ap_s:.3f})")
+plt.axhline(baseline, linestyle='--', color='gray', label=f"Baseline ({baseline:.1%})")
+plt.xlabel("Recall")
+plt.ylabel("Precision")
+plt.title("Precision-Recall-Kurve")
+plt.legend()
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
           <div class="vis-box">
             <div class="vis-box-label">📊 Visualisierung — Precision-Recall-Kurve</div>
             <p>
@@ -206,7 +225,6 @@ F2 (sklearn): 0.6250</pre>
               (Anteil der positiven Klasse im Datensatz) — eine gute Kurve liegt
               deutlich darüber.
             </p>
-            <img src="../assets/img/inhalt/k7-t03-pr-curve.png" alt="Precision-Recall-Kurve eines Random Forest auf unbalanciertem Datensatz, mit Zufalls-Baseline als horizontale Linie">
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
@@ -306,6 +324,32 @@ print(f"F2-Score (Recall-Fokus): {f2:.4f}")</code></pre>
                 <pre>F2-Score (Recall-Fokus): 0.5242</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: PR-Kurve &amp; F1 vs. Threshold</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (prec, rec, thresh, best_t, f1_scores, ap)
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+
+axes[0].plot(rec, prec, label=f"PR-Kurve (AP = {ap:.3f})")
+axes[0].set_xlabel("Recall")
+axes[0].set_ylabel("Precision")
+axes[0].set_title("Precision-Recall-Kurve (Fraud)")
+axes[0].legend()
+
+axes[1].plot(thresh, f1_scores, label="F1-Score")
+axes[1].axvline(best_t, linestyle='--', color='red', label=f"Bestes Threshold ({best_t:.2f})")
+axes[1].set_xlabel("Threshold")
+axes[1].set_ylabel("F1-Score")
+axes[1].set_title("F1-Score vs. Threshold")
+axes[1].legend()
+
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>

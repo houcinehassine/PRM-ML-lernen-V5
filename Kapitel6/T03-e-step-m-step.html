@@ -194,10 +194,26 @@ Gelernte Gewichte: [0.43902541 0.56097459]</pre>
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Log-Likelihood über die Iterationen</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (lls)
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(6, 4))
+plt.plot(lls, marker='o', markersize=3)
+plt.xlabel("Iteration")
+plt.ylabel("Log-Likelihood")
+plt.title("Log-Likelihood über die Iterationen")
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
           <div class="vis-box">
             <div class="vis-box-label">📊 Visualisierung — Log-Likelihood über die Iterationen</div>
             <p>
-              Trägt man die Liste <code>lls</code> über die Iterationsnummer auf, sieht man eine
+              Die Liste <code>lls</code> über die Iterationsnummer aufgetragen zeigt eine
               streng monoton steigende Kurve, die anfangs steil ansteigt (E-Step und M-Step
               "ziehen" die Parameter schnell in die Nähe der wahren Cluster) und sich danach
               abflacht, bis die Änderung unter die Toleranzgrenze <code>1e-6</code> fällt —
@@ -279,6 +295,24 @@ print(f"Punkte mit >30% Unsicherheit: {uncertain.sum()}")</code></pre>
 Punkte mit >30% Unsicherheit: 0</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Unsicherheit der Zuweisung</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, R_sklearn, gmm)
+import matplotlib.pyplot as plt
+
+uncertainty = 1 - R_sklearn.max(axis=1)
+
+plt.figure(figsize=(5.5, 4))
+sc = plt.scatter(X[:, 0], X[:, 1], c=uncertainty, cmap='magma_r', s=20, edgecolors='k', linewidths=0.3)
+plt.scatter(gmm.means_[:, 0], gmm.means_[:, 1], c='cyan', marker='X', s=120, label='Zentren')
+plt.colorbar(sc, label='Unsicherheit (1 - max Responsibility)')
+plt.title("Unsicherheit der Cluster-Zuweisung")
+plt.legend()
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>

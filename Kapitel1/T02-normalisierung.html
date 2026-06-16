@@ -234,17 +234,6 @@ Rücktransformation korrekt: True</pre></div>
               </div>
             </div>
 
-            <div class="vis-box">
-              <div class="vis-box-label">📊 Visualisierung — Verteilung vor/nach MinMax-Skalierung</div>
-              <p>
-                Ein Histogramm zeigt den Effekt: <strong>vorher</strong> liegen die Werte in ihrem
-                ursprünglichen Wertebereich (z.B. 100–300), <strong>nachher</strong> liegen alle
-                Werte in <code>[0, 1]</code> — die <em>Form</em> der Verteilung bleibt gleich,
-                nur die Skala der x-Achse ändert sich.
-              </p>
-              <img src="../assets/img/uebung/k1-ex2-minmax-hist.png" alt="Histogramm: Verteilung vor und nach MinMax-Skalierung, gleiche Form, andere Skala">
-            </div>
-
             <div class="code-cell" data-runnable="true">
               <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Verteilung vor/nach MinMax</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
               <pre><code class="language-python">import numpy as np
@@ -267,6 +256,16 @@ axes[1].set_xlabel("Skalierter Wert")
 fig.suptitle("Verteilung vor/nach MinMax-Skalierung — gleiche Form, andere Skala")
 plt.show()
 </code></pre>
+            </div>
+
+            <div class="vis-box">
+              <div class="vis-box-label">📊 Visualisierung — Verteilung vor/nach MinMax-Skalierung</div>
+              <p>
+                Das Histogramm zeigt den Effekt: <strong>vorher</strong> liegen die Werte in ihrem
+                ursprünglichen Wertebereich (z.B. 100–300), <strong>nachher</strong> liegen alle
+                Werte in <code>[0, 1]</code> — die <em>Form</em> der Verteilung bleibt gleich,
+                nur die Skala der x-Achse ändert sich.
+              </p>
             </div>
 
             <div class="so-what"><div class="so-what-label">Einblick</div><p>Der Scaler besteht aus 2 Phasen: <strong>fit</strong> (x_min/x_max berechnen) und <strong>transform</strong> (Formel anwenden). Das ist exakt das sklearn-Muster: <code>fit_transform(X_train)</code> → <code>transform(X_test)</code>. Die <code>inverse_transform</code>-Methode zeigt: Skalierung ist vollständig umkehrbar.</p></div>

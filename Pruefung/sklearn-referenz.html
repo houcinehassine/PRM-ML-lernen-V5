@@ -8,519 +8,849 @@
   <script type="module" src="../header.js"></script>
   <script type="module" src="../footer.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
   <style>
-    .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-6) var(--space-4) 0;text-align:center}
-    .pruef-hero h1{font-family:var(--font-display);font-size:var(--text-xl);margin-bottom:var(--space-2)}
-    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:64ch;margin:0 auto}
-    .pruef-section{max-width:1120px;margin:0 auto var(--space-10);padding:0 var(--space-4)}
-    .pruef-section h2{
-      display:flex;align-items:center;gap:var(--space-3);
-      margin-bottom:var(--space-4);padding-bottom:var(--space-2);
-      border-bottom:2px solid var(--color-border);
-      scroll-margin-top:4.5rem;
-    }
-    .pruef-num{
-      display:inline-flex;align-items:center;justify-content:center;
-      width:2rem;height:2rem;border-radius:var(--radius-md);
-      background:var(--color-primary-highlight);color:var(--color-primary);
-      font-weight:800;font-size:var(--text-sm);flex-shrink:0;
-    }
-    .est-import{
-      font-family:var(--font-mono);font-size:var(--text-xs);
-      background:var(--color-surface-2);border:1px solid var(--color-border);
-      border-radius:var(--radius-md);padding:var(--space-2) var(--space-3);
-      margin-bottom:var(--space-3);overflow-x:auto;
-    }
-    table code{font-size:var(--text-xs)}
-    .pruef-section h3{font-size:var(--text-md);margin:var(--space-6) 0 var(--space-2)}
+    /* ── Hero ── */
+    .pruef-hero{max-width:760px;margin:var(--space-6) 0 var(--space-4);text-align:center}
+    .pruef-hero h1{font-family:var(--font-display);font-size:clamp(1.6rem,3.5vw,2.4rem);margin-bottom:var(--space-2)}
+    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:60ch;margin:0 auto}
 
-    /* ═══ Parameter-Karten: 1-4 pro Zeile, je nach Browserbreite ═══ */
-    .cmd-grid{
-      display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-      gap:var(--space-3);margin-bottom:var(--space-3);
-    }
-    .cmd-card{
-      border:1px solid var(--color-border);border-radius:var(--radius-lg);
-      background:var(--color-surface);padding:var(--space-3);
-      display:flex;flex-direction:column;gap:.5rem;
-    }
-    /* breitere Karte für Beispiele mit längeren Code-/Output-Zeilen */
-    .cmd-card--wide{grid-column:span 2}
-    @media (max-width:560px){
-      .cmd-card--wide{grid-column:span 1}
-    }
-    .cmd-head{
-      font-size:var(--text-sm);font-weight:800;color:var(--color-primary);
-      word-break:break-word;text-align:center;
-    }
-    .cmd-desc{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.55;margin:0}
-    .cmd-desc code{font-size:var(--text-xs)}
+    /* ── Section-Level Nav ── */
+    .pruef-sec-nav{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:var(--space-6);padding-bottom:var(--space-3);border-bottom:1px solid var(--color-border)}
+    .pruef-sec-nav a{font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted);text-decoration:none;padding:.3rem .75rem;border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface);transition:all .15s;white-space:nowrap}
+    .pruef-sec-nav a:hover{color:var(--color-text);border-color:var(--color-primary)}
+    .pruef-sec-nav a.active{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
 
-    /* ═══ Mini-Code + Output direkt in der Karte (pro Methode/Aufruf) ═══ */
-    .cmd-code{
-      background:var(--color-surface-2);border:1px solid var(--color-border);
-      border-radius:var(--radius-md);padding:var(--space-2);
-      font-size:.72rem;line-height:1.5;overflow-x:auto;margin:0;
-    }
-    .cmd-out{
-      background:color-mix(in oklab,var(--color-success) 6%,var(--color-surface));
-      border:1px solid var(--color-border);border-radius:var(--radius-md);
-      padding:var(--space-2);font-size:.72rem;line-height:1.5;
-      color:var(--color-text-muted);overflow-x:auto;margin:0;font-family:var(--font-mono);
-    }
-    .cmd-card .cmd-out:before{content:"→ ";color:var(--color-success);font-weight:800}
-    .cmd-out--wrap{white-space:pre-wrap;word-break:break-word;overflow-x:hidden}
+    /* ── Section & headings ── */
+    .pruef-section{margin-bottom:var(--space-12)}
+    .pruef-section h2{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-5);padding-bottom:var(--space-3);border-bottom:3px solid var(--sec-color,var(--color-border));scroll-margin-top:4.5rem}
+    .pruef-section h3{font-size:1rem;font-weight:800;margin:var(--space-6) 0 var(--space-2);color:var(--sec-color,var(--color-text));letter-spacing:-.01em}
+    .pruef-num{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:var(--radius-md);background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 15%,var(--color-surface-2));color:var(--sec-color,var(--color-primary));font-weight:800;font-size:var(--text-sm);flex-shrink:0}
 
-    /* ═══ Setup-Karte: Import + Daten + Modell, volle Breite ═══ */
-    .cmd-setup{
-      grid-column:1 / -1;background:var(--color-surface-2);
-      border:1px solid var(--color-border);border-radius:var(--radius-lg);
-      padding:var(--space-3);display:flex;flex-direction:column;gap:.5rem;
+    /* ── Per-section accent colours ── */
+    #preprocessing   {--sec-color:#0d9488}
+    #lineare-modelle {--sec-color:#2563eb}
+    #svm             {--sec-color:#7c3aed}
+    #baumbasiert     {--sec-color:#d97706}
+    #clustering      {--sec-color:#db2777}
+    #model-selection {--sec-color:#dc2626}
+    #metrics         {--sec-color:#059669}
+
+    /* ── Ref card ── */
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-xl);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.8rem 1.1rem;background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 8%,var(--color-surface-2));border-bottom:1px solid color-mix(in oklab,var(--sec-color,var(--color-border)) 30%,var(--color-border))}
+    .ref-name{font-family:var(--font-mono);font-weight:800;color:var(--sec-color,var(--color-primary));font-size:1.05rem}
+    .ref-mod{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.14rem .55rem;border-radius:var(--radius-full);background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 15%,transparent);color:var(--sec-color,var(--color-primary))}
+    .ref-body{padding:1.1rem 1.2rem 1.2rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.95rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.88em;background:var(--color-surface-2);padding:.08em .38em;border-radius:4px;color:var(--sec-color,var(--color-primary))}
+    .ref-body pre{margin:.8rem 0 0;background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3);font-size:.82rem;line-height:1.6;overflow-x:auto}
+    .ref-body pre code{background:none;padding:0;color:inherit;font-size:1em}
+    .ref-params{list-style:none;margin:.6rem 0 0;padding:0;font-size:.88rem}
+    .ref-params li{padding:.35rem 0;border-bottom:1px dashed var(--color-border);line-height:1.6}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+    .ref-sub{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--sec-color,var(--color-text-muted));margin:.9rem 0 .2rem}
+
+    /* ── Details expander ── */
+    .ref-details{margin-top:.7rem;border:1px solid color-mix(in oklab,var(--sec-color,var(--color-border)) 25%,var(--color-border));border-radius:var(--radius-md);background:var(--color-surface);overflow:hidden}
+    .ref-details summary{cursor:pointer;list-style:none;padding:.45rem .8rem;font-size:.8rem;font-weight:800;color:var(--sec-color,var(--color-primary));display:flex;align-items:center;gap:.4rem;user-select:none}
+    .ref-details summary::-webkit-details-marker{display:none}
+    .ref-details summary::before{content:'▸';display:inline-block;transition:transform .15s;color:var(--sec-color,var(--color-primary))}
+    .ref-details[open] summary::before{transform:rotate(90deg)}
+    .ref-details[open] summary{border-bottom:1px solid var(--color-border)}
+    .ref-details summary:hover{background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 6%,var(--color-surface-2))}
+    .ref-details .ref-params{padding:.5rem .8rem .7rem}
+
+    /* ── Example-card grid (vertical stack, 3-col per card) ── */
+    .ref-grid{display:flex;flex-direction:column;gap:.4rem;margin-top:var(--space-4)}
+    .ref-ex{
+      display:grid;
+      grid-template-columns:minmax(140px,17%) 1fr minmax(200px,25%);
+      align-items:stretch;
+      border:1px solid var(--color-border);
+      border-left:3px solid var(--sec-color,var(--color-primary));
+      border-radius:var(--radius-md);
+      background:var(--color-surface);
+      overflow:hidden;
+      min-width:0;
     }
-    .cmd-setup .cmd-head{
-      text-align:left;font-size:var(--text-xs);font-weight:800;
-      color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em;
+    .ref-ex-meta{
+      padding:.6rem .85rem;
+      border-right:1px solid var(--color-border);
+      display:flex;
+      flex-direction:column;
+      gap:.3rem;
+      justify-content:center;
+      background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 4%,var(--color-surface-2));
     }
-    .cmd-setup .cmd-code{font-size:.78rem}
+    .ref-ex .ref-sub{
+      margin:0;font-size:.78rem;font-weight:800;text-transform:uppercase;
+      letter-spacing:.05em;color:var(--sec-color,var(--color-primary));
+    }
+    .ref-ex-meta > p{font-size:.84rem;color:var(--color-text-muted);line-height:1.5;margin:0}
+    .ref-ex pre{
+      margin:0;font-size:.76rem;line-height:1.55;
+      padding:.6rem .8rem;overflow-x:auto;
+      border-radius:0;border:none;
+      border-right:1px solid var(--color-border);
+      background:var(--color-surface-2);
+    }
+    .ref-ex pre code{font-size:1em}
+    
+    /* standalone .ref-out outside ref-ex (ref-body level) */
+    .ref-body > .ref-out{
+      margin:.4rem 0 0;padding:var(--space-2) var(--space-3);
+      border:1px solid color-mix(in oklab,var(--sec-color,#059669) 22%,var(--color-border));
+      border-left:3px solid var(--sec-color,#059669);
+      border-radius:var(--radius-sm);
+    }
+
+    /* ── Info-boxes (SVM section) ── */
+    .info-box{padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 6%,var(--color-surface));border:1px solid color-mix(in oklab,var(--sec-color,var(--color-primary)) 20%,var(--color-border));margin:var(--space-3) 0;font-size:.88rem;line-height:1.65}
+    .info-box.warning{background:color-mix(in oklab,var(--color-warning) 8%,var(--color-surface));border-color:color-mix(in oklab,var(--color-warning) 25%,var(--color-border))}
+
+    /* ── Output block ── */
+    .ref-out{
+      margin:.25rem 0 0;
+      padding:var(--space-2) var(--space-3);
+      background:color-mix(in oklab,var(--sec-color,#059669) 7%,var(--color-surface));
+      border:1px solid color-mix(in oklab,var(--sec-color,#059669) 22%,var(--color-border));
+      border-left:3px solid var(--sec-color,#059669);
+      border-radius:var(--radius-sm);
+      font-family:var(--font-mono);
+      font-size:.76rem;
+      line-height:1.55;
+      white-space:pre;
+      overflow-x:auto;
+      color:var(--color-text-muted);
+    }
+    .ref-ex .ref-out{font-size:.68rem;margin:.25rem 0 0;width:100%;box-sizing:border-box}
+
+    /* ── Kapitel filter bar ── */
+    .kapitel-filter-bar button.lernpfad-step{
+      appearance:none;background:none;border:none;cursor:pointer;
+      font-family:inherit;
+    }
+    .kapitel-filter-bar button.lernpfad-step.kf-all{--lp-color:var(--color-primary)}
+    .kf-hidden{display:none!important}
+
+    /* ── Responsive layout override for reference pages ── */
+    #main-content.content{max-width:none;padding:var(--space-6) var(--space-8)}
+    @media(max-width:900px){#main-content.content{padding:var(--space-4) var(--space-4)}}
   </style>
 </head>
 <body>
   <site-header active="pruefung" title="scikit-learn-Referenz – PRM V5"></site-header>
 
-  <div class="pruef-layout">
-    <nav class="pruef-side">
-      <div class="pruef-side-group">
-        <div class="pruef-side-label">Während der Prüfung</div>
-        <a href="cheatsheet.html">📋 Cheat-Sheet</a>
-        <a href="entscheidungshilfe.html">🧭 Entscheidungshilfe</a>
-        <a href="numpy-referenz.html">🔢 NumPy</a>
-        <a href="sklearn-referenz.html" class="active">🚀 sklearn</a>
-        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
-        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
-        <a href="code-scratch-referenz.html">🛠️ Von Scratch</a>
-      </div>
-      <div class="pruef-side-group" id="section-nav">
-        <div class="pruef-side-label">Auf dieser Seite</div>
-        <a href="#preprocessing">1 · Preprocessing</a>
-        <a href="#lineare-modelle">2 · Lineare Modelle</a>
-        <a href="#svm">3 · SVM</a>
-        <a href="#baumbasiert">4 · Baumbasiert</a>
-        <a href="#clustering">5 · Clustering &amp; PCA</a>
-        <a href="#model-selection">6 · Model Selection</a>
-        <a href="#metrics">7 · Metrics</a>
-      </div>
+  <div class="layout">
+    <site-sidebar active="pruefung/sklearn"></site-sidebar>
+
+  <main id="main-content" class="content">
+    <nav class="lernpfad-bar kapitel-filter-bar" id="kapitel-filter-bar" aria-label="Nach Kapitel filtern">
+      <button class="lernpfad-step kf-all active" data-kf="all">
+        <span class="lp-icon">📚</span><span>Alle Kapitel</span>
+      </button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#0d9488" data-kf="k1">
+        <span class="lp-icon">✂️</span><span>K1 · Preprocessing</span>
+      </button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#2563eb" data-kf="k2">
+        <span class="lp-icon">📈</span><span>K2 · Lin. Modelle</span>
+      </button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#7c3aed" data-kf="k3">
+        <span class="lp-icon">⚡</span><span>K3 · SVM</span>
+      </button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#d97706" data-kf="k5">
+        <span class="lp-icon">🌲</span><span>K5 · Baumbasiert</span>
+      </button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#db2777" data-kf="k4k6">
+        <span class="lp-icon">🔵</span><span>K4/K6 · Clustering &amp; GMM</span>
+      </button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#059669" data-kf="k7">
+        <span class="lp-icon">📊</span><span>K7 · Evaluation</span>
+      </button>
     </nav>
+
+
 
     <div class="pruef-hero">
       <h1>🚀 scikit-learn-Referenz</h1>
-      <p>Konstruktor, zentrale Parameter und Hyperparameter der wichtigsten Estimatoren aus K1–K7 — inkl. Erklärung, was jeder Parameter bewirkt.</p>
+      <p>Konstruktor, zentrale Parameter und Hyperparameter der wichtigsten Estimatoren aus K1–K7.</p>
     </div>
 
-  <main id="main-content" class="pruef-main">
+    
+
+
 
     <!-- ═══ 1 · PREPROCESSING ═══ -->
-    <section class="pruef-section" id="preprocessing">
+    <section class="pruef-section" id="preprocessing" data-kapitel="k1">
       <h2><span class="pruef-num">1</span> Preprocessing</h2>
 
       <h3>StandardScaler</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.preprocessing import StandardScaler
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">StandardScaler</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.preprocessing import StandardScaler
 X = np.array([[1, 200], [2, 300], [3, 400]])
 scaler = StandardScaler()</code></pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">fit(X)</code>
-          <p class="cmd-desc">berechnet Mittelwert &amp; Standardabweichung pro Feature</p>
-          <pre class="cmd-code"><code class="language-python">scaler.fit(X)
-print(scaler.mean_, scaler.scale_)</code></pre>
-          <pre class="cmd-out">[  2. 300.] [ 0.8165 81.6497]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">transform(X)</code>
-          <p class="cmd-desc">wendet Z-Score-Transformation an: (x − μ) / σ</p>
-          <pre class="cmd-code"><code class="language-python">print(scaler.transform(X))</code></pre>
-          <pre class="cmd-out">[[-1.2247 -1.2247]
+        <pre><code>StandardScaler(
+    copy=True,      # Kopiert X statt es in-place zu überschreiben.
+    with_mean=True, # Zentriert die Daten (subtrahiert den Mittelwert)
+    with_std=True,  # Skaliert auf Einheitsvarianz (teilt durch die Standardabweichung).
+)</code></pre>
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>copy=True</code> – Kopiert <code>X</code> statt es in-place zu überschreiben.</li>
+<li><code>with_mean=True</code> – Zentriert die Daten (subtrahiert den Mittelwert). Bei Sparse-Matrizen muss dies <code>False</code> sein.</li>
+<li><code>with_std=True</code> – Skaliert auf Einheitsvarianz (teilt durch die Standardabweichung).</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">fit(X)</p>
+                <p>berechnet Mittelwert &amp; Standardabweichung pro Feature</p>
+              </div>
+              <pre><code>scaler.fit(X)
+mean = scaler.mean_  # Mittelwert pro Feature
+scale = scaler.scale_  # Std.-Abweichung pro Feature
+print(mean, scale)</code></pre>
+<pre class="ref-out"><code>[  2. 300.] [ 0.8165 81.6497]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">transform(X)</p>
+                <p>wendet Z-Score-Transformation an: (x − μ) / σ</p>
+              </div>
+              <pre><code>X_trans = scaler.transform(X)  # transformierte Daten
+print(X_trans)</code></pre>
+<pre class="ref-out"><code>[[-1.2247 -1.2247]
  [ 0.      0.    ]
- [ 1.2247  1.2247]]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">fit_transform(X)</code>
-          <p class="cmd-desc">fit + transform in einem Schritt — <strong>nur auf Trainingsdaten!</strong></p>
-          <pre class="cmd-code"><code class="language-python">print(scaler.fit_transform(X))</code></pre>
-          <pre class="cmd-out">[[-1.2247 -1.2247]
+ [ 1.2247  1.2247]]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">fit_transform(X)</p>
+                <p>fit + transform in einem Schritt — <strong>nur auf Trainingsdaten!</strong></p>
+              </div>
+              <pre><code>X_trans = scaler.fit_transform(X)  # fitten + transformieren in einem Schritt
+print(X_trans)</code></pre>
+<pre class="ref-out"><code>[[-1.2247 -1.2247]
  [ 0.      0.    ]
- [ 1.2247  1.2247]]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">inverse_transform(Xs)</code>
-          <p class="cmd-desc">macht die Skalierung rückgängig — zurück in Originaleinheiten</p>
-          <pre class="cmd-code"><code class="language-python">Xs = scaler.transform(X)
-print(scaler.inverse_transform(Xs))</code></pre>
-          <pre class="cmd-out">[[  1. 200.]
+ [ 1.2247  1.2247]]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">inverse_transform(Xs)</p>
+                <p>macht die Skalierung rückgängig — zurück in Originaleinheiten</p>
+              </div>
+              <pre><code>Xs = scaler.transform(X)
+X_orig = scaler.inverse_transform(Xs)  # Rücktransformation in Originalraum
+print(X_orig)</code></pre>
+<pre class="ref-out"><code>[[  1. 200.]
  [  2. 300.]
- [  3. 400.]]</pre>
+ [  3. 400.]]</code></pre>
+            </div>
         </div>
+      </div>
       </div>
 
       <h3>MinMaxScaler</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.preprocessing import MinMaxScaler
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">MinMaxScaler</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.preprocessing import MinMaxScaler
 X = np.array([[1, 200], [2, 300], [3, 400]])</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">feature_range=(0,1)</code>
-          <p class="cmd-desc">Standard — skaliert linear auf [0, 1]</p>
-          <pre class="cmd-code"><code class="language-python">print(MinMaxScaler(feature_range=(0, 1)).fit_transform(X))</code></pre>
-          <pre class="cmd-out">[[0.  0. ]
+        <ul class="ref-params">
+<li><code>feature_range=(0, 1)</code> – Ziel-Intervall, auf das skaliert wird — z.B. <code>(-1, 1)</code> für neuronale Netze mit tanh.</li>
+<li><code>copy=True</code> – Kopiert <code>X</code> statt es in-place zu überschreiben.</li>
+<li><code>clip=False</code> – Wenn <code>True</code>, werden Transform-Werte außerhalb von <code>feature_range</code> auf die Grenzen abgeschnitten (z.B. bei Test-Ausreißern außerhalb des Trainingsbereichs).</li>
+</ul>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">feature_range=(0,1)</p>
+                <p>Standard — skaliert linear auf [0, 1]</p>
+              </div>
+              <pre><code>print(MinMaxScaler(feature_range=(0, 1)).fit_transform(X))</code></pre>
+<pre class="ref-out"><code>[[0.  0. ]
  [0.5 0.5]
- [1.  1. ]]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">feature_range=(-1,1)</code>
-          <p class="cmd-desc">beliebiges Zielintervall möglich</p>
-          <pre class="cmd-code"><code class="language-python">print(MinMaxScaler(feature_range=(-1, 1)).fit_transform(X))</code></pre>
-          <pre class="cmd-out">[[-1. -1.]
+ [1.  1. ]]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">feature_range=(-1,1)</p>
+                <p>beliebiges Zielintervall möglich</p>
+              </div>
+              <pre><code>print(MinMaxScaler(feature_range=(-1, 1)).fit_transform(X))</code></pre>
+<pre class="ref-out"><code>[[-1. -1.]
  [ 0.  0.]
- [ 1.  1.]]</pre>
+ [ 1.  1.]]</code></pre>
+            </div>
         </div>
+      </div>
       </div>
 
       <h3>OneHotEncoder / LabelEncoder</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import LabelEncoder</code></pre>
+                  <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">OneHotEncoder</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
         </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">OneHotEncoder(sparse_output=False, handle_unknown='ignore')</code>
-          <p class="cmd-desc"><code>handle_unknown='ignore'</code> verhindert Fehler bei unbekannten Kategorien im Test-Set</p>
-          <pre class="cmd-code"><code class="language-python">ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
-ohe.fit([['rot'], ['gruen'], ['blau']])
-print(ohe.categories_)
-print(ohe.transform([['rot'], ['gelb']]))  # 'gelb' unbekannt</code></pre>
-          <pre class="cmd-out">[array(['blau', 'gruen', 'rot'], dtype=object)]
+        <div class="ref-body">
+          <pre><code>from sklearn.preprocessing import OneHotEncoder
+X_cat = [['rot'], ['gruen'], ['blau'], ['rot']]</code></pre>
+          <pre><code>OneHotEncoder(
+    categories='auto',      # Kategorien automatisch aus Trainingsdaten
+    drop=None,              # 'first' entfernt erste Kategorie (keine Multikollinearität)
+    sparse_output=True,     # False → dichtes ndarray statt Sparse-Matrix
+    handle_unknown='error', # 'ignore' → unbekannte Kategorien als 0-Vektor
+    min_frequency=None,     # seltene Kategorien → gemeinsamer Bin
+    max_categories=None,    # begrenzt Output-Kategorien pro Feature
+)</code></pre>
+          <details class="ref-details">
+            <summary>📖 Parameter — Details</summary>
+            <ul class="ref-params">
+          <li><code>categories='auto'</code> – Kategorien werden automatisch aus den Trainingsdaten gelernt</li>
+          <li><code>drop=None</code> – 'first' entfernt erste Kategorie pro Feature (vermeidet Multikollinearität)</li>
+          <li><code>sparse_output=True</code> – False liefert ein dichtes ndarray statt einer Sparse-Matrix</li>
+          <li><code>handle_unknown='error'</code> – 'ignore' kodiert unbekannte Kategorien als Nullvektor</li>
+          <li><code>min_frequency=None</code> – Kategorien unter dieser Häufigkeit → ein gemeinsamer Seltene-Kategorie-Bin</li>
+          <li><code>max_categories=None</code> – Begrenzt die maximale Anzahl an Output-Kategorien pro Feature</li>
+            </ul>
+          </details>
+          <div class="ref-grid">
+            <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">fit + transform</p>
+                <p>kodiert Kategorien als One-Hot-Vektoren — <strong>sparse_output=False</strong> für ndarray</p>
+              </div>
+              <pre><code>model = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+model.fit(X_cat)
+cats = model.categories_  # gelernte Kategorien
+print(cats)
+X_trans = model.transform([['rot'], ['gelb']])  # transformierte Daten
+print(X_trans)</code></pre>
+<pre class="ref-out"><code>[array(['blau', 'gruen', 'rot'], dtype=object)]
 [[0. 0. 1.]
- [0. 0. 0.]]</pre>
+ [0. 0. 0.]]</code></pre>
+            </div>
+          </div>
         </div>
-        <div class="cmd-card">
-          <code class="cmd-head">LabelEncoder()</code>
-          <p class="cmd-desc">kodiert Ziel-Variable y als 0..n_classes-1 (kein Konstruktor-Parameter)</p>
-          <pre class="cmd-code"><code class="language-python">y = ['Katze', 'Hund', 'Katze', 'Vogel']
-print(LabelEncoder().fit_transform(y))</code></pre>
-          <pre class="cmd-out">[1 0 1 2]</pre>
+      </div>
+
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">LabelEncoder</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
+        </div>
+        <div class="ref-body">
+          <pre><code>from sklearn.preprocessing import LabelEncoder
+y = ['Katze', 'Hund', 'Katze', 'Vogel']</code></pre>
+          <div class="ref-grid">
+            <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">fit + transform</p>
+                <p>kodiert String-Labels als Ganzzahlen 0..n−1</p>
+              </div>
+              <pre><code>model = LabelEncoder()
+model.fit(y)
+X_trans = model.transform(y)  # transformierte Daten
+print(X_trans)
+klassen = model.classes_  # bekannte Klassen
+print(klassen)</code></pre>
+<pre class="ref-out"><code>[1 0 1 2]
+['Hund' 'Katze' 'Vogel']</code></pre>
+            </div>
+            <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">inverse_transform</p>
+                <p>wandelt kodierte Zahlen zurück in Original-Labels</p>
+              </div>
+              <pre><code>model = LabelEncoder()
+model.fit(y)
+encoded = model.transform(y)
+X_orig = model.inverse_transform(encoded)  # Rücktransformation in Originalraum
+print(X_orig)</code></pre>
+<pre class="ref-out"><code>['Katze' 'Hund' 'Katze' 'Vogel']</code></pre>
+            </div>
+          </div>
         </div>
       </div>
 
       <h3>train_test_split</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.model_selection import train_test_split
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">train_test_split</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.model_selection import train_test_split
 X = np.arange(10).reshape(5, 2)
 y = np.array([0, 1, 0, 1, 0])</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">train_test_split(
-    *arrays,            # X, y, ... beliebig viele gleich lange Arrays
-    test_size=None,     # Anteil/Anzahl Test-Samples (Standard 0.25 wenn beide None)
-    train_size=None,    # Anteil/Anzahl Train-Samples
-    random_state=None,  # Seed für Reproduzierbarkeit
-    shuffle=True,       # vor dem Split mischen
-    stratify=None,      # Array für klassen-proportionalen Split
+        <pre><code>train_test_split(
+    *arrays,           # X, y, ..
+    test_size=None,    # Anteil (float 0–1) oder Anzahl (int) der Testdaten
+    train_size=None,   # Anteil/Anzahl Trainingsdaten
+    random_state=None, # Seed für reproduzierbare Splits
+    shuffle=True,      # mischt die Daten vor dem Split
+    stratify=None,     # Array (meist y) für klassen-proportionalen Split
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">test_size</code>
-          <p class="cmd-desc">Anteil für Test-Set, z.B. 0.4 = 40%</p>
-          <pre class="cmd-code"><code class="language-python">X_train, X_test, y_train, y_test = train_test_split(
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>*arrays</code> – X, y, ... beliebig viele gleich lange Arrays/Matrizen, die synchron gesplittet werden.</li>
+<li><code>test_size=None</code> – Anteil (float 0–1) oder Anzahl (int) der Testdaten. Standard 0.25, wenn weder <code>test_size</code> noch <code>train_size</code> gesetzt sind.</li>
+<li><code>train_size=None</code> – Anteil/Anzahl Trainingsdaten — meist weggelassen, ergibt sich automatisch aus <code>test_size</code>.</li>
+<li><code>random_state=None</code> – Seed für reproduzierbare Splits — gleicher Wert = gleicher Split.</li>
+<li><code>shuffle=True</code> – mischt die Daten vor dem Split. Bei Zeitreihen auf <code>False</code> setzen, um die Reihenfolge zu erhalten.</li>
+<li><code>stratify=None</code> – Array (meist <code>y</code>) für klassen-proportionalen Split — wichtig bei unbalancierten Klassen.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">test_size</p>
+                <p>Anteil für Test-Set, z.B. 0.4 = 40%</p>
+              </div>
+              <pre><code>X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.4, random_state=42)
-print(X_train.shape, X_test.shape)</code></pre>
-          <pre class="cmd-out">(3, 2) (2, 2)</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">random_state</code>
-          <p class="cmd-desc">Seed für Reproduzierbarkeit — gleicher Seed = gleicher Split</p>
-          <pre class="cmd-code"><code class="language-python">_, _, ytr1, _ = train_test_split(X, y, test_size=0.4, random_state=42)
+train_shape = X_train.shape  # Zeilen × Features im Trainingsset
+test_shape  = X_test.shape   # Zeilen × Features im Testset
+print(train_shape, test_shape)</code></pre>
+<pre class="ref-out"><code>(3, 2) (2, 2)</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">random_state</p>
+                <p>Seed für Reproduzierbarkeit — gleicher Seed = gleicher Split</p>
+              </div>
+              <pre><code>_, _, ytr1, _ = train_test_split(X, y, test_size=0.4, random_state=42)
 _, _, ytr2, _ = train_test_split(X, y, test_size=0.4, random_state=42)
 print(ytr1, ytr2)</code></pre>
-          <pre class="cmd-out">[0 0 1] [0 0 1]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">stratify=y</code>
-          <p class="cmd-desc">erhält Klassenverteilung in Train/Test (wichtig bei Imbalance)</p>
-          <pre class="cmd-code"><code class="language-python">X2 = np.arange(20).reshape(10, 2)
+<pre class="ref-out"><code>[0 0 1] [0 0 1]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">stratify=y</p>
+                <p>erhält Klassenverteilung in Train/Test (wichtig bei Imbalance)</p>
+              </div>
+              <pre><code>X2 = np.arange(20).reshape(10, 2)
 y2 = np.array([0,0,0,0,0,0,0,1,1,1])
 _, _, ytr, yte = train_test_split(
     X2, y2, test_size=0.3, random_state=42, stratify=y2)
 print(ytr, yte)</code></pre>
-          <pre class="cmd-out">[1 0 0 0 0 0 1] [1 0 0]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">shuffle=False</code>
-          <p class="cmd-desc">Standard True — bei Zeitreihen auf False setzen (Reihenfolge bleibt erhalten)</p>
-          <pre class="cmd-code"><code class="language-python">_, _, ytr, yte = train_test_split(X, y, test_size=0.4, shuffle=False)
+<pre class="ref-out"><code>[1 0 0 0 0 0 1] [1 0 0]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">shuffle=False</p>
+                <p>Standard True — bei Zeitreihen auf False setzen (Reihenfolge bleibt erhalten)</p>
+              </div>
+              <pre><code>_, _, ytr, yte = train_test_split(X, y, test_size=0.4, shuffle=False)
 print(ytr, yte)</code></pre>
-          <pre class="cmd-out">[0 1 0] [1 0]</pre>
+<pre class="ref-out"><code>[0 1 0] [1 0]</code></pre>
+            </div>
         </div>
+      </div>
       </div>
     </section>
 
     <!-- ═══ 2 · LINEARE MODELLE ═══ -->
-    <section class="pruef-section" id="lineare-modelle">
+    <section class="pruef-section" id="lineare-modelle" data-kapitel="k2">
       <h2><span class="pruef-num">2</span> Lineare Modelle</h2>
 
       <h3>LinearRegression</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.linear_model import LinearRegression
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">LinearRegression</span>
+          <span class="ref-mod">sklearn.linear_model</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.linear_model import LinearRegression
 X = np.array([[1], [2], [3], [4]])
 y = np.array([2, 4, 6, 8])
-model = LinearRegression().fit(X, y)</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten — kaum Tuning nötig</p>
-          <pre class="cmd-code"><code class="language-python">LinearRegression(
-    fit_intercept=True,  # Achsenabschnitt mitschätzen
-    copy_X=True,         # X vor Fit kopieren statt überschreiben
-    n_jobs=None,         # Parallelisierung (nur bei vielen Targets relevant)
-    positive=False,      # True erzwingt nicht-negative Koeffizienten
+model = LinearRegression()
+model.fit(X, y)</code></pre>
+        <pre><code>LinearRegression(
+    fit_intercept=True, # schätzt den Achsenabschnitt b mit; False erzwingt eine Gerade durch…
+    copy_X=True,        # kopiert X vor dem Fit statt es in-place zu überschreiben.
+    n_jobs=None,        # Parallelisierung über mehrere Zielgrößen
+    positive=False,     # True erzwingt nicht-negative Koeffizienten (z.B
 )</code></pre>
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>fit_intercept=True</code> – schätzt den Achsenabschnitt <code>b</code> mit; <code>False</code> erzwingt eine Gerade durch den Ursprung.</li>
+<li><code>copy_X=True</code> – kopiert <code>X</code> vor dem Fit statt es in-place zu überschreiben.</li>
+<li><code>n_jobs=None</code> – Parallelisierung über mehrere Zielgrößen — nur relevant bei Multi-Output-Regression.</li>
+<li><code>positive=False</code> – <code>True</code> erzwingt nicht-negative Koeffizienten (z.B. bei physikalisch sinnvollen Größen).</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">.coef_ / .intercept_</p>
+                <p>gelernte Steigung(en) und Achsenabschnitt nach <code>fit()</code></p>
+              </div>
+              <pre><code>koeff = model.coef_  # Gewichte pro Feature
+achse = model.intercept_  # y-Achsenabschnitt
+print(koeff, achse)</code></pre>
+<pre class="ref-out"><code>[2.] 0.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">score(X, y)</p>
+                <p>R² auf den übergebenen Daten — 1.0 = perfekte Vorhersage</p>
+              </div>
+              <pre><code>genauigkeit = model.score(X, y)  # Accuracy auf den Testdaten
+print(genauigkeit)</code></pre>
+<pre class="ref-out"><code>1.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">predict([[5]])</p>
+                <p>Vorhersage für neue, unbekannte Werte</p>
+              </div>
+              <pre><code>y_pred = model.predict([[5]])  # Klassenvorhersagen
+print(y_pred)</code></pre>
+<pre class="ref-out"><code>[10.]</code></pre>
+            </div>
         </div>
-        <div class="cmd-card">
-          <code class="cmd-head">.coef_ / .intercept_</code>
-          <p class="cmd-desc">gelernte Steigung(en) und Achsenabschnitt nach <code>fit()</code></p>
-          <pre class="cmd-code"><code class="language-python">print(model.coef_, model.intercept_)</code></pre>
-          <pre class="cmd-out">[2.] 0.0</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">score(X, y)</code>
-          <p class="cmd-desc">R² auf den übergebenen Daten — 1.0 = perfekte Vorhersage</p>
-          <pre class="cmd-code"><code class="language-python">print(model.score(X, y))</code></pre>
-          <pre class="cmd-out">1.0</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">predict([[5]])</code>
-          <p class="cmd-desc">Vorhersage für neue, unbekannte Werte</p>
-          <pre class="cmd-code"><code class="language-python">print(model.predict([[5]]))</code></pre>
-          <pre class="cmd-out">[10.]</pre>
-        </div>
+      </div>
       </div>
       <p style="color:var(--color-text-muted);font-size:var(--text-sm)">Keine relevanten Hyperparameter — löst die Normalengleichung (OLS) ohne Regularisierung.</p>
 
       <h3>Ridge / Lasso</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.linear_model import Ridge, Lasso
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Ridge / Lasso</span>
+          <span class="ref-mod">sklearn.linear_model</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.linear_model import Ridge, Lasso
 X = np.array([[1, 1], [2, 2.1], [3, 2.9], [4, 4.1]])
 y = np.array([2, 4, 6, 8])</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter — Ridge</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">Ridge(
+        <p class="ref-sub">Ridge</p>
+        <pre><code>Ridge(
     alpha=1.0,          # Regularisierungsstärke (L2)
-    fit_intercept=True,
-    copy_X=True,
-    max_iter=None,      # None → solverabhängiger Default
-    tol=1e-4,
-    solver='auto',      # 'auto','svd','cholesky','lsqr','sag',...
-    positive=False,
-    random_state=None,
+    fit_intercept=True, # Achsenabschnitt mitschätzen.
+    copy_X=True,        # kopiert X statt es in-place zu überschreiben.
+    max_iter=None,      # max
+    tol=1e-4,           # Konvergenztoleranz für iterative Solver.
+    solver='auto',      # wählt automatisch passenden Solver ('svd', 'cholesky', 'lsqr', 'sag',…
+    positive=False,     # erzwingt nicht-negative Koeffizienten.
+    random_state=None,  # nur relevant für die Solver 'sag'/'saga'.
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter — Lasso</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">Lasso(
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>alpha=1.0</code> – Regularisierungsstärke (L2) — größer = stärkere Schrumpfung der Koeffizienten Richtung 0 (weniger Overfitting, mehr Bias).</li>
+<li><code>fit_intercept=True</code> – Achsenabschnitt mitschätzen.</li>
+<li><code>copy_X=True</code> – kopiert <code>X</code> statt es in-place zu überschreiben.</li>
+<li><code>max_iter=None</code> – max. Iterationen für iterative Solver; <code>None</code> = solverabhängiger Default.</li>
+<li><code>tol=1e-4</code> – Konvergenztoleranz für iterative Solver.</li>
+<li><code>solver='auto'</code> – wählt automatisch passenden Solver (<code>'svd'</code>, <code>'cholesky'</code>, <code>'lsqr'</code>, <code>'sag'</code>, <code>'saga'</code>, ...).</li>
+<li><code>positive=False</code> – erzwingt nicht-negative Koeffizienten.</li>
+<li><code>random_state=None</code> – nur relevant für die Solver <code>'sag'</code>/<code>'saga'</code>.</li>
+</ul>
+</details>
+        <p class="ref-sub">Lasso</p>
+        <pre><code>Lasso(
     alpha=1.0,          # Regularisierungsstärke (L1)
-    fit_intercept=True,
-    copy_X=True,
-    max_iter=1000,
-    tol=1e-4,
-    selection='cyclic', # oder 'random'
-    positive=False,
-    random_state=None,
+    fit_intercept=True, # Achsenabschnitt mitschätzen.
+    copy_X=True,        # kopiert X statt es in-place zu überschreiben.
+    max_iter=1000,      # max. Iterationen des Koordinatenabstiegs
+    tol=1e-4,           # Konvergenztoleranz.
+    selection='cyclic', # 'random' wählt die zu aktualisierende Koordinate zufällig
+    positive=False,     # erzwingt nicht-negative Koeffizienten.
+    random_state=None,  # relevant bei selection='random'.
 )</code></pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">alpha</code>
-          <p class="cmd-desc">Regularisierungsstärke. α=0 → wie OLS. Größer α → stärkere Schrumpfung der Gewichte → weniger Overfitting, mehr Bias</p>
-          <pre class="cmd-code"><code class="language-python">for a in [0.0, 1.0, 10.0]:
-    print(a, Ridge(alpha=a).fit(X, y).coef_)</code></pre>
-          <pre class="cmd-out">0.0 [2. 0.]
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>alpha=1.0</code> – Regularisierungsstärke (L1) — größer = mehr Koeffizienten werden exakt 0 (automatische Feature-Selektion).</li>
+<li><code>fit_intercept=True</code> – Achsenabschnitt mitschätzen.</li>
+<li><code>copy_X=True</code> – kopiert <code>X</code> statt es in-place zu überschreiben.</li>
+<li><code>max_iter=1000</code> – max. Iterationen des Koordinatenabstiegs — bei Konvergenzwarnung erhöhen.</li>
+<li><code>tol=1e-4</code> – Konvergenztoleranz.</li>
+<li><code>selection='cyclic'</code> – <code>'random'</code> wählt die zu aktualisierende Koordinate zufällig — kann bei hochdimensionalen Daten schneller konvergieren.</li>
+<li><code>positive=False</code> – erzwingt nicht-negative Koeffizienten.</li>
+<li><code>random_state=None</code> – relevant bei <code>selection='random'</code>.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">alpha</p>
+                <p>Regularisierungsstärke. α=0 → wie OLS. Größer α → stärkere Schrumpfung der Gewichte → weniger Overfitting, mehr Bias</p>
+              </div>
+              <pre><code>for a in [0.0, 1.0, 10.0]:
+    model = Ridge(alpha=a)
+    model.fit(X, y)
+    koeff = model.coef_  # Gewichte pro Feature
+    print(koeff)</code></pre>
+<pre class="ref-out"><code>0.0 [2. 0.]
 1.0 [0.9119 0.8968]
-10.0 [0.4978 0.5015]</pre>
+10.0 [0.4978 0.5015]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">Ridge (L2)</p>
+                <p>schrumpft alle Gewichte, setzt sie aber nie exakt auf 0</p>
+              </div>
+              <pre><code>print(Ridge(alpha=1.0).fit(X, y).coef_)</code></pre>
+<pre class="ref-out"><code>[0.9119 0.8968]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">Lasso (L1)</p>
+                <p>kann Gewichte exakt auf 0 setzen → Feature-Selektion</p>
+              </div>
+              <pre><code>print(Lasso(alpha=1.0).fit(X, y).coef_)</code></pre>
+<pre class="ref-out"><code>[0.     1.1897]</code></pre>
+            </div>
         </div>
-        <div class="cmd-card">
-          <code class="cmd-head">Ridge (L2)</code>
-          <p class="cmd-desc">schrumpft alle Gewichte, setzt sie aber nie exakt auf 0</p>
-          <pre class="cmd-code"><code class="language-python">print(Ridge(alpha=1.0).fit(X, y).coef_)</code></pre>
-          <pre class="cmd-out">[0.9119 0.8968]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">Lasso (L1)</code>
-          <p class="cmd-desc">kann Gewichte exakt auf 0 setzen → Feature-Selektion</p>
-          <pre class="cmd-code"><code class="language-python">print(Lasso(alpha=1.0).fit(X, y).coef_)</code></pre>
-          <pre class="cmd-out">[0.     1.1897]</pre>
-        </div>
+      </div>
       </div>
 
       <h3>LogisticRegression</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.linear_model import LogisticRegression
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">LogisticRegression</span>
+          <span class="ref-mod">sklearn.linear_model</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.linear_model import LogisticRegression
 from sklearn.datasets import load_iris
 X, y = load_iris(return_X_y=True)</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">LogisticRegression(
-    penalty='l2',        # 'l1','l2','elasticnet','none'
-    C=1.0,               # inverse Regularisierungsstärke
-    fit_intercept=True,
-    class_weight=None,   # z.B. 'balanced'
-    random_state=None,
-    solver='lbfgs',      # 'lbfgs','liblinear','newton-cg','sag','saga'
-    max_iter=100,
-    multi_class='auto',  # 'ovr' oder 'multinomial'
-    l1_ratio=None,       # nur bei penalty='elasticnet' (0..1)
-    n_jobs=None,
+        <pre><code>LogisticRegression(
+    penalty='l2',       # Art der Regularisierung
+    C=1.0,              # inverse Regularisierungsstärke
+    fit_intercept=True, # Achsenabschnitt mitschätzen.
+    class_weight=None,  # 'balanced' gewichtet Klassen invers zu ihrer Häufigkeit
+    random_state=None,  # Seed für Solver mit Zufallskomponente ('sag', 'saga', 'liblinear').
+    solver='lbfgs',     # Optimierungsalgorithmus
+    max_iter=100,       # max. Iterationen bis Konvergenz
+    multi_class='auto', # 'ovr' (One-vs-Rest) oder 'multinomial' (Softmax) für…
+    l1_ratio=None,      # Mischverhältnis L1/L2, nur bei penalty='elasticnet' (0 = reines L2, 1…
+    n_jobs=None,        # Parallelisierung bei multi_class='ovr'.
 )</code></pre>
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>penalty='l2'</code> – Art der Regularisierung — <code>'l1'</code> (Feature-Selektion), <code>'l2'</code> (Standard), <code>'elasticnet'</code> (Mischung), <code>None</code> (keine).</li>
+<li><code>C=1.0</code> – inverse Regularisierungsstärke — kleinerer Wert = stärkere Regularisierung.</li>
+<li><code>fit_intercept=True</code> – Achsenabschnitt mitschätzen.</li>
+<li><code>class_weight=None</code> – <code>'balanced'</code> gewichtet Klassen invers zu ihrer Häufigkeit — wichtig bei unbalancierten Daten.</li>
+<li><code>random_state=None</code> – Seed für Solver mit Zufallskomponente (<code>'sag'</code>, <code>'saga'</code>, <code>'liblinear'</code>).</li>
+<li><code>solver='lbfgs'</code> – Optimierungsalgorithmus — bestimmt auch, welche <code>penalty</code> unterstützt wird (z.B. <code>'liblinear'</code> für <code>'l1'</code>, <code>'saga'</code> für <code>'elasticnet'</code>).</li>
+<li><code>max_iter=100</code> – max. Iterationen bis Konvergenz — bei "did not converge"-Warnung erhöhen.</li>
+<li><code>multi_class='auto'</code> – <code>'ovr'</code> (One-vs-Rest) oder <code>'multinomial'</code> (Softmax) für Mehrklassen-Probleme.</li>
+<li><code>l1_ratio=None</code> – Mischverhältnis L1/L2, nur bei <code>penalty='elasticnet'</code> (0 = reines L2, 1 = reines L1).</li>
+<li><code>n_jobs=None</code> – Parallelisierung bei <code>multi_class='ovr'</code>.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">C</p>
+                <p>Inverse Regularisierungsstärke (1/λ). <strong>Kleines C</strong> = starke Regularisierung, <strong>großes C</strong> = wenig Regularisierung</p>
+              </div>
+              <pre><code>model1 = LogisticRegression(max_iter=200, C=1.0)
+model1.fit(X, y)
+model2 = LogisticRegression(max_iter=200, C=0.01)
+model2.fit(X, y)
+acc1 = model1.score(X, y)  # Accuracy mit C=1.0 (schwache Regularisierung)
+acc2 = model2.score(X, y)  # Accuracy mit C=0.01 (starke Regularisierung)
+print(acc1, acc2)</code></pre>
+<pre class="ref-out"><code>0.9733 0.8733</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">penalty</p>
+                <p>'l1', 'l2' (Standard), 'elasticnet' oder 'none' — Art der Regularisierung</p>
+              </div>
+              <pre><code>model = LogisticRegression(max_iter=200, penalty='l1', solver='liblinear')
+model.fit(X, y)
+genauigkeit = model.score(X, y)  # Accuracy auf den Testdaten
+print(genauigkeit)</code></pre>
+<pre class="ref-out"><code>0.96</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">solver</p>
+                <p>Optimierungsalgorithmus, z.B. 'lbfgs' (Standard), 'liblinear' (gut für l1)</p>
+              </div>
+              <pre><code>for s in ['lbfgs', 'liblinear']:
+    model = LogisticRegression(max_iter=200, solver=s)
+    model.fit(X, y)
+    print(s, model.score(X, y))</code></pre>
+<pre class="ref-out"><code>lbfgs 0.9733
+liblinear 0.96</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">max_iter</p>
+                <p>maximale Iterationen bis Konvergenz (bei Warnung erhöhen, z.B. 1000)</p>
+              </div>
+              <pre><code>model = LogisticRegression(max_iter=5)
+model.fit(X, y)
+n_iter = model.n_iter_  # tatsächlich genutzte Iterationen bis Konvergenz
+print(n_iter)</code></pre>
+<pre class="ref-out"><code>[5]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">multi_class</p>
+                <p>'auto' wählt automatisch One-vs-Rest oder Multinomial bei &gt;2 Klassen</p>
+              </div>
+              <pre><code>model = LogisticRegression(max_iter=200)
+model.fit(X, y)
+klassen = model.classes_  # bekannte Klassen
+print(klassen)
+y_pred = model.predict([[5.1, 3.5, 1.4, 0.2]])  # Klassenvorhersagen
+print(y_pred)</code></pre>
+<pre class="ref-out"><code>[0 1 2]
+[0]</code></pre>
+            </div>
         </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">C</code>
-          <p class="cmd-desc">Inverse Regularisierungsstärke (1/λ). <strong>Kleines C</strong> = starke Regularisierung, <strong>großes C</strong> = wenig Regularisierung</p>
-          <pre class="cmd-code"><code class="language-python">m1 = LogisticRegression(max_iter=200, C=1.0).fit(X, y)
-m2 = LogisticRegression(max_iter=200, C=0.01).fit(X, y)
-print(m1.score(X, y), m2.score(X, y))</code></pre>
-          <pre class="cmd-out">0.9733 0.8733</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">penalty</code>
-          <p class="cmd-desc">'l1', 'l2' (Standard), 'elasticnet' oder 'none' — Art der Regularisierung</p>
-          <pre class="cmd-code"><code class="language-python">m = LogisticRegression(max_iter=200, penalty='l1', solver='liblinear').fit(X, y)
-print(m.score(X, y))</code></pre>
-          <pre class="cmd-out">0.96</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">solver</code>
-          <p class="cmd-desc">Optimierungsalgorithmus, z.B. 'lbfgs' (Standard), 'liblinear' (gut für l1)</p>
-          <pre class="cmd-code"><code class="language-python">for s in ['lbfgs', 'liblinear']:
-    m = LogisticRegression(max_iter=200, solver=s).fit(X, y)
-    print(s, m.score(X, y))</code></pre>
-          <pre class="cmd-out">lbfgs 0.9733
-liblinear 0.96</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">max_iter</code>
-          <p class="cmd-desc">maximale Iterationen bis Konvergenz (bei Warnung erhöhen, z.B. 1000)</p>
-          <pre class="cmd-code"><code class="language-python">m = LogisticRegression(max_iter=5).fit(X, y)
-print(m.n_iter_)  # tatsächlich genutzte Iterationen</code></pre>
-          <pre class="cmd-out">[5]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">multi_class</code>
-          <p class="cmd-desc">'auto' wählt automatisch One-vs-Rest oder Multinomial bei &gt;2 Klassen</p>
-          <pre class="cmd-code"><code class="language-python">m = LogisticRegression(max_iter=200).fit(X, y)
-print(m.classes_)
-print(m.predict([[5.1, 3.5, 1.4, 0.2]]))</code></pre>
-          <pre class="cmd-out">[0 1 2]
-[0]</pre>
-        </div>
+      </div>
       </div>
     </section>
 
     <!-- ═══ 3 · SVM ═══ -->
-    <section class="pruef-section" id="svm">
+    <section class="pruef-section" id="svm" data-kapitel="k3">
       <h2><span class="pruef-num">3</span> Support Vector Machine (SVC)</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.svm import SVC
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Support Vector Machine (SVC)</span>
+          <span class="ref-mod">sklearn.svm</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.svm import SVC
 X = [[0, 0], [1, 1], [1, 0], [0, 1]]   # XOR-Muster
 y = [0, 1, 1, 0]</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">SVC(
-    C=1.0,                # Soft-Margin-Strafterm
-    kernel='rbf',         # 'linear','poly','rbf','sigmoid'
-    degree=3,             # nur für kernel='poly'
-    gamma='scale',        # 'scale','auto' oder float — für rbf/poly/sigmoid
-    coef0=0.0,            # nur für 'poly'/'sigmoid'
-    shrinking=True,
-    probability=False,    # aktiviert predict_proba (langsamer)
-    tol=1e-3,
-    class_weight=None,    # z.B. 'balanced'
-    max_iter=-1,          # -1 = kein Limit
-    decision_function_shape='ovr',  # oder 'ovo'
-    random_state=None,
+        <pre><code>SVC(
+    C=1.0,                         # Soft-Margin-Strafterm
+    kernel='rbf',                  # Kernel-Funktion
+    degree=3,                      # Polynomgrad, nur relevant für kernel='poly'.
+    gamma='scale',                 # Kernel-Koeffizient für 'rbf'/'poly'/'sigmoid'
+    coef0=0.0,                     # unabhängiger Term, nur für 'poly'/'sigmoid'.
+    shrinking=True,                # nutzt eine Shrinking-Heuristik für schnelleres Training.
+    probability=False,             # aktiviert predict_proba() über interne Kreuzvalidierung
+    tol=1e-3,                      # Konvergenztoleranz.
+    class_weight=None,             # 'balanced' für unbalancierte Klassen.
+    max_iter=-1,                   # -1 = kein Limit der Solver-Iterationen.
+    decision_function_shape='ovr', # 'ovr' (One-vs-Rest) oder 'ovo' (One-vs-One) für Mehrklassen-Probleme.
+    random_state=None,             # Seed für interne Datenmischung bei probability=True.
 )</code></pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">C</code>
-          <p class="cmd-desc">Strafterm für Fehlklassifikationen (Soft-Margin). <strong>Klein</strong> → breite Margin. <strong>Groß</strong> → schmale Margin, mehr Overfitting-Risiko</p>
-          <pre class="cmd-code"><code class="language-python">for c in [0.1, 1, 100]:
-    m = SVC(C=c, kernel='rbf').fit(X, y)
-    print(c, m.score(X, y))</code></pre>
-          <pre class="cmd-out">0.1 1.0
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>C=1.0</code> – Soft-Margin-Strafterm — kleiner = breitere Margin, mehr Toleranz für Fehlklassifikationen; größer = engere Margin, Risiko von Overfitting.</li>
+<li><code>kernel='rbf'</code> – Kernel-Funktion — <code>'linear'</code>, <code>'poly'</code>, <code>'rbf'</code> oder <code>'sigmoid'</code>.</li>
+<li><code>degree=3</code> – Polynomgrad, nur relevant für <code>kernel='poly'</code>.</li>
+<li><code>gamma='scale'</code> – Kernel-Koeffizient für <code>'rbf'</code>/<code>'poly'</code>/<code>'sigmoid'</code> — größer = komplexere, engere Entscheidungsgrenze.</li>
+<li><code>coef0=0.0</code> – unabhängiger Term, nur für <code>'poly'</code>/<code>'sigmoid'</code>.</li>
+<li><code>shrinking=True</code> – nutzt eine Shrinking-Heuristik für schnelleres Training.</li>
+<li><code>probability=False</code> – aktiviert <code>predict_proba()</code> über interne Kreuzvalidierung — verlangsamt das Training deutlich.</li>
+<li><code>tol=1e-3</code> – Konvergenztoleranz.</li>
+<li><code>class_weight=None</code> – <code>'balanced'</code> für unbalancierte Klassen.</li>
+<li><code>max_iter=-1</code> – <code>-1</code> = kein Limit der Solver-Iterationen.</li>
+<li><code>decision_function_shape='ovr'</code> – <code>'ovr'</code> (One-vs-Rest) oder <code>'ovo'</code> (One-vs-One) für Mehrklassen-Probleme.</li>
+<li><code>random_state=None</code> – Seed für interne Datenmischung bei <code>probability=True</code>.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">C</p>
+                <p>Strafterm für Fehlklassifikationen (Soft-Margin). <strong>Klein</strong> → breite Margin. <strong>Groß</strong> → schmale Margin, mehr Overfitting-Risiko</p>
+              </div>
+              <pre><code>for c in [0.1, 1, 100]:
+    model = SVC(C=c, kernel='rbf')
+    model.fit(X, y)
+    print(c, model.score(X, y))</code></pre>
+<pre class="ref-out"><code>0.1 1.0
 1 1.0
-100 1.0</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">kernel</code>
-          <p class="cmd-desc">'linear', 'rbf' (Standard), 'poly', 'sigmoid'</p>
-          <pre class="cmd-code"><code class="language-python">for k in ['linear', 'rbf', 'poly']:
-    m = SVC(kernel=k).fit(X, y)
-    print(k, m.predict(X))</code></pre>
-          <pre class="cmd-out">linear [0 1 1 0]
+100 1.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">kernel</p>
+                <p>'linear', 'rbf' (Standard), 'poly', 'sigmoid'</p>
+              </div>
+              <pre><code>for k in ['linear', 'rbf', 'poly']:
+    model = SVC(kernel=k)
+    model.fit(X, y)
+    print(k, model.predict(X))</code></pre>
+<pre class="ref-out"><code>linear [0 1 1 0]
 rbf [0 1 1 0]
-poly [0 1 1 0]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">gamma</code>
-          <p class="cmd-desc">nur bei 'rbf'/'poly'/'sigmoid'. <strong>Klein</strong> → glattere Grenze. <strong>Groß</strong> → komplexere Grenze, mehr Overfitting</p>
-          <pre class="cmd-code"><code class="language-python">for g in ['scale', 0.1, 10]:
-    m = SVC(gamma=g).fit(X, y)
-    print(g, m.score(X, y))</code></pre>
-          <pre class="cmd-out">scale 1.0
+poly [0 1 1 0]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">gamma</p>
+                <p>nur bei 'rbf'/'poly'/'sigmoid'. <strong>Klein</strong> → glattere Grenze. <strong>Groß</strong> → komplexere Grenze, mehr Overfitting</p>
+              </div>
+              <pre><code>for model in ['scale', 0.1, 10]:
+    model = SVC(gamma=g)
+    model.fit(X, y)
+    print(model, model.score(X, y))</code></pre>
+<pre class="ref-out"><code>scale 1.0
 0.1 1.0
-10 1.0</pre>
+10 1.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">degree</p>
+                <p>nur bei 'poly': Grad des Polynoms (Standard 3)</p>
+              </div>
+              <pre><code>model = SVC(kernel='poly', degree=3)
+model.fit(X, y)
+y_pred = model.predict(X)  # Klassenvorhersagen
+print(y_pred)</code></pre>
+<pre class="ref-out"><code>[0 1 1 0]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">class_weight</p>
+                <p>'balanced' gewichtet Klassen umgekehrt proportional zur Häufigkeit</p>
+              </div>
+              <pre><code>model = SVC(class_weight='balanced')
+model.fit(X, y)
+y_pred = model.predict(X)  # Klassenvorhersagen
+print(y_pred)</code></pre>
+<pre class="ref-out"><code>[0 1 1 0]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">probability</p>
+                <p>True aktiviert <code>predict_proba()</code> (zusätzliche interne CV, langsamer)</p>
+              </div>
+              <pre><code>model = SVC(probability=True)
+model.fit(X, y)
+y_proba = model.predict_proba(X)[:1]  # Wahrscheinlichkeiten für erste Zeile
+print(y_proba)</code></pre>
+<pre class="ref-out"><code>[[0.0803 0.9197]]</code></pre>
+            </div>
         </div>
-        <div class="cmd-card">
-          <code class="cmd-head">degree</code>
-          <p class="cmd-desc">nur bei 'poly': Grad des Polynoms (Standard 3)</p>
-          <pre class="cmd-code"><code class="language-python">m = SVC(kernel='poly', degree=3).fit(X, y)
-print(m.predict(X))</code></pre>
-          <pre class="cmd-out">[0 1 1 0]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">class_weight</code>
-          <p class="cmd-desc">'balanced' gewichtet Klassen umgekehrt proportional zur Häufigkeit</p>
-          <pre class="cmd-code"><code class="language-python">m = SVC(class_weight='balanced').fit(X, y)
-print(m.predict(X))</code></pre>
-          <pre class="cmd-out">[0 1 1 0]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">probability</code>
-          <p class="cmd-desc">True aktiviert <code>predict_proba()</code> (zusätzliche interne CV, langsamer)</p>
-          <pre class="cmd-code"><code class="language-python">m = SVC(probability=True).fit(X, y)
-print(m.predict_proba(X)[:1])</code></pre>
-          <pre class="cmd-out">[[0.0803 0.9197]]</pre>
-        </div>
+      </div>
       </div>
       <div class="info-box" style="font-family:var(--font-mono)">
         Margin = 2 / ‖w‖ &nbsp;→&nbsp; größeres ‖w‖ = schmalere Margin.<br>
@@ -530,747 +860,1145 @@ print(m.predict_proba(X)[:1])</code></pre>
     </section>
 
     <!-- ═══ 4 · BAUMBASIERT ═══ -->
-    <section class="pruef-section" id="baumbasiert">
+    <section class="pruef-section" id="baumbasiert" data-kapitel="k5">
       <h2><span class="pruef-num">4</span> Baumbasierte Modelle</h2>
 
       <h3>DecisionTreeClassifier / Regressor</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.tree import DecisionTreeClassifier
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">DecisionTreeClassifier / Regressor</span>
+          <span class="ref-mod">sklearn.tree</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
 X, y = load_iris(return_X_y=True)</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">DecisionTreeClassifier(
-    criterion='gini',         # 'gini','entropy','log_loss'
-    splitter='best',          # oder 'random'
-    max_depth=None,           # None = bis Blätter rein sind
-    min_samples_split=2,
-    min_samples_leaf=1,
-    min_weight_fraction_leaf=0.0,
-    max_features=None,        # 'sqrt','log2', int, float
-    max_leaf_nodes=None,
-    min_impurity_decrease=0.0,
-    class_weight=None,
-    ccp_alpha=0.0,            # Pruning-Komplexität
-    random_state=None,
+        <pre><code>DecisionTreeClassifier(
+    criterion='gini',             # Splitkriterium
+    splitter='best',              # 'best' wählt den besten Split, 'random' den besten unter zufälligen…
+    max_depth=None,               # maximale Baumtiefe
+    min_samples_split=2,          # Mindestanzahl Samples, damit ein Knoten weiter gesplittet wird.
+    min_samples_leaf=1,           # Mindestanzahl Samples pro Blatt
+    min_weight_fraction_leaf=0.0, # wie min_samples_leaf, aber als Anteil der gewichteten Gesamtsumme…
+    max_features=None,            # Anzahl/Anteil Features, die pro Split betrachtet werden ('sqrt',…
+    max_leaf_nodes=None,          # Begrenzung der maximalen Blattanzahl.
+    min_impurity_decrease=0.0,    # Mindest-Verbesserung der Unreinheit, damit ein Split durchgeführt…
+    class_weight=None,            # 'balanced' für unbalancierte Klassen.
+    ccp_alpha=0.0,                # Komplexitätsparameter für Cost-Complexity-Pruning
+    random_state=None,            # Seed für splitter='random' bzw. zufällige Feature-Auswahl.
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">criterion</code>
-          <p class="cmd-desc">Splitkriterium: 'gini' (Standard) oder 'entropy' für Klassifikation, 'squared_error' für Regression</p>
-          <pre class="cmd-code"><code class="language-python">for crit in ['gini', 'entropy']:
-    t = DecisionTreeClassifier(criterion=crit, max_depth=2, random_state=42).fit(X, y)
-    print(crit, t.score(X, y))</code></pre>
-          <pre class="cmd-out">gini 0.96
-entropy 0.96</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">max_depth</code>
-          <p class="cmd-desc">maximale Baumtiefe. Klein → Underfitting, Groß/None → Overfitting</p>
-          <pre class="cmd-code"><code class="language-python">for md in [1, 3, None]:
-    t = DecisionTreeClassifier(max_depth=md, random_state=42).fit(X, y)
-    print(md, "tiefe=", t.get_depth(), "acc=", t.score(X, y))</code></pre>
-          <pre class="cmd-out">1 tiefe= 1 acc= 0.6667
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>criterion='gini'</code> – Splitkriterium — <code>'gini'</code>, <code>'entropy'</code> oder <code>'log_loss'</code>.</li>
+<li><code>splitter='best'</code> – <code>'best'</code> wählt den besten Split, <code>'random'</code> den besten unter zufälligen Kandidaten (mehr Varianz, schneller).</li>
+<li><code>max_depth=None</code> – maximale Baumtiefe — <code>None</code> = bis alle Blätter rein sind (hohes Overfitting-Risiko).</li>
+<li><code>min_samples_split=2</code> – Mindestanzahl Samples, damit ein Knoten weiter gesplittet wird.</li>
+<li><code>min_samples_leaf=1</code> – Mindestanzahl Samples pro Blatt — größere Werte glätten das Modell.</li>
+<li><code>min_weight_fraction_leaf=0.0</code> – wie <code>min_samples_leaf</code>, aber als Anteil der gewichteten Gesamtsumme aller Samples.</li>
+<li><code>max_features=None</code> – Anzahl/Anteil Features, die pro Split betrachtet werden (<code>'sqrt'</code>, <code>'log2'</code>, int, float, <code>None</code> = alle).</li>
+<li><code>max_leaf_nodes=None</code> – Begrenzung der maximalen Blattanzahl.</li>
+<li><code>min_impurity_decrease=0.0</code> – Mindest-Verbesserung der Unreinheit, damit ein Split durchgeführt wird.</li>
+<li><code>class_weight=None</code> – <code>'balanced'</code> für unbalancierte Klassen.</li>
+<li><code>ccp_alpha=0.0</code> – Komplexitätsparameter für Cost-Complexity-Pruning — größer = stärkeres Pruning nach dem Training.</li>
+<li><code>random_state=None</code> – Seed für <code>splitter='random'</code> bzw. zufällige Feature-Auswahl.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">criterion</p>
+                <p>Splitkriterium: 'gini' (Standard) oder 'entropy' für Klassifikation, 'squared_error' für Regression</p>
+              </div>
+              <pre><code>for crit in ['gini', 'entropy']:
+    model = DecisionTreeClassifier(criterion=crit, max_depth=2, random_state=42)
+    model.fit(X, y)
+    print(crit, model.score(X, y))</code></pre>
+<pre class="ref-out"><code>gini 0.96
+entropy 0.96</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">max_depth</p>
+                <p>maximale Baumtiefe. Klein → Underfitting, Groß/None → Overfitting</p>
+              </div>
+              <pre><code>for md in [1, 3, None]:
+    model = DecisionTreeClassifier(max_depth=md, random_state=42)
+    model.fit(X, y)
+    print(md, "tiefe=", model.get_depth(), "acc=", model.score(X, y))</code></pre>
+<pre class="ref-out"><code>1 tiefe= 1 acc= 0.6667
 3 tiefe= 3 acc= 0.9733
-None tiefe= 5 acc= 1.0</pre>
+None tiefe= 5 acc= 1.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">min_samples_split</p>
+                <p>Mindestanzahl Samples, um einen Knoten weiter zu splitten</p>
+              </div>
+              <pre><code>for mss in [2, 20]:
+    model = DecisionTreeClassifier(min_samples_split=mss, random_state=42)
+    model.fit(X, y)
+    print(mss, "blätter=", model.get_n_leaves())</code></pre>
+<pre class="ref-out"><code>2 blätter= 9
+20 blätter= 6</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">min_samples_leaf</p>
+                <p>Mindestanzahl Samples in einem Blatt — größere Werte glätten das Modell</p>
+              </div>
+              <pre><code>for msl in [1, 10]:
+    model = DecisionTreeClassifier(min_samples_leaf=msl, random_state=42)
+    model.fit(X, y)
+    print(msl, "blätter=", model.get_n_leaves())</code></pre>
+<pre class="ref-out"><code>1 blätter= 9
+10 blätter= 6</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">max_features</p>
+                <p>Anzahl Features pro Split ('sqrt', 'log2', int, float)</p>
+              </div>
+              <pre><code>for mf in ['sqrt', None]:
+    model = DecisionTreeClassifier(max_features=mf, random_state=42)
+    model.fit(X, y)
+    print(mf, model.score(X, y))</code></pre>
+<pre class="ref-out"><code>sqrt 1.0
+None 1.0</code></pre>
+            </div>
         </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">min_samples_split</code>
-          <p class="cmd-desc">Mindestanzahl Samples, um einen Knoten weiter zu splitten</p>
-          <pre class="cmd-code"><code class="language-python">for mss in [2, 20]:
-    t = DecisionTreeClassifier(min_samples_split=mss, random_state=42).fit(X, y)
-    print(mss, "blätter=", t.get_n_leaves())</code></pre>
-          <pre class="cmd-out">2 blätter= 9
-20 blätter= 6</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">min_samples_leaf</code>
-          <p class="cmd-desc">Mindestanzahl Samples in einem Blatt — größere Werte glätten das Modell</p>
-          <pre class="cmd-code"><code class="language-python">for msl in [1, 10]:
-    t = DecisionTreeClassifier(min_samples_leaf=msl, random_state=42).fit(X, y)
-    print(msl, "blätter=", t.get_n_leaves())</code></pre>
-          <pre class="cmd-out">1 blätter= 9
-10 blätter= 6</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">max_features</code>
-          <p class="cmd-desc">Anzahl Features pro Split ('sqrt', 'log2', int, float)</p>
-          <pre class="cmd-code"><code class="language-python">for mf in ['sqrt', None]:
-    t = DecisionTreeClassifier(max_features=mf, random_state=42).fit(X, y)
-    print(mf, t.score(X, y))</code></pre>
-          <pre class="cmd-out">sqrt 1.0
-None 1.0</pre>
-        </div>
+      </div>
       </div>
 
       <h3>RandomForestClassifier / Regressor</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.ensemble import RandomForestClassifier
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">RandomForestClassifier / Regressor</span>
+          <span class="ref-mod">sklearn.ensemble</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.ensemble import RandomForestClassifier
 from sklearn.datasets import load_iris
 X, y = load_iris(return_X_y=True)</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur — vererbt die meisten Tree-Parameter</p>
-          <pre class="cmd-code"><code class="language-python">RandomForestClassifier(
-    n_estimators=100,
-    criterion='gini',
-    max_depth=None,
-    min_samples_split=2,
-    min_samples_leaf=1,
-    max_features='sqrt',     # 'sqrt','log2', int, float, None
-    bootstrap=True,
-    oob_score=False,         # benötigt bootstrap=True
-    n_jobs=None,             # -1 = alle Kerne
-    random_state=None,
-    class_weight=None,       # z.B. 'balanced'
-    ccp_alpha=0.0,
+        <pre><code>RandomForestClassifier(
+    n_estimators=100,    # Anzahl Bäume im Wald
+    criterion='gini',    # Splitkriterium pro Baum
+    max_depth=None,      # maximale Tiefe jedes Baums
+    min_samples_split=2, # Mindestanzahl Samples, um einen Knoten zu splitten.
+    min_samples_leaf=1,  # Mindestanzahl Samples pro Blatt.
+    max_features='sqrt', # Anzahl Features pro Split
+    bootstrap=True,      # Bagging
+    oob_score=False,     # berechnet einen kostenlosen Validierungs-Score aus den nicht…
+    n_jobs=None,         # -1 = alle CPU-Kerne parallel für das Training der Bäume nutzen.
+    random_state=None,   # Seed für Bootstrap-Sampling und Feature-Auswahl.
+    class_weight=None,   # 'balanced' für unbalancierte Klassen.
+    ccp_alpha=0.0,       # Komplexitätsparameter für Cost-Complexity-Pruning der einzelnen Bäume.
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">n_estimators</code>
-          <p class="cmd-desc">Anzahl Bäume — mehr Bäume = stabiler, aber langsamer (Diminishing Returns)</p>
-          <pre class="cmd-code"><code class="language-python">for n in [1, 10, 100]:
-    rf = RandomForestClassifier(n_estimators=n, random_state=42).fit(X, y)
-    print(n, rf.score(X, y))</code></pre>
-          <pre class="cmd-out">1 0.9867
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>n_estimators=100</code> – Anzahl Bäume im Wald — mehr Bäume = stabilere Vorhersagen, aber langsamer.</li>
+<li><code>criterion='gini'</code> – Splitkriterium pro Baum — <code>'gini'</code>, <code>'entropy'</code> oder <code>'log_loss'</code>.</li>
+<li><code>max_depth=None</code> – maximale Tiefe jedes Baums — <code>None</code> = bis Blätter rein sind.</li>
+<li><code>min_samples_split=2</code> – Mindestanzahl Samples, um einen Knoten zu splitten.</li>
+<li><code>min_samples_leaf=1</code> – Mindestanzahl Samples pro Blatt.</li>
+<li><code>max_features='sqrt'</code> – Anzahl Features pro Split — <code>'sqrt'</code> (Standard für Klassifikation) sorgt für Dekorrelation der Bäume.</li>
+<li><code>bootstrap=True</code> – Bagging — jeder Baum wird auf einer Stichprobe mit Zurücklegen trainiert.</li>
+<li><code>oob_score=False</code> – berechnet einen kostenlosen Validierungs-Score aus den nicht gezogenen ("Out-of-Bag") Samples (benötigt <code>bootstrap=True</code>).</li>
+<li><code>n_jobs=None</code> – <code>-1</code> = alle CPU-Kerne parallel für das Training der Bäume nutzen.</li>
+<li><code>random_state=None</code> – Seed für Bootstrap-Sampling und Feature-Auswahl.</li>
+<li><code>class_weight=None</code> – <code>'balanced'</code> für unbalancierte Klassen.</li>
+<li><code>ccp_alpha=0.0</code> – Komplexitätsparameter für Cost-Complexity-Pruning der einzelnen Bäume.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">n_estimators</p>
+                <p>Anzahl Bäume — mehr Bäume = stabiler, aber langsamer (Diminishing Returns)</p>
+              </div>
+              <pre><code>for n in [1, 10, 100]:
+    model = RandomForestClassifier(n_estimators=n, random_state=42)
+    model.fit(X, y)
+    print(n, model.score(X, y))</code></pre>
+<pre class="ref-out"><code>1 0.9867
 10 1.0
-100 1.0</pre>
+100 1.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">max_depth</p>
+                <p>wie bei DecisionTree, aber pro Baum im Wald</p>
+              </div>
+              <pre><code>for md in [1, None]:
+    model = RandomForestClassifier(max_depth=md, random_state=42)
+    model.fit(X, y)
+    print(md, model.score(X, y))</code></pre>
+<pre class="ref-out"><code>1 0.9733
+None 1.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">max_features</p>
+                <p>Features pro Split — 'sqrt' (Standard für Klassifikation) sorgt für Diversität der Bäume</p>
+              </div>
+              <pre><code>for mf in ['sqrt', 'log2']:
+    model = RandomForestClassifier(max_features=mf, random_state=42)
+    model.fit(X, y)
+    print(mf, model.score(X, y))</code></pre>
+<pre class="ref-out"><code>sqrt 1.0
+log2 1.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">min_samples_leaf</p>
+                <p>größere Werte glätten jeden einzelnen Baum</p>
+              </div>
+              <pre><code>for msl in [1, 5]:
+    model = RandomForestClassifier(min_samples_leaf=msl, random_state=42)
+    model.fit(X, y)
+    print(msl, model.score(X, y))</code></pre>
+<pre class="ref-out"><code>1 1.0
+5 0.9733</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">bootstrap</p>
+                <p>True (Standard): jeder Baum auf zufälliger Stichprobe mit Zurücklegen</p>
+              </div>
+              <pre><code>model = RandomForestClassifier(bootstrap=True, random_state=42)
+model.fit(X, y)
+genauigkeit = model.score(X, y)  # Accuracy auf den Testdaten
+print(genauigkeit)</code></pre>
+<pre class="ref-out"><code>1.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">oob_score</p>
+                <p>True: nutzt nicht gezogene Out-of-Bag-Samples als kostenlose Validierung</p>
+              </div>
+              <pre><code>model = RandomForestClassifier(oob_score=True, random_state=42)
+model.fit(X, y)
+oob = model.oob_score_  # Out-of-Bag-Accuracy als kostenlose Validierung
+print(oob)</code></pre>
+<pre class="ref-out"><code>0.9533</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">n_jobs=-1</p>
+                <p>nutzt alle CPU-Kerne — Bäume sind unabhängig parallelisierbar</p>
+              </div>
+              <pre><code>model = RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=42)
+model.fit(X, y)
+genauigkeit = model.score(X, y)  # Accuracy auf den Testdaten
+print(genauigkeit)</code></pre>
+<pre class="ref-out"><code>1.0</code></pre>
+            </div>
         </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">max_depth</code>
-          <p class="cmd-desc">wie bei DecisionTree, aber pro Baum im Wald</p>
-          <pre class="cmd-code"><code class="language-python">for md in [1, None]:
-    rf = RandomForestClassifier(max_depth=md, random_state=42).fit(X, y)
-    print(md, rf.score(X, y))</code></pre>
-          <pre class="cmd-out">1 0.9733
-None 1.0</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">max_features</code>
-          <p class="cmd-desc">Features pro Split — 'sqrt' (Standard für Klassifikation) sorgt für Diversität der Bäume</p>
-          <pre class="cmd-code"><code class="language-python">for mf in ['sqrt', 'log2']:
-    rf = RandomForestClassifier(max_features=mf, random_state=42).fit(X, y)
-    print(mf, rf.score(X, y))</code></pre>
-          <pre class="cmd-out">sqrt 1.0
-log2 1.0</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">min_samples_leaf</code>
-          <p class="cmd-desc">größere Werte glätten jeden einzelnen Baum</p>
-          <pre class="cmd-code"><code class="language-python">for msl in [1, 5]:
-    rf = RandomForestClassifier(min_samples_leaf=msl, random_state=42).fit(X, y)
-    print(msl, rf.score(X, y))</code></pre>
-          <pre class="cmd-out">1 1.0
-5 0.9733</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">bootstrap</code>
-          <p class="cmd-desc">True (Standard): jeder Baum auf zufälliger Stichprobe mit Zurücklegen</p>
-          <pre class="cmd-code"><code class="language-python">rf = RandomForestClassifier(bootstrap=True, random_state=42).fit(X, y)
-print(rf.score(X, y))</code></pre>
-          <pre class="cmd-out">1.0</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">oob_score</code>
-          <p class="cmd-desc">True: nutzt nicht gezogene Out-of-Bag-Samples als kostenlose Validierung</p>
-          <pre class="cmd-code"><code class="language-python">rf = RandomForestClassifier(oob_score=True, random_state=42).fit(X, y)
-print(rf.oob_score_)</code></pre>
-          <pre class="cmd-out">0.9533</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">n_jobs=-1</code>
-          <p class="cmd-desc">nutzt alle CPU-Kerne — Bäume sind unabhängig parallelisierbar</p>
-          <pre class="cmd-code"><code class="language-python">rf = RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=42).fit(X, y)
-print(rf.score(X, y))</code></pre>
-          <pre class="cmd-out">1.0</pre>
-        </div>
+      </div>
       </div>
 
       <h3>GradientBoostingClassifier</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.ensemble import GradientBoostingClassifier
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">GradientBoostingClassifier</span>
+          <span class="ref-mod">sklearn.ensemble</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.datasets import load_iris
 X, y = load_iris(return_X_y=True)</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">GradientBoostingClassifier(
-    loss='log_loss',
-    learning_rate=0.1,
-    n_estimators=100,
-    subsample=1.0,            # &lt;1.0 = stochastic boosting
-    criterion='friedman_mse',
-    min_samples_split=2,
-    min_samples_leaf=1,
-    max_depth=3,               # bewusst flach (weak learners)
-    max_features=None,
-    validation_fraction=0.1,   # für early stopping
-    n_iter_no_change=None,     # early stopping aktivieren
-    ccp_alpha=0.0,
-    random_state=None,
+        <pre><code>GradientBoostingClassifier(
+    loss='log_loss',          # Verlustfunktion, die in jeder Boosting-Runde minimiert wird.
+    learning_rate=0.1,        # Schrumpfung jedes Baum-Beitrags
+    n_estimators=100,         # Anzahl Boosting-Stufen (Bäume).
+    subsample=1.0,            # &lt;1.0 = Stochastic Gradient Boosting (zufällige Teilmenge der Daten…
+    criterion='friedman_mse', # Splitqualitätsmaß für die einzelnen Bäume.
+    min_samples_split=2,      # Mindestanzahl Samples, um einen Knoten zu splitten.
+    min_samples_leaf=1,       # Mindestanzahl Samples pro Blatt.
+    max_depth=3,              # bewusst flache Bäume als "weak learners"
+    max_features=None,        # Anzahl/Anteil Features pro Split.
+    validation_fraction=0.1,  # Anteil der Trainingsdaten für das interne…
+    n_iter_no_change=None,    # aktiviert Early Stopping: Training stoppt, wenn sich der…
+    ccp_alpha=0.0,            # Komplexitätsparameter für Cost-Complexity-Pruning.
+    random_state=None,        # Seed für Reproduzierbarkeit.
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">n_estimators</code>
-          <p class="cmd-desc">Anzahl sequentieller Bäume ("weak learners") — zu viele → Overfitting</p>
-          <pre class="cmd-code"><code class="language-python">for n in [10, 100]:
-    g = GradientBoostingClassifier(n_estimators=n, random_state=42).fit(X, y)
-    print(n, g.score(X, y))</code></pre>
-          <pre class="cmd-out">10 0.9933
-100 1.0</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">learning_rate</code>
-          <p class="cmd-desc">Schrittweite pro Baum. Klein + viele Bäume = robuster, aber langsamer</p>
-          <pre class="cmd-code"><code class="language-python">for lr in [0.01, 0.1, 1.0]:
-    g = GradientBoostingClassifier(n_estimators=5, max_depth=1, learning_rate=lr, random_state=42).fit(X, y)
-    print(lr, g.score(X, y))</code></pre>
-          <pre class="cmd-out">0.01 0.96
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>loss='log_loss'</code> – Verlustfunktion, die in jeder Boosting-Runde minimiert wird.</li>
+<li><code>learning_rate=0.1</code> – Schrumpfung jedes Baum-Beitrags — kleinerer Wert + mehr <code>n_estimators</code> = robusteres Modell.</li>
+<li><code>n_estimators=100</code> – Anzahl Boosting-Stufen (Bäume).</li>
+<li><code>subsample=1.0</code> – <code>&lt;1.0</code> = Stochastic Gradient Boosting (zufällige Teilmenge der Daten pro Baum, reduziert Varianz).</li>
+<li><code>criterion='friedman_mse'</code> – Splitqualitätsmaß für die einzelnen Bäume.</li>
+<li><code>min_samples_split=2</code> – Mindestanzahl Samples, um einen Knoten zu splitten.</li>
+<li><code>min_samples_leaf=1</code> – Mindestanzahl Samples pro Blatt.</li>
+<li><code>max_depth=3</code> – bewusst flache Bäume als "weak learners" — typisch 3–5.</li>
+<li><code>max_features=None</code> – Anzahl/Anteil Features pro Split.</li>
+<li><code>validation_fraction=0.1</code> – Anteil der Trainingsdaten für das interne Early-Stopping-Validation-Set.</li>
+<li><code>n_iter_no_change=None</code> – aktiviert Early Stopping: Training stoppt, wenn sich der Validierungs-Score über so viele Runden nicht verbessert.</li>
+<li><code>ccp_alpha=0.0</code> – Komplexitätsparameter für Cost-Complexity-Pruning.</li>
+<li><code>random_state=None</code> – Seed für Reproduzierbarkeit.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">n_estimators</p>
+                <p>Anzahl sequentieller Bäume ("weak learners") — zu viele → Overfitting</p>
+              </div>
+              <pre><code>for n in [10, 100]:
+    model = GradientBoostingClassifier(n_estimators=n, random_state=42)
+    model.fit(X, y)
+    acc = model.score(X, y)  # Accuracy mit n Bäumen
+    print(n, acc)</code></pre>
+<pre class="ref-out"><code>10 0.9933
+100 1.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">learning_rate</p>
+                <p>Schrittweite pro Baum. Klein + viele Bäume = robuster, aber langsamer</p>
+              </div>
+              <pre><code>for lr in [0.01, 0.1, 1.0]:
+    model = GradientBoostingClassifier(n_estimators=5, max_depth=1, learning_rate=lr, random_state=42)
+    model.fit(X, y)
+    acc = model.score(X, y)  # Accuracy bei dieser learning_rate
+    print(lr, acc)</code></pre>
+<pre class="ref-out"><code>0.01 0.96
 0.1 0.9533
-1.0 0.9733</pre>
+1.0 0.9733</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">max_depth</p>
+                <p>meist klein (2-5) — jeder Baum ist ein 'weak learner'</p>
+              </div>
+              <pre><code>for md in [1, 3]:
+    model = GradientBoostingClassifier(n_estimators=10, max_depth=md, random_state=42)
+    model.fit(X, y)
+    acc = model.score(X, y)  # Accuracy mit max_depth=md
+    print(md, acc)</code></pre>
+<pre class="ref-out"><code>1 0.9533
+3 0.9933</code></pre>
+            </div>
         </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">max_depth</code>
-          <p class="cmd-desc">meist klein (2-5) — jeder Baum ist ein 'weak learner'</p>
-          <pre class="cmd-code"><code class="language-python">for md in [1, 3]:
-    g = GradientBoostingClassifier(n_estimators=10, max_depth=md, random_state=42).fit(X, y)
-    print(md, g.score(X, y))</code></pre>
-          <pre class="cmd-out">1 0.9533
-3 0.9933</pre>
-        </div>
+      </div>
       </div>
 
       <h3>GradientBoostingRegressor &amp; AdaBoostClassifier</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.ensemble import GradientBoostingRegressor, AdaBoostClassifier
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">GradientBoostingRegressor &amp; AdaBoostClassifier</span>
+          <span class="ref-mod">sklearn.ensemble</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.ensemble import GradientBoostingRegressor, AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_diabetes, load_iris
 from sklearn.model_selection import train_test_split
 X_tr, X_te, y_tr, y_te = train_test_split(*load_diabetes(return_X_y=True), test_size=0.2, random_state=42)</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">GradientBoostingRegressor — learning_rate</code>
-          <p class="cmd-desc">Regression-Bäume (criterion='squared_error') als weak learners; zu großes learning_rate → Overfitting/Divergenz</p>
-          <pre class="cmd-code"><code class="language-python">for lr in [0.01, 0.1, 1.0]:
-    g = GradientBoostingRegressor(n_estimators=50, learning_rate=lr, random_state=42).fit(X_tr, y_tr)
-    print(lr, round(g.score(X_te, y_te), 4))</code></pre>
-          <pre class="cmd-out">0.01 0.2673
+        <p class="ref-sub">GradientBoostingRegressor</p>
+        <pre><code>GradientBoostingRegressor(
+    loss='squared_error', # Verlustfunktion: 'squared_error', 'absolute_error' (robuster gegen…
+    n_estimators=100,     # Anzahl Boosting-Stufen (Bäume)
+    learning_rate=0.1,    # Schrumpfung jedes Baum-Beitrags
+    max_depth=3,          # Tiefe der einzelnen Regression-Bäume
+    subsample=1.0,        # Anteil der Trainingsdaten pro Baum (&lt;1.0 = Stochastic Gradient…
+    random_state=None,    # Seed für Reproduzierbarkeit.
+)</code></pre>
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>loss='squared_error'</code> – Verlustfunktion: <code>'squared_error'</code>, <code>'absolute_error'</code> (robuster gegen Ausreißer), <code>'huber'</code> oder <code>'quantile'</code>.</li>
+<li><code>n_estimators=100</code> – Anzahl Boosting-Stufen (Bäume). Mehr → bessere Anpassung, aber Overfitting-Risiko.</li>
+<li><code>learning_rate=0.1</code> – Schrumpfung jedes Baum-Beitrags. Kleiner Wert + mehr <code>n_estimators</code> = robusteres Modell.</li>
+<li><code>max_depth=3</code> – Tiefe der einzelnen Regression-Bäume — steuert Interaktionsordnung der Features.</li>
+<li><code>subsample=1.0</code> – Anteil der Trainingsdaten pro Baum (&lt;1.0 = Stochastic Gradient Boosting, reduziert Varianz).</li>
+<li><code>random_state=None</code> – Seed für Reproduzierbarkeit.</li>
+</ul>
+</details>
+        <p class="ref-sub">AdaBoostClassifier</p>
+        <pre><code>AdaBoostClassifier(
+    estimator=None,    # Basis-Schätzer (Standard: DecisionTreeClassifier(max_depth=1), ein…
+    n_estimators=50,   # Maximale Anzahl sequentieller Boosting-Runden.
+    learning_rate=1.0, # Gewichtung des Beitrags jedes Klassifikators
+    algorithm='SAMME', # Boosting-Algorithmus-Variante für die Gewichtsanpassung.
+    random_state=None, # Seed für Reproduzierbarkeit.
+)</code></pre>
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>estimator=None</code> – Basis-Schätzer (Standard: <code>DecisionTreeClassifier(max_depth=1)</code>, ein "Stump").</li>
+<li><code>n_estimators=50</code> – Maximale Anzahl sequentieller Boosting-Runden.</li>
+<li><code>learning_rate=1.0</code> – Gewichtung des Beitrags jedes Klassifikators — kleinere Werte erfordern mehr <code>n_estimators</code>.</li>
+<li><code>algorithm='SAMME'</code> – Boosting-Algorithmus-Variante für die Gewichtsanpassung.</li>
+<li><code>random_state=None</code> – Seed für Reproduzierbarkeit.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">GradientBoostingRegressor — learning_rate</p>
+                <p>Regression-Bäume (criterion='squared_error') als weak learners; zu großes learning_rate → Overfitting/Divergenz</p>
+              </div>
+              <pre><code>for lr in [0.01, 0.1, 1.0]:
+    model = GradientBoostingRegressor(n_estimators=50, learning_rate=lr, random_state=42)
+    model.fit(X_tr, y_tr)
+    r2 = round(model.score(X_te, y_te), 4)  # R²-Score auf Testdaten
+    print(lr, r2)</code></pre>
+<pre class="ref-out"><code>0.01 0.2673
 0.1  0.4621
-1.0  -0.4064</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">.staged_predict()</code>
-          <p class="cmd-desc">Generator: Vorhersage nach jeder einzelnen Boosting-Runde — nützlich für Learning Curves &amp; Early Stopping</p>
-          <pre class="cmd-code"><code class="language-python">from sklearn.metrics import mean_squared_error
-g = GradientBoostingRegressor(n_estimators=200, learning_rate=0.05, max_depth=3, random_state=42).fit(X_tr, y_tr)
-test_mse = [mean_squared_error(y_te, pred) for pred in g.staged_predict(X_te)]
-print(round(test_mse[0], 1), round(test_mse[99], 1), round(test_mse[199], 1))</code></pre>
-          <pre class="cmd-out">5154.1 2786.9 2831.0</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">AdaBoostClassifier</code>
-          <p class="cmd-desc">estimator=Stump (max_depth=1) — sequentiell gewichtete schwache Klassifikatoren</p>
-          <pre class="cmd-code"><code class="language-python">X, y = load_iris(return_X_y=True)
+1.0  -0.4064</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">.staged_predict()</p>
+                <p>Generator: Vorhersage nach jeder einzelnen Boosting-Runde — nützlich für Learning Curves &amp; Early Stopping</p>
+              </div>
+              <pre><code>from sklearn.metrics import mean_squared_error
+model = GradientBoostingRegressor(n_estimators=200, learning_rate=0.05, max_depth=3, random_state=42)
+model.fit(X_tr, y_tr)
+test_mse = [mean_squared_error(y_te, pred) for pred in model.staged_predict(X_te)]
+mse_start = round(test_mse[0],   1)  # MSE nach   1 Baum
+mse_mid   = round(test_mse[99],  1)  # MSE nach 100 Bäumen
+mse_end   = round(test_mse[199], 1)  # MSE nach 200 Bäumen
+print(mse_start, mse_mid, mse_end)</code></pre>
+<pre class="ref-out"><code>5154.1 2786.9 2831.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">AdaBoostClassifier</p>
+                <p>estimator=Stump (max_depth=1) — sequentiell gewichtete schwache Klassifikatoren</p>
+              </div>
+              <pre><code>X_iris, y_iris = load_iris(return_X_y=True)
 for n in [10, 50, 100]:
-    a = AdaBoostClassifier(estimator=DecisionTreeClassifier(max_depth=1), n_estimators=n, random_state=42).fit(X, y)
-    print(n, round(a.score(X, y), 4))</code></pre>
-          <pre class="cmd-out">10  0.9667
+    stump = DecisionTreeClassifier(max_depth=1)  # schwacher Basis-Klassifikator
+    model = AdaBoostClassifier(estimator=stump, n_estimators=n, random_state=42)
+    model.fit(X_iris, y_iris)
+    acc = round(model.score(X_iris, y_iris), 4)  # Accuracy mit n Stumps
+    print(n, acc)</code></pre>
+<pre class="ref-out"><code>10  0.9667
 50  0.98
-100 0.98</pre>
+100 0.98</code></pre>
+            </div>
         </div>
+      </div>
       </div>
     </section>
 
     <!-- ═══ 5 · CLUSTERING ═══ -->
-    <section class="pruef-section" id="clustering">
+    <section class="pruef-section" id="clustering" data-kapitel="k4k6">
       <h2><span class="pruef-num">5</span> Clustering &amp; PCA</h2>
 
       <h3>KMeans</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.cluster import KMeans
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">KMeans</span>
+          <span class="ref-mod">sklearn.cluster</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.cluster import KMeans
 X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">KMeans(
-    n_clusters=8,            # k — Anzahl Cluster
-    init='k-means++',        # 'k-means++','random' oder Array
-    n_init=10,                # Anzahl unabhängiger Läufe (auto in &gt;=1.4)
-    max_iter=300,             # Lloyd-Iterationen pro Lauf
-    tol=1e-4,                 # Konvergenzschwelle
-    algorithm='lloyd',        # oder 'elkan'
-    random_state=None,
+        <pre><code>KMeans(
+    n_clusters=8,      # k
+    init='k-means++',  # intelligente, weit gestreute Startpunkte (Standard) statt 'random'
+    n_init=10,         # Anzahl unabhängiger Initialisierungen
+    max_iter=300,      # max. Lloyd-Iterationen pro Initialisierung.
+    tol=1e-4,          # Konvergenzschwelle für die Verschiebung der Cluster-Zentren.
+    algorithm='lloyd', # 'lloyd' (Standard, EM-artig) oder 'elkan' (oft schneller bei vielen…
+    random_state=None, # Seed für die Initialisierung der Cluster-Zentren.
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">n_clusters</code>
-          <p class="cmd-desc">Anzahl Cluster k — muss vorab festgelegt werden</p>
-          <pre class="cmd-code"><code class="language-python">for n in [2, 3]:
-    km = KMeans(n_clusters=n, n_init=10, random_state=42).fit(X)
-    print(n, km.labels_, "inertia=", km.inertia_)</code></pre>
-          <pre class="cmd-out">2 [0 0 0 1 1 1] inertia= 16.0
-3 [0 2 0 1 1 1] inertia= 10.0</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">init</code>
-          <p class="cmd-desc">'k-means++' (Standard, kluge Startpunkte) oder 'random'</p>
-          <pre class="cmd-code"><code class="language-python">for init in ['k-means++', 'random']:
-    km = KMeans(n_clusters=2, init=init, n_init=10, random_state=42).fit(X)
-    print(init, km.labels_)</code></pre>
-          <pre class="cmd-out">k-means++ [0 0 0 1 1 1]
-random [0 0 0 1 1 1]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">n_init</code>
-          <p class="cmd-desc">Anzahl Initialisierungen — bestes Ergebnis (kleinste Inertia) wird behalten</p>
-          <pre class="cmd-code"><code class="language-python">for ni in [1, 10]:
-    km = KMeans(n_clusters=2, n_init=ni, random_state=42).fit(X)
-    print(ni, "inertia=", km.inertia_)</code></pre>
-          <pre class="cmd-out">1 inertia= 16.0
-10 inertia= 16.0</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">max_iter</code>
-          <p class="cmd-desc">maximale Lloyd-Iterationen pro Initialisierung</p>
-          <pre class="cmd-code"><code class="language-python">km = KMeans(n_clusters=2, max_iter=1, n_init=1, random_state=42).fit(X)
-print(km.n_iter_)  # tatsächlich genutzte Iterationen</code></pre>
-          <pre class="cmd-out">1</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">.inertia_</code>
-          <p class="cmd-desc">Attribut nach <code>fit()</code>: WCSS (Within-Cluster-Sum-of-Squares) — für Elbow-Plot</p>
-          <pre class="cmd-code"><code class="language-python">km = KMeans(n_clusters=2, n_init=10, random_state=42).fit(X)
-print(km.inertia_)
-print(km.cluster_centers_)</code></pre>
-          <pre class="cmd-out">16.0
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>n_clusters=8</code> – k — Anzahl Cluster, muss vorab festgelegt werden (z.B. via Elbow-Methode).</li>
+<li><code>init='k-means++'</code> – intelligente, weit gestreute Startpunkte (Standard) statt <code>'random'</code> — konvergiert meist schneller/besser.</li>
+<li><code>n_init=10</code> – Anzahl unabhängiger Initialisierungen — das Ergebnis mit der kleinsten Inertia wird behalten.</li>
+<li><code>max_iter=300</code> – max. Lloyd-Iterationen pro Initialisierung.</li>
+<li><code>tol=1e-4</code> – Konvergenzschwelle für die Verschiebung der Cluster-Zentren.</li>
+<li><code>algorithm='lloyd'</code> – <code>'lloyd'</code> (Standard, EM-artig) oder <code>'elkan'</code> (oft schneller bei vielen Clustern dank Dreiecksungleichung).</li>
+<li><code>random_state=None</code> – Seed für die Initialisierung der Cluster-Zentren.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">n_clusters</p>
+                <p>Anzahl Cluster k — muss vorab festgelegt werden</p>
+              </div>
+              <pre><code>for n in [2, 3]:
+    model = KMeans(n_clusters=n, n_init=10, random_state=42)
+    model.fit(X)
+    labels  = model.labels_   # Cluster-Zuordnung pro Punkt
+    inertia = model.inertia_  # WCSS (Within-Cluster-Sum-of-Squares)
+    print(n, labels, "inertia=", inertia)</code></pre>
+<pre class="ref-out"><code>2 [0 0 0 1 1 1] inertia= 16.0
+3 [0 2 0 1 1 1] inertia= 10.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">init</p>
+                <p>'k-means++' (Standard, kluge Startpunkte) oder 'random'</p>
+              </div>
+              <pre><code>for init in ['k-means++', 'random']:
+    model = KMeans(n_clusters=2, init=init, n_init=10, random_state=42)
+    model.fit(X)
+    labels = model.labels_  # Cluster-Zuordnung dieser Initialisierung
+    print(init, labels)</code></pre>
+<pre class="ref-out"><code>k-means++ [0 0 0 1 1 1]
+random [0 0 0 1 1 1]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">n_init</p>
+                <p>Anzahl Initialisierungen — bestes Ergebnis (kleinste Inertia) wird behalten</p>
+              </div>
+              <pre><code>for ni in [1, 10]:
+    model = KMeans(n_clusters=2, n_init=ni, random_state=42)
+    model.fit(X)
+    inertia = model.inertia_  # bestes WCSS aus ni Starts
+    print(ni, "inertia=", inertia)</code></pre>
+<pre class="ref-out"><code>1 inertia= 16.0
+10 inertia= 16.0</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">max_iter</p>
+                <p>maximale Lloyd-Iterationen pro Initialisierung</p>
+              </div>
+              <pre><code>model = KMeans(n_clusters=2, max_iter=1, n_init=1, random_state=42)
+model.fit(X)
+n_iter = model.n_iter_  # Iterationen bis Konvergenz (hier: max_iter=1 erzwungen)
+print(n_iter)</code></pre>
+<pre class="ref-out"><code>1</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">.inertia_</p>
+                <p>Attribut nach <code>fit()</code>: WCSS (Within-Cluster-Sum-of-Squares) — für Elbow-Plot</p>
+              </div>
+              <pre><code>model = KMeans(n_clusters=2, n_init=10, random_state=42)
+model.fit(X)
+inertia = model.inertia_  # Summe quadr. Distanzen
+print(inertia)
+zentren = model.cluster_centers_  # Cluster-Zentren
+print(zentren)</code></pre>
+<pre class="ref-out"><code>16.0
 [[ 1.  2.]
- [10.  2.]]</pre>
+ [10.  2.]]</code></pre>
+            </div>
         </div>
+      </div>
       </div>
 
       <h3>DBSCAN</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.cluster import DBSCAN
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">DBSCAN</span>
+          <span class="ref-mod">sklearn.cluster</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.cluster import DBSCAN
 X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">DBSCAN(
-    eps=0.5,              # max. Nachbarschaftsradius
-    min_samples=5,        # Mindestpunkte für Core-Point
-    metric='euclidean',   # auch 'manhattan', 'cosine', ...
-    algorithm='auto',     # 'auto','ball_tree','kd_tree','brute'
-    leaf_size=30,         # für ball_tree/kd_tree
-    n_jobs=None,
+        <pre><code>DBSCAN(
+    eps=0.5,            # maximaler Radius, innerhalb dem zwei Punkte als Nachbarn gelten
+    min_samples=5,      # Mindestanzahl Nachbarn (inkl
+    metric='euclidean', # Distanzmetrik
+    algorithm='auto',   # Datenstruktur zur Nachbarschaftssuche
+    leaf_size=30,       # Blattgröße für 'ball_tree'/'kd_tree'
+    n_jobs=None,        # Parallelisierung der Nachbarschaftssuche.
 )</code></pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">eps</code>
-          <p class="cmd-desc">maximaler Abstand zwischen zwei Punkten, um als Nachbarn zu gelten. Zu klein → alles Noise, zu groß → ein Cluster</p>
-          <pre class="cmd-code"><code class="language-python">for eps in [1.5, 3, 6]:
-    db = DBSCAN(eps=eps, min_samples=2).fit(X)
-    print(eps, db.labels_)</code></pre>
-          <pre class="cmd-out">1.5 [-1 -1 -1 -1 -1 -1]
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>eps=0.5</code> – maximaler Radius, innerhalb dem zwei Punkte als Nachbarn gelten — der zentrale, sensible Hyperparameter.</li>
+<li><code>min_samples=5</code> – Mindestanzahl Nachbarn (inkl. des Punkts selbst) innerhalb von <code>eps</code>, damit ein Punkt ein Core-Point ist.</li>
+<li><code>metric='euclidean'</code> – Distanzmetrik — auch <code>'manhattan'</code>, <code>'cosine'</code> u.a. möglich.</li>
+<li><code>algorithm='auto'</code> – Datenstruktur zur Nachbarschaftssuche — <code>'auto'</code>, <code>'ball_tree'</code>, <code>'kd_tree'</code> oder <code>'brute'</code>.</li>
+<li><code>leaf_size=30</code> – Blattgröße für <code>'ball_tree'</code>/<code>'kd_tree'</code> — beeinflusst nur die Geschwindigkeit.</li>
+<li><code>n_jobs=None</code> – Parallelisierung der Nachbarschaftssuche.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">eps</p>
+                <p>maximaler Abstand zwischen zwei Punkten, um als Nachbarn zu gelten. Zu klein → alles Noise, zu groß → ein Cluster</p>
+              </div>
+              <pre><code>for eps in [1.5, 3, 6]:
+    model = DBSCAN(eps=eps, min_samples=2)
+    model.fit(X)
+    print(eps, model.labels_)</code></pre>
+<pre class="ref-out"><code>1.5 [-1 -1 -1 -1 -1 -1]
 3 [0 0 0 1 1 1]
-6 [0 0 0 1 1 1]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">min_samples</code>
-          <p class="cmd-desc">Mindestanzahl Punkte (inkl. sich selbst) für einen Core-Point</p>
-          <pre class="cmd-code"><code class="language-python">for ms in [1, 2, 3]:
-    db = DBSCAN(eps=3, min_samples=ms).fit(X)
-    print(ms, db.labels_)</code></pre>
-          <pre class="cmd-out">1 [0 0 0 1 1 1]
+6 [0 0 0 1 1 1]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">min_samples</p>
+                <p>Mindestanzahl Punkte (inkl. sich selbst) für einen Core-Point</p>
+              </div>
+              <pre><code>for model in [1, 2, 3]:
+    model = DBSCAN(eps=3, min_samples=ms)
+    model.fit(X)
+    print(model, model.labels_)</code></pre>
+<pre class="ref-out"><code>1 [0 0 0 1 1 1]
 2 [0 0 0 1 1 1]
-3 [0 0 0 1 1 1]</pre>
+3 [0 0 0 1 1 1]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">.labels_</p>
+                <p>Cluster-IDs nach <code>fit()</code>, <strong>-1 = Noise/Ausreißer</strong> — kein vorgegebenes k nötig</p>
+              </div>
+              <pre><code>model = DBSCAN(eps=3, min_samples=2)
+model.fit(X)
+labels = model.labels_  # Cluster-Zuordnung
+print(labels)</code></pre>
+<pre class="ref-out"><code>[0 0 0 1 1 1]</code></pre>
+            </div>
         </div>
-        <div class="cmd-card">
-          <code class="cmd-head">.labels_</code>
-          <p class="cmd-desc">Cluster-IDs nach <code>fit()</code>, <strong>-1 = Noise/Ausreißer</strong> — kein vorgegebenes k nötig</p>
-          <pre class="cmd-code"><code class="language-python">db = DBSCAN(eps=3, min_samples=2).fit(X)
-print(db.labels_)</code></pre>
-          <pre class="cmd-out">[0 0 0 1 1 1]</pre>
-        </div>
+      </div>
       </div>
 
       <h3>Weitere Clustering-Algorithmen</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.cluster import AgglomerativeClustering, MeanShift, SpectralClustering
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Weitere Clustering-Algorithmen</span>
+          <span class="ref-mod">sklearn.cluster</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.cluster import AgglomerativeClustering, MeanShift, SpectralClustering
 from sklearn.datasets import make_blobs, make_moons
 X, y = make_blobs(n_samples=300, centers=4, cluster_std=0.8, random_state=42)</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Überblick</code>
-          <p class="cmd-desc">Wann welchen Algorithmus nutzen?</p>
-          <table>
-            <thead><tr><th>Algorithmus</th><th>Idee</th><th>k vorgeben?</th><th>wann nutzen</th></tr></thead>
-            <tbody>
-              <tr><td>AgglomerativeClustering</td><td>Hierarchisches Mergen (bottom-up) nach Linkage-Kriterium</td><td>Ja (oder Dendrogramm-Schnitt)</td><td>Hierarchie/Dendrogramm gewünscht</td></tr>
-              <tr><td>SpectralClustering</td><td>Graph-Laplacian + KMeans im Eigenvektor-Raum</td><td>Ja</td><td>nicht-konvexe Cluster (Monde, Ringe)</td></tr>
-              <tr><td>MeanShift</td><td>Verschiebt Punkte iterativ zu lokalen Dichte-Maxima</td><td>Nein (bandwidth steuert)</td><td>k unbekannt, dichte-basiert</td></tr>
-              <tr><td>OPTICS</td><td>Wie DBSCAN, aber variable Dichte über Reachability-Plot</td><td>Nein</td><td>Cluster mit unterschiedlicher Dichte</td></tr>
-              <tr><td>Birch</td><td>Baumstruktur (CF-Tree), inkrementell</td><td>Optional</td><td>sehr große Datenmengen</td></tr>
-              <tr><td>k-Median (KMedoids)</td><td>Wie k-Means, aber Medoid (echter Punkt) statt Mittelwert</td><td>Ja</td><td>robust gegenüber Ausreißern</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">AgglomerativeClustering — linkage</code>
-          <p class="cmd-desc">'ward' (Standard, minimiert Varianz), 'complete' (max. Distanz), 'average', 'single' (min. Distanz, anfällig für Chaining-Effekt)</p>
-          <pre class="cmd-code"><code class="language-python">from sklearn.metrics import silhouette_score
+        <ul class="ref-params">
+<li><code>AgglomerativeClustering: n_clusters=2</code> – Anzahl Cluster — kann auch via <code>distance_threshold</code> statt fester Anzahl gesteuert werden (dann <code>n_clusters=None</code>).</li>
+<li><code>AgglomerativeClustering: linkage='ward'</code> – <code>'ward'</code>, <code>'complete'</code>, <code>'average'</code> oder <code>'single'</code> — Kriterium zur Distanz zwischen Clustern.</li>
+<li><code>MeanShift: bandwidth=None</code> – Suchradius für die Dichteschätzung; <code>None</code> schätzt automatisch via <code>estimate_bandwidth</code>.</li>
+<li><code>SpectralClustering: n_clusters=8</code> – Anzahl Cluster im Eigenvektor-Raum.</li>
+<li><code>SpectralClustering: affinity='rbf'</code> – <code>'nearest_neighbors'</code> für nicht-konvexe Formen (Monde, Ringe), <code>'rbf'</code> für gaußsche Ähnlichkeit.</li>
+<li><code>SpectralClustering: n_neighbors=10</code> – Anzahl Nachbarn für den Graph-Aufbau bei <code>affinity='nearest_neighbors'</code>.</li>
+</ul>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">Überblick</p>
+                <p>Wann welchen Algorithmus nutzen?</p>
+              </div>
+              <pre><code># Algorithmus         k?   Form          Ausreißer
+# KMeans              ja   konvex        empfindlich
+# DBSCAN              nein beliebig      robust (Noise)
+# AggloClustering     ja   hierarchisch  empfindlich
+# MeanShift           nein konvex        ok
+# SpectralClustering  ja   beliebig      empfindlich</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">AgglomerativeClustering — linkage</p>
+                <p>'ward' (Standard, minimiert Varianz), 'complete' (max. Distanz), 'average', 'single' (min. Distanz, anfällig für Chaining-Effekt)</p>
+              </div>
+              <pre><code>from sklearn.metrics import silhouette_score
 for linkage in ['ward', 'complete', 'average', 'single']:
-    ac = AgglomerativeClustering(n_clusters=4, linkage=linkage).fit(X)
-    print(linkage, round(silhouette_score(X, ac.labels_), 4))</code></pre>
-          <pre class="cmd-out">ward     0.8335
+    model = AgglomerativeClustering(n_clusters=4, linkage=linkage)
+    model.fit(X)
+    sil = round(silhouette_score(X, model.labels_), 4)  # Silhouette-Score
+    print(linkage, sil)</code></pre>
+<pre class="ref-out"><code>ward     0.8335
 complete 0.8335
 average  0.8335
-single   0.8335</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">MeanShift — kein k nötig</code>
-          <p class="cmd-desc"><code>bandwidth</code> steuert die Suchradius-Größe (analog zu eps bei DBSCAN); Anzahl Cluster ergibt sich automatisch</p>
-          <pre class="cmd-code"><code class="language-python">ms = MeanShift(bandwidth=2).fit(X)
-print("Gefundene Cluster:", len(set(ms.labels_)))
-print("Silhouette:", round(silhouette_score(X, ms.labels_), 4))</code></pre>
-          <pre class="cmd-out">Gefundene Cluster: 4
-Silhouette: 0.8335</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">SpectralClustering — nicht-konvexe Cluster</code>
-          <p class="cmd-desc">Nutzt <code>affinity='nearest_neighbors'</code> statt euklidischer Distanz → erkennt Mond-/Ring-Formen, an denen KMeans scheitert</p>
-          <pre class="cmd-code"><code class="language-python">from sklearn.cluster import KMeans
+single   0.8335</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">MeanShift — kein k nötig</p>
+                <p><code>bandwidth</code> steuert die Suchradius-Größe (analog zu eps bei DBSCAN); Anzahl Cluster ergibt sich automatisch</p>
+              </div>
+              <pre><code>model = MeanShift(bandwidth=2)
+model.fit(X)
+n_cluster = len(set(model.labels_))              # Anzahl auto-gefundener Cluster
+sil       = round(silhouette_score(X, model.labels_), 4)  # Silhouette-Score
+print("Cluster:",    n_cluster)
+print("Silhouette:", sil)</code></pre>
+<pre class="ref-out"><code>Gefundene Cluster: 4
+Silhouette: 0.8335</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">SpectralClustering — nicht-konvexe Cluster</p>
+                <p>Nutzt <code>affinity='nearest_neighbors'</code> statt euklidischer Distanz → erkennt Mond-/Ring-Formen, an denen KMeans scheitert</p>
+              </div>
+              <pre><code>from sklearn.cluster import KMeans
 Xm, ym = make_moons(n_samples=200, noise=0.05, random_state=42)
 
-sc = SpectralClustering(n_clusters=2, affinity='nearest_neighbors', n_neighbors=10, random_state=42).fit(Xm)
-km = KMeans(n_clusters=2, random_state=42, n_init=10).fit(Xm)
+# SpectralClustering erkennt nicht-konvexe Formen
+model_sc = SpectralClustering(n_clusters=2, affinity='nearest_neighbors', n_neighbors=10, random_state=42)
+model_sc.fit(Xm)
+acc_sc = max((model_sc.labels_ == ym).mean(),
+             (1 - model_sc.labels_ == ym).mean())  # Übereinstimmung mit echten Labels
 
-print("SpectralClustering Übereinstimmung:", max((sc.labels_ == ym).mean(), (sc.labels_ != ym).mean()))
-print("KMeans Übereinstimmung:           ", max((km.labels_ == ym).mean(), (km.labels_ != ym).mean()))</code></pre>
-          <pre class="cmd-out">SpectralClustering Übereinstimmung: 1.0
-KMeans Übereinstimmung:            0.735</pre>
+# KMeans scheitert an Mond-Formen
+model_km = KMeans(n_clusters=2, n_init=10, random_state=42)
+model_km.fit(Xm)
+acc_km = max((model_km.labels_ == ym).mean(),
+             (1 - model_km.labels_ == ym).mean())
+
+print("Spectral:", round(acc_sc, 4))
+print("KMeans: ", round(acc_km, 4))</code></pre>
+<pre class="ref-out"><code>SpectralClustering Übereinstimmung: 1.0
+KMeans Übereinstimmung:            0.735</code></pre>
+            </div>
         </div>
+      </div>
       </div>
 
       <h3>GaussianMixture</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.mixture import GaussianMixture
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">GaussianMixture</span>
+          <span class="ref-mod">sklearn.mixture</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.mixture import GaussianMixture
 X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">GaussianMixture(
-    n_components=1,           # Anzahl Gauß-Komponenten
-    covariance_type='full',   # 'full','tied','diag','spherical'
-    tol=1e-3,
-    max_iter=100,              # EM-Iterationen
-    n_init=1,                  # Anzahl Initialisierungen
-    init_params='kmeans',      # oder 'k-means++','random',...
-    random_state=None,
+        <pre><code>GaussianMixture(
+    n_components=1,         # Anzahl Gauß-Komponenten (= "Cluster").
+    covariance_type='full', # 'full' (jede Komponente eigene volle Kovarianzmatrix), 'tied' (alle…
+    tol=1e-3,               # Konvergenzschwelle für die Änderung der Log-Likelihood.
+    max_iter=100,           # max. EM-Iterationen (E-Step + M-Step).
+    n_init=1,               # Anzahl Initialisierungen
+    init_params='kmeans',   # Initialisierungsmethode für Mittelwerte/Kovarianzen: 'kmeans',…
+    random_state=None,      # Seed für die Initialisierung.
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">n_components</code>
-          <p class="cmd-desc">Anzahl Gauß-Verteilungen (analog zu k bei KMeans)</p>
-          <pre class="cmd-code"><code class="language-python">for n in [2, 3]:
-    gm = GaussianMixture(n_components=n, random_state=42).fit(X)
-    print(n, gm.predict(X))</code></pre>
-          <pre class="cmd-out">2 [0 0 0 1 1 1]
-3 [0 2 0 1 1 1]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">covariance_type</code>
-          <p class="cmd-desc">'full' (Standard, flexibel), 'diag', 'tied', 'spherical' — beeinflusst Modellkomplexität</p>
-          <pre class="cmd-code"><code class="language-python">for ct in ['full', 'diag', 'spherical', 'tied']:
-    gm = GaussianMixture(n_components=2, covariance_type=ct, random_state=42).fit(X)
-    print(ct, "aic=", round(gm.aic(X), 2))</code></pre>
-          <pre class="cmd-out">full aic= -18.64
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>n_components=1</code> – Anzahl Gauß-Komponenten (= "Cluster").</li>
+<li><code>covariance_type='full'</code> – <code>'full'</code> (jede Komponente eigene volle Kovarianzmatrix), <code>'tied'</code> (alle Komponenten teilen sich eine), <code>'diag'</code> (nur Diagonale), <code>'spherical'</code> (ein Skalar pro Komponente).</li>
+<li><code>tol=1e-3</code> – Konvergenzschwelle für die Änderung der Log-Likelihood.</li>
+<li><code>max_iter=100</code> – max. EM-Iterationen (E-Step + M-Step).</li>
+<li><code>n_init=1</code> – Anzahl Initialisierungen — das Ergebnis mit der höchsten Log-Likelihood wird behalten.</li>
+<li><code>init_params='kmeans'</code> – Initialisierungsmethode für Mittelwerte/Kovarianzen: <code>'kmeans'</code>, <code>'k-means++'</code>, <code>'random'</code> oder <code>'random_from_data'</code>.</li>
+<li><code>random_state=None</code> – Seed für die Initialisierung.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">n_components</p>
+                <p>Anzahl Gauß-Verteilungen (analog zu k bei KMeans)</p>
+              </div>
+              <pre><code>for n in [2, 3]:
+    model = GaussianMixture(n_components=n, random_state=42)
+    model.fit(X)
+    print(n, model.predict(X))</code></pre>
+<pre class="ref-out"><code>2 [0 0 0 1 1 1]
+3 [0 2 0 1 1 1]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">covariance_type</p>
+                <p>'full' (Standard, flexibel), 'diag', 'tied', 'spherical' — beeinflusst Modellkomplexität</p>
+              </div>
+              <pre><code>for ct in ['full', 'diag', 'spherical', 'tied']:
+    model = GaussianMixture(n_components=2, covariance_type=ct, random_state=42)
+    model.fit(X)
+    print(ct, "aic=", round(model.aic(X), 2))</code></pre>
+<pre class="ref-out"><code>full aic= -18.64
 diag aic= -22.64
 spherical aic= 59.82
-tied aic= -24.64</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">predict_proba(X)</code>
-          <p class="cmd-desc">Soft-Assignment: Wahrscheinlichkeit pro Cluster (im Gegensatz zu KMeans hartem Label)</p>
-          <pre class="cmd-code"><code class="language-python">gm = GaussianMixture(n_components=2, random_state=42).fit(X)
-print(gm.predict_proba(X))</code></pre>
-          <pre class="cmd-out">[[1. 0.]
+tied aic= -24.64</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">predict_proba(X)</p>
+                <p>Soft-Assignment: Wahrscheinlichkeit pro Cluster (im Gegensatz zu KMeans hartem Label)</p>
+              </div>
+              <pre><code>model = GaussianMixture(n_components=2, random_state=42)
+model.fit(X)
+y_proba = model.predict_proba(X)  # Klassenwahrscheinlichkeiten
+print(y_proba)</code></pre>
+<pre class="ref-out"><code>[[1. 0.]
  [1. 0.]
  [1. 0.]
  [0. 1.]
  [0. 1.]
- [0. 1.]]</pre>
+ [0. 1.]]</code></pre>
+            </div>
         </div>
+      </div>
       </div>
 
       <h3>PCA (Principal Component Analysis)</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.decomposition import PCA
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">PCA (Principal Component Analysis)</span>
+          <span class="ref-mod">sklearn.decomposition</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.decomposition import PCA
 X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">PCA(
-    n_components=None,   # int, float in (0,1) = Ziel-Varianzanteil, 'mle' oder None (=alle)
-    svd_solver='auto',   # 'auto','full','arpack','randomized'
-    whiten=False,        # True: Komponenten auf Einheitsvarianz skalieren
-    random_state=None,   # nur für 'arpack'/'randomized'
+        <pre><code>PCA(
+    n_components=None, # Anzahl Komponenten
+    svd_solver='auto', # SVD-Algorithmus
+    whiten=False,      # True skaliert die Komponenten auf Einheitsvarianz
+    random_state=None, # Seed, nur relevant für svd_solver='arpack'/'randomized'.
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">n_components</code>
-          <p class="cmd-desc">Anzahl der zu behaltenden Hauptkomponenten (≤ Anzahl Features)</p>
-          <pre class="cmd-code"><code class="language-python">for n in [1, 2]:
-    pca = PCA(n_components=n).fit(X)
-    print(n, "ratio=", pca.explained_variance_ratio_)</code></pre>
-          <pre class="cmd-out">1 ratio= [0.8836]
-2 ratio= [0.8836 0.1164]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">.components_ / .explained_variance_ratio_</code>
-          <p class="cmd-desc">Attribute nach <code>fit()</code>: Hauptachsen (Zeilen) und ihr Anteil an der Gesamtvarianz</p>
-          <pre class="cmd-code"><code class="language-python">pca = PCA(n_components=2).fit(X)
-print(pca.components_)
-print(pca.explained_variance_ratio_)</code></pre>
-          <pre class="cmd-out">[[1. 0.]
+        <details class="ref-details">
+<summary>📖 Parameter — Details</summary>
+<ul class="ref-params">
+<li><code>n_components=None</code> – Anzahl Komponenten — int (feste Zahl), float in (0,1) (Ziel-Varianzanteil, z.B. <code>0.95</code>), <code>'mle'</code> (automatische Schätzung) oder <code>None</code> (= alle Komponenten).</li>
+<li><code>svd_solver='auto'</code> – SVD-Algorithmus — <code>'auto'</code>, <code>'full'</code>, <code>'arpack'</code> oder <code>'randomized'</code> (schneller bei großen Datensätzen mit wenigen Zielkomponenten).</li>
+<li><code>whiten=False</code> – <code>True</code> skaliert die Komponenten auf Einheitsvarianz — entfernt Korrelationsinformation, kann nachgeschalteten Algorithmen helfen.</li>
+<li><code>random_state=None</code> – Seed, nur relevant für <code>svd_solver='arpack'</code>/<code>'randomized'</code>.</li>
+</ul>
+</details>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">n_components</p>
+                <p>Anzahl der zu behaltenden Hauptkomponenten (≤ Anzahl Features)</p>
+              </div>
+              <pre><code>for n in [1, 2]:
+    model = PCA(n_components=n)
+    model.fit(X)
+    print(n, "ratio=", model.explained_variance_ratio_)</code></pre>
+<pre class="ref-out"><code>1 ratio= [0.8836]
+2 ratio= [0.8836 0.1164]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">.components_ / .explained_variance_ratio_</p>
+                <p>Attribute nach <code>fit()</code>: Hauptachsen (Zeilen) und ihr Anteil an der Gesamtvarianz</p>
+              </div>
+              <pre><code>model = PCA(n_components=2)
+model.fit(X)
+komp = model.components_  # Hauptkomponenten
+print(komp)
+var_ratio = model.explained_variance_ratio_  # erklärter Varianzanteil
+print(var_ratio)</code></pre>
+<pre class="ref-out"><code>[[1. 0.]
  [0. 1.]]
-[0.8836 0.1164]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">.transform() / .inverse_transform()</code>
-          <p class="cmd-desc">Projektion auf die Hauptkomponenten und Rücktransformation (Rekonstruktion)</p>
-          <pre class="cmd-code"><code class="language-python">pca = PCA(n_components=1).fit(X)
-X_proj = pca.transform(X)
-print(X_proj.ravel())
-print(pca.inverse_transform(X_proj))</code></pre>
-          <pre class="cmd-out">[-4.5 -4.5 -4.5  4.5  4.5  4.5]
+[0.8836 0.1164]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">.transform() / .inverse_transform()</p>
+                <p>Projektion auf die Hauptkomponenten und Rücktransformation (Rekonstruktion)</p>
+              </div>
+              <pre><code>model = PCA(n_components=1)
+model.fit(X)
+X_proj = model.transform(X)   # Projektion auf 1 Hauptkomponente
+X_flat = X_proj.ravel()       # als 1D-Array
+print(X_flat)
+X_orig = model.inverse_transform(X_proj)  # Rücktransformation in Originalraum
+print(X_orig)</code></pre>
+<pre class="ref-out"><code>[-4.5 -4.5 -4.5  4.5  4.5  4.5]
 [[ 1.  2.]
  [ 1.  2.]
  [ 1.  2.]
  [10.  2.]
  [10.  2.]
- [10.  2.]]</pre>
+ [10.  2.]]</code></pre>
+            </div>
         </div>
+      </div>
       </div>
     </section>
 
     <!-- ═══ 6 · MODEL SELECTION ═══ -->
-    <section class="pruef-section" id="model-selection">
+    <section class="pruef-section" id="model-selection" data-kapitel="k7">
       <h2><span class="pruef-num">6</span> Model Selection &amp; Tuning</h2>
 
       <h3>cross_val_score / StratifiedKFold</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.model_selection import cross_val_score, StratifiedKFold
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">cross_val_score / StratifiedKFold</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import load_iris
 X, y = load_iris(return_X_y=True)</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">cv</code>
-          <p class="cmd-desc">Anzahl Folds für die Kreuzvalidierung</p>
-          <pre class="cmd-code"><code class="language-python">for cv in [3, 5]:
+        <ul class="ref-params">
+<li><code>cross_val_score(estimator, X, y=None, …)</code> – Trainiert/evaluiert <code>estimator</code> per Kreuzvalidierung und gibt ein Array der Scores zurück.</li>
+<li><code>cv=None</code> – Anzahl Folds (Standard 5) oder ein Cross-Validation-Splitter-Objekt wie <code>StratifiedKFold</code>.</li>
+<li><code>scoring=None</code> – Metrik-Name (z.B. <code>'accuracy'</code>, <code>'f1_macro'</code>, <code>'neg_mean_squared_error'</code>) oder eigene Scoring-Funktion. <code>None</code> = Standard-<code>score()</code> des Estimators.</li>
+<li><code>n_jobs=None</code> – Anzahl paralleler Folds (<code>-1</code> = alle CPU-Kerne).</li>
+<li><code>StratifiedKFold(n_splits=5)</code> – Anzahl Folds — Klassenverteilung bleibt in jedem Fold erhalten (wichtig bei unbalancierten Klassen).</li>
+<li><code>StratifiedKFold: shuffle=False</code> – Mischt die Daten vor dem Splitten — bei <code>True</code> sollte <code>random_state</code> gesetzt werden.</li>
+<li><code>StratifiedKFold: random_state=None</code> – Seed für Reproduzierbarkeit (nur relevant wenn <code>shuffle=True</code>).</li>
+</ul>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">cv</p>
+                <p>Anzahl Folds für die Kreuzvalidierung</p>
+              </div>
+              <pre><code>for cv in [3, 5]:
     scores = cross_val_score(DecisionTreeClassifier(random_state=42), X, y, cv=cv)
     print(cv, scores)</code></pre>
-          <pre class="cmd-out">3 [0.98 0.94 0.96]
-5 [0.9667 0.9667 0.9    0.9333 1.    ]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">scoring</code>
-          <p class="cmd-desc">Metrik zur Bewertung jeder Kombination</p>
-          <pre class="cmd-code"><code class="language-python">for sc in ['accuracy', 'f1_macro']:
-    scores = cross_val_score(DecisionTreeClassifier(random_state=42), X, y, cv=5, scoring=sc)
-    print(sc, scores)</code></pre>
-          <pre class="cmd-out">accuracy [0.9667 0.9667 0.9    0.9333 1.    ]
-f1_macro [0.9666 0.9666 0.8997 0.9333 1.    ]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">StratifiedKFold</code>
-          <p class="cmd-desc">erhält Klassenverteilung in jedem Fold — Standard für Klassifikation</p>
-          <pre class="cmd-code"><code class="language-python">skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+<pre class="ref-out"><code>3 [0.98 0.94 0.96]
+5 [0.9667 0.9667 0.9    0.9333 1.    ]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">scoring</p>
+                <p>Metrik zur Bewertung jeder Kombination</p>
+              </div>
+              <pre><code>for model in ['accuracy', 'f1_macro']:
+    scores = cross_val_score(DecisionTreeClassifier(random_state=42), X, y, cv=5, scoring=model)
+    print(model, scores)</code></pre>
+<pre class="ref-out"><code>accuracy [0.9667 0.9667 0.9    0.9333 1.    ]
+f1_macro [0.9666 0.9666 0.8997 0.9333 1.    ]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">StratifiedKFold</p>
+                <p>erhält Klassenverteilung in jedem Fold — Standard für Klassifikation</p>
+              </div>
+              <pre><code>skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scores = cross_val_score(DecisionTreeClassifier(random_state=42), X, y, cv=skf)
 print(scores)</code></pre>
-          <pre class="cmd-out">[1.     0.9667 0.9333 0.9667 0.9   ]</pre>
+<pre class="ref-out"><code>[1.     0.9667 0.9333 0.9667 0.9   ]</code></pre>
+            </div>
         </div>
+      </div>
       </div>
 
       <h3>GridSearchCV / RandomizedSearchCV</h3>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+                  <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">GridSearchCV / RandomizedSearchCV</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+        <div class="ref-body">
+          <pre><code>from sklearn.model_selection import (
+    GridSearchCV, RandomizedSearchCV)
 from sklearn.svm import SVC
 from sklearn.datasets import load_iris
-X, y = load_iris(return_X_y=True)</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter — GridSearchCV</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">GridSearchCV(
-    estimator,                # Modell mit fit/predict
-    param_grid,               # Dict oder Liste von Dicts
-    scoring=None,             # z.B. 'accuracy', 'f1_macro', None=estimator.score
-    n_jobs=None,              # -1 = alle Kerne (parallele Kombinationen)
-    refit=True,               # bestes Modell auf gesamten Daten neu fitten
-    cv=None,                  # Anzahl Folds (None = 5)
-    verbose=0,
-    return_train_score=False,
+
+X, y = load_iris(return_X_y=True)
+
+# Suchraum: C × gamma = 3 × 2 = 6 Kombinationen
+param_grid = {
+    'C':     [0.1, 1, 10],
+    'gamma': [0.01, 0.1],
+}
+# Basis-Modell dessen Parameter optimiert werden
+base_model = SVC()</code></pre>
+
+          <p class="ref-sub">GridSearchCV</p>
+          <pre><code>GridSearchCV(
+    estimator,                # Modell mit fit/predict-API
+    param_grid,               # Dict: Param → Werteliste
+    scoring=None,             # Metrik: 'accuracy', 'f1_macro' …
+    n_jobs=None,              # -1 = alle CPU-Kerne nutzen
+    refit=True,               # bestes Modell auf allen Daten neu fitten
+    cv=None,                  # Folds Kreuzvalidierung (None = 5)
+    verbose=0,                # Konsolenausgabe während Suche
+    return_train_score=False, # True für Overfitting-Diagnose
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Alle Parameter — RandomizedSearchCV</code>
-          <p class="cmd-desc">vollständige Signatur mit Standardwerten</p>
-          <pre class="cmd-code"><code class="language-python">RandomizedSearchCV(
-    estimator,
-    param_distributions,      # Dict mit Listen ODER Verteilungen
-    n_iter=10,                # Anzahl zufällig gezogener Kombinationen
-    scoring=None,
-    n_jobs=None,
-    refit=True,
-    cv=None,
-    random_state=None,        # für reproduzierbares Sampling
+          <details class="ref-details">
+            <summary>📖 Parameter — Details</summary>
+            <ul class="ref-params">
+<li><code>estimator</code> – Modell mit <code>fit</code>/<code>predict</code>-Schnittstelle.</li>
+<li><code>param_grid</code> – Dict oder Liste von Dicts: Parametername → Werteliste. <strong>Alle</strong> Kombinationen werden getestet.</li>
+<li><code>scoring=None</code> – Bewertungsmetrik, z.B. <code>'accuracy'</code>, <code>'f1_macro'</code>; <code>None</code> → <code>estimator.score()</code>.</li>
+<li><code>n_jobs=None</code> – <code>-1</code> = alle CPU-Kerne parallel nutzen.</li>
+<li><code>refit=True</code> – fittet das beste Modell auf dem gesamten Trainingsdatensatz neu — danach direkt <code>.predict()</code> nutzbar.</li>
+<li><code>cv=None</code> – Anzahl Folds für innere Kreuzvalidierung (<code>None</code> = 5).</li>
+<li><code>return_train_score=False</code> – <code>True</code> liefert zusätzlich Trainings-Scores zur Overfitting-Diagnose.</li>
+</ul>
+          </details>
+
+          <p class="ref-sub">RandomizedSearchCV</p>
+          <pre><code>RandomizedSearchCV(
+    estimator,           # Modell mit fit/predict-API
+    param_distributions, # Dict: Param → Liste od. Verteilung
+    n_iter=10,           # Anzahl zufälliger Kombinationen
+    scoring=None,        # Metrik wie bei GridSearchCV
+    n_jobs=None,         # -1 = parallele Berechnung
+    refit=True,          # bestes Modell neu fitten
+    cv=None,             # Folds (None = 5)
+    random_state=None,   # Seed für Reproduzierbarkeit
     verbose=0,
 )</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">estimator</code>
-          <p class="cmd-desc">das Modell, dessen Hyperparameter optimiert werden</p>
-          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]}, cv=3)
-print(grid.estimator)</code></pre>
-          <pre class="cmd-out">SVC()</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">param_grid</code>
-          <p class="cmd-desc">Dict mit Parameter-Namen → Liste der zu testenden Werte (alle Kombinationen werden geprüft)</p>
-          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]}, cv=3)
-grid.fit(X, y)
-print(len(grid.cv_results_['params']))  # 3*2 Kombinationen</code></pre>
-          <pre class="cmd-out">6</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">cv</code>
-          <p class="cmd-desc">Anzahl Folds für die innere Kreuzvalidierung</p>
-          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]}, cv=3)
-grid.fit(X, y)
-print(round(grid.best_score_, 4))</code></pre>
-          <pre class="cmd-out">0.9733</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">scoring</code>
-          <p class="cmd-desc">Metrik zur Bewertung jeder Kombination (Standard: <code>estimator.score</code>)</p>
-          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]},
-                    cv=3, scoring='f1_macro')
-grid.fit(X, y)
-print(grid.best_params_)</code></pre>
-          <pre class="cmd-out">{'C': 10, 'gamma': 0.1}</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">.best_params_ / .best_estimator_</code>
-          <p class="cmd-desc">Attribute nach <code>fit()</code>: beste Hyperparameter bzw. bereits darauf trainiertes Modell</p>
-          <pre class="cmd-code"><code class="language-python">grid = GridSearchCV(SVC(), param_grid={'C':[0.1,1,10],'gamma':[0.01,0.1]}, cv=3)
-grid.fit(X, y)
-print(grid.best_params_)
-print(grid.best_estimator_)</code></pre>
-          <pre class="cmd-out">{'C': 10, 'gamma': 0.1}
-SVC(C=10, gamma=0.1)</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">RandomizedSearchCV</code>
-          <p class="cmd-desc">zieht <code>n_iter</code> zufällige Kombinationen statt aller — effizienter bei großem Suchraum</p>
-          <pre class="cmd-code"><code class="language-python">from scipy.stats import uniform
-rgrid = RandomizedSearchCV(
-    SVC(), param_distributions={'C': uniform(0.1, 10), 'gamma': ['scale','auto']},
-    n_iter=5, cv=3, random_state=42)
-rgrid.fit(X, y)
-print(rgrid.best_params_)</code></pre>
-          <pre class="cmd-out">{'C': 6.0866, 'gamma': 'scale'}</pre>
+          <details class="ref-details">
+            <summary>📖 Parameter — Details</summary>
+            <ul class="ref-params">
+<li><code>estimator</code> – Modell mit <code>fit</code>/<code>predict</code>-Schnittstelle.</li>
+<li><code>param_distributions</code> – Dict mit Listen <em>oder</em> Verteilungen (z.B. <code>scipy.stats.uniform</code>).</li>
+<li><code>n_iter=10</code> – Anzahl zufällig gezogener Kombinationen — Kompromiss zwischen Vollständigkeit und Rechenzeit.</li>
+<li><code>scoring=None</code> – Bewertungsmetrik wie bei <code>GridSearchCV</code>.</li>
+<li><code>random_state=None</code> – Seed für reproduzierbares Sampling.</li>
+<li><code>refit=True</code> – bestes Modell auf allen Trainingsdaten neu fitten.</li>
+</ul>
+          </details>
+
+          <div class="ref-grid">
+            <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">fit + best_params_</p>
+                <p>findet beste Hyperparameter per Cross-Validation</p>
+              </div>
+              <pre><code>model = GridSearchCV(
+    base_model, param_grid, cv=3)
+model.fit(X, y)
+# welche Parameter haben am besten abgeschnitten?
+best = model.best_params_
+print(best)</code></pre>
+              <pre class="ref-out"><code>{'C': 10, 'gamma': 0.1}</code></pre>
+            </div>
+            <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">best_score_</p>
+                <p>mittlerer CV-Score des besten Hyperparameter-Sets</p>
+              </div>
+              <pre><code>model = GridSearchCV(
+    base_model, param_grid, cv=3)
+model.fit(X, y)
+# durchschnittlicher Accuracy-Score aller Folds
+score = round(model.best_score_, 4)
+print(score)</code></pre>
+              <pre class="ref-out"><code>0.9733</code></pre>
+            </div>
+            <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">best_estimator_</p>
+                <p>bereits auf <em>allen</em> Daten trainiertes bestes Modell</p>
+              </div>
+              <pre><code>model = GridSearchCV(
+    base_model, param_grid,
+    cv=3, refit=True)
+model.fit(X, y)
+# fertiges Modell → direkt predict() nutzbar
+best_est = model.best_estimator_
+print(best_est)</code></pre>
+              <pre class="ref-out"><code>SVC(C=10, gamma=0.1)</code></pre>
+            </div>
+            <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">scoring='f1_macro'</p>
+                <p>andere Metrik für unbalancierten Datensatz</p>
+              </div>
+              <pre><code>model = GridSearchCV(
+    base_model, param_grid,
+    cv=3, scoring='f1_macro')
+model.fit(X, y)
+# bestes param_grid laut f1_macro
+best = model.best_params_
+print(best)</code></pre>
+              <pre class="ref-out"><code>{'C': 10, 'gamma': 0.1}</code></pre>
+            </div>
+            <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">RandomizedSearchCV</p>
+                <p>zieht <code>n_iter</code> zufällige Kombinationen — effizienter bei großem Suchraum</p>
+              </div>
+              <pre><code>from scipy.stats import uniform
+
+# Verteilungen statt Wertelisten
+param_dist = {
+    'C':     uniform(0.1, 10),
+    'gamma': ['scale', 'auto'],
+}
+model = RandomizedSearchCV(
+    base_model, param_dist,
+    n_iter=5, cv=3,
+    random_state=42)
+model.fit(X, y)
+# zufällig gefundenes bestes Parameterset
+best = model.best_params_
+print(best)</code></pre>
+              <pre class="ref-out"><code>{'C': 6.09, 'gamma': 'scale'}</code></pre>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ═══ 7 · METRICS ═══ -->
-    <section class="pruef-section" id="metrics">
+    <section class="pruef-section" id="metrics" data-kapitel="k7">
       <h2><span class="pruef-num">7</span> Metrics</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from sklearn.metrics import (confusion_matrix, classification_report, roc_auc_score,
+            <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Metrics</span>
+          <span class="ref-mod">sklearn.metrics</span>
+        </div>
+                    <div class="ref-body">
+        <pre><code>from sklearn.metrics import (confusion_matrix, classification_report, roc_auc_score,
     f1_score, mean_squared_error, r2_score, silhouette_score)
 y_true = [0, 1, 1, 0, 1, 2, 2, 0]
 y_pred = [0, 1, 0, 0, 1, 2, 1, 0]</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">confusion_matrix(y_true, y_pred)</code>
-          <p class="cmd-desc">Matrix der Vorhersagen vs. tatsächlichen Klassen</p>
-          <pre class="cmd-code"><code class="language-python">print(confusion_matrix(y_true, y_pred))</code></pre>
-          <pre class="cmd-out">[[3 0 0]
+        <ul class="ref-params">
+<li><code>f1_score(…, average='binary')</code> – <code>'binary'</code> (nur bei 2 Klassen), <code>'macro'</code> (ungewichteter Mittelwert pro Klasse), <code>'weighted'</code> (gewichtet nach Klassenhäufigkeit), <code>'micro'</code> (global über alle Samples).</li>
+<li><code>roc_auc_score(…, multi_class='raise')</code> – Bei Mehrklassen-Problemen <code>'ovr'</code> (One-vs-Rest) oder <code>'ovo'</code> (One-vs-One) angeben; braucht <code>predict_proba()</code>-Werte statt Klassenlabels.</li>
+<li><code>confusion_matrix(…, labels=None)</code> – Reihenfolge/Auswahl der Klassen in der Matrix explizit festlegen (sonst sortiert nach den vorkommenden Werten).</li>
+<li><code>classification_report(…, output_dict=False)</code> – <code>True</code> liefert ein Dict statt formatierten Text — praktisch für Weiterverarbeitung.</li>
+<li><code>mean_squared_error(…, squared=True)</code> – <i>(ältere sklearn-Versionen)</i> <code>False</code> liefert RMSE statt MSE; in neueren Versionen stattdessen <code>root_mean_squared_error</code> verwenden.</li>
+<li><code>silhouette_score(X, labels, metric='euclidean')</code> – Distanzmetrik für die Cluster-Kompaktheit/-Trennung.</li>
+</ul>
+        <div class="ref-grid">
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">confusion_matrix(y_true, y_pred)</p>
+                <p>Matrix der Vorhersagen vs. tatsächlichen Klassen</p>
+              </div>
+              <pre><code>print(confusion_matrix(y_true, y_pred))</code></pre>
+<pre class="ref-out"><code>[[3 0 0]
  [1 2 0]
- [0 1 1]]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">roc_auc_score(y_true, y_proba)</code>
-          <p class="cmd-desc">Fläche unter der ROC-Kurve, braucht Wahrscheinlichkeiten via <code>predict_proba()[:,1]</code></p>
-          <pre class="cmd-code"><code class="language-python">y_true_b = [0, 0, 1, 1]
+ [0 1 1]]</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">roc_auc_score(y_true, y_proba)</p>
+                <p>Fläche unter der ROC-Kurve, braucht Wahrscheinlichkeiten via <code>predict_proba()[:,1]</code></p>
+              </div>
+              <pre><code>y_true_b = [0, 0, 1, 1]
 y_proba = [0.1, 0.4, 0.35, 0.8]
 print(roc_auc_score(y_true_b, y_proba))</code></pre>
-          <pre class="cmd-out">0.75</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">f1_score(y_true, y_pred, average='macro')</code>
-          <p class="cmd-desc"><code>average</code>: 'macro' (ungewichtet), 'weighted' (nach Klassenhäufigkeit)</p>
-          <pre class="cmd-code"><code class="language-python">print(f1_score(y_true, y_pred, average='macro'))
+<pre class="ref-out"><code>0.75</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">f1_score(y_true, y_pred, average='macro')</p>
+                <p><code>average</code>: 'macro' (ungewichtet), 'weighted' (nach Klassenhäufigkeit)</p>
+              </div>
+              <pre><code>print(f1_score(y_true, y_pred, average='macro'))
 print(f1_score(y_true, y_pred, average='weighted'))</code></pre>
-          <pre class="cmd-out">0.7301587301587301
-0.738095238095238</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">mean_squared_error / r2_score</code>
-          <p class="cmd-desc">Standardmetriken für Regression</p>
-          <pre class="cmd-code"><code class="language-python">y_reg_true = [3.0, -0.5, 2.0, 7.0]
+<pre class="ref-out"><code>0.7301587301587301
+0.738095238095238</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">mean_squared_error / r2_score</p>
+                <p>Standardmetriken für Regression</p>
+              </div>
+              <pre><code>y_reg_true = [3.0, -0.5, 2.0, 7.0]
 y_reg_pred = [2.5, 0.0, 2.0, 8.0]
 print(mean_squared_error(y_reg_true, y_reg_pred))
 print(r2_score(y_reg_true, y_reg_pred))</code></pre>
-          <pre class="cmd-out">0.375
-0.9486081370449679</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">silhouette_score(X, labels)</code>
-          <p class="cmd-desc">Cluster-Qualität ohne Ground-Truth-Labels (-1 bis 1, höher = besser)</p>
-          <pre class="cmd-code"><code class="language-python">X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])
+<pre class="ref-out"><code>0.375
+0.9486081370449679</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">silhouette_score(X, labels)</p>
+                <p>Cluster-Qualität ohne Ground-Truth-Labels (-1 bis 1, höher = besser)</p>
+              </div>
+              <pre><code>X = np.array([[1,2],[1,4],[1,0],[10,2],[10,4],[10,0]])
 print(silhouette_score(X, [0,0,0,1,1,1]))</code></pre>
-          <pre class="cmd-out">0.7133477791749615</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">classification_report(y_true, y_pred)</code>
-          <p class="cmd-desc">Precision/Recall/F1 pro Klasse + Macro/Weighted-Avg</p>
-          <pre class="cmd-code"><code class="language-python">print(classification_report(y_true, y_pred))</code></pre>
-          <pre class="cmd-out cmd-out--wrap">              precision    recall  f1-score   support
+<pre class="ref-out"><code>0.7133477791749615</code></pre>
+            </div>
+        <div class="ref-ex">
+              <div class="ref-ex-meta">
+                <p class="ref-sub">classification_report(y_true, y_pred)</p>
+                <p>Precision/Recall/F1 pro Klasse + Macro/Weighted-Avg</p>
+              </div>
+              <pre><code>print(classification_report(y_true, y_pred))</code></pre>
+<pre class="ref-out"><code>precision    recall  f1-score   support
 
            0       0.75      1.00      0.86         3
            1       0.67      0.67      0.67         3
@@ -1278,8 +2006,10 @@ print(silhouette_score(X, [0,0,0,1,1,1]))</code></pre>
 
     accuracy                           0.75         8
    macro avg       0.81      0.72      0.73         8
-weighted avg       0.78      0.75      0.74         8</pre>
+weighted avg       0.78      0.75      0.74         8</code></pre>
+            </div>
         </div>
+      </div>
       </div>
     </section>
 
@@ -1301,6 +2031,41 @@ weighted avg       0.78      0.75      0.74         8</pre>
     };
     document.addEventListener('scroll', setActive, { passive: true });
     setActive();
+  </script>
+
+  <script>
+    (function () {
+      const bar      = document.getElementById('kapitel-filter-bar');
+      const sections = document.querySelectorAll('.pruef-section[data-kapitel]');
+      if (!bar) return;
+
+      bar.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-kf]');
+        if (!btn) return;
+        const kf = btn.dataset.kf;
+
+        /* active pill */
+        bar.querySelectorAll('[data-kf]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        /* show / hide */
+        sections.forEach(sec => {
+          if (kf === 'all' || sec.dataset.kapitel === kf) {
+            sec.classList.remove('kf-hidden');
+          } else {
+            sec.classList.add('kf-hidden');
+          }
+        });
+
+        /* scroll to first visible section when filtering */
+        if (kf !== 'all') {
+          const first = [...sections].find(s => !s.classList.contains('kf-hidden'));
+          if (first) {
+            setTimeout(() => first.scrollIntoView({ behavior: 'smooth', block: 'start' }), 40);
+          }
+        }
+      });
+    })();
   </script>
 </body>
 </html>

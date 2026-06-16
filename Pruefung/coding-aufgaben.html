@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coding-Aufgaben – PRM V5</title>
+  <meta name="description" content="Interaktive Python-Programmieraufgaben direkt im Browser — Pyodide führt Code aus, numpy und sklearn verfügbar."/>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+  <style>
+    /* ── Hero ─────────────────────────────────────────────────── */
+    .pruef-hero {
+      max-width: 880px;
+      margin: 0 auto var(--space-6);
+      padding: var(--space-6) var(--space-4) 0;
+      text-align: center;
+    }
+    .pruef-hero h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      margin-bottom: var(--space-2);
+    }
+    .pruef-hero p {
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      max-width: 64ch;
+      margin: 0 auto;
+    }
+
+    /* ── Python-Status-Banner ──────────────────────────────────── */
+    .py-status {
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) var(--space-6);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      transition: background 0.3s, color 0.3s;
+    }
+    .py-status.loading  { background: color-mix(in oklab, #d97706 15%, var(--color-surface-2)); color: #92400e; }
+    .py-status.ready    { background: color-mix(in oklab, #059669 12%, var(--color-surface-2)); color: #065f46; }
+    .py-status.error    { background: color-mix(in oklab, #dc2626 12%, var(--color-surface-2)); color: #991b1b; }
+    .py-status-dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .py-status.loading .py-status-dot  { background: #d97706; animation: pulse 1.2s ease-in-out infinite; }
+    .py-status.ready   .py-status-dot  { background: #059669; }
+    .py-status.error   .py-status-dot  { background: #dc2626; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+    /* ── Layout ───────────────────────────────────────────────── */
+    #main-content.content { max-width: none; padding: var(--space-6) var(--space-8); }
+    @media (max-width: 900px) { #main-content.content { padding: var(--space-4); } }
+
+    /* ── Task cards ───────────────────────────────────────────── */
+    .coding-tasks-grid {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-8);
+      padding: 0 var(--space-4) var(--space-12);
+    }
+    .coding-task {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .task-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .task-kapitel-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.18rem 0.55rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .task-title {
+      font-size: var(--text-base);
+      font-weight: 700;
+      flex: 1;
+      margin: 0;
+    }
+    .task-difficulty {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+    .task-body {
+      padding: var(--space-4) var(--space-5);
+    }
+    .task-desc {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-3);
+      line-height: 1.6;
+    }
+
+    /* ── Code editor ──────────────────────────────────────────── */
+    .code-editor {
+      width: 100%;
+      font-family: var(--font-mono, 'JetBrains Mono', 'Fira Code', 'Consolas', monospace);
+      font-size: 0.82rem;
+      line-height: 1.65;
+      min-height: 340px;
+      padding: 0.75rem 1rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      color: var(--color-text);
+      resize: vertical;
+      box-sizing: border-box;
+      tab-size: 4;
+      transition: border-color 0.15s;
+    }
+    .code-editor:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-primary) 20%, transparent);
+    }
+
+    /* ── Buttons ──────────────────────────────────────────────── */
+    .task-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+      flex-wrap: wrap;
+    }
+    .btn-run {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 0.45rem 1rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-run:hover  { opacity: 0.88; }
+    .btn-run:active { transform: scale(0.97); }
+    .btn-run:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn-reset, .btn-hint-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 0.45rem 0.85rem;
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .btn-reset:hover, .btn-hint-toggle:hover {
+      background: var(--color-surface-2);
+      color: var(--color-text);
+    }
+
+    /* ── Hint ────────────────────────────────────────────────── */
+    .task-hint {
+      display: none;
+      margin-top: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: color-mix(in oklab, #2563eb 8%, var(--color-surface-2));
+      border-left: 3px solid #2563eb;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: var(--text-sm);
+      color: var(--color-text);
+    }
+    .task-hint code {
+      font-family: var(--font-mono, monospace);
+      font-size: 0.82rem;
+      background: color-mix(in oklab, #2563eb 12%, var(--color-surface));
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+    }
+
+    /* ── Results ──────────────────────────────────────────────── */
+    .task-result {
+      margin-top: var(--space-3);
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .test-result {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--radius-sm);
+    }
+    .test-result.pass {
+      color: #065f46;
+      background: color-mix(in oklab, #059669 10%, var(--color-surface-2));
+    }
+    .test-result.fail {
+      color: #991b1b;
+      background: color-mix(in oklab, #dc2626 10%, var(--color-surface-2));
+    }
+    .code-output {
+      font-family: var(--font-mono, monospace);
+      font-size: 0.78rem;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      padding: 0.6rem 0.9rem;
+      border-radius: var(--radius-sm);
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-top: var(--space-2);
+      color: var(--color-text);
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .output-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted);
+      margin-top: var(--space-2);
+    }
+
+    /* ── Progress summary ────────────────────────────────────── */
+    .progress-bar-wrap {
+      max-width: 900px;
+      margin: 0 auto var(--space-6);
+      padding: 0 var(--space-4);
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--color-border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #059669, #2563eb);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .progress-label {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-2);
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-label strong { color: var(--color-text); }
+
+    /* ── Filter bar ──────────────────────────────────────────── */
+    .kapitel-filter-bar { margin-bottom: var(--space-5); }
+  </style>
+</head>
+<body>
+  <site-header active="pruefung" title="Coding-Aufgaben – PRM V5"></site-header>
+
+  <div id="py-status" class="py-status loading">
+    <div class="py-status-dot"></div>
+    <span id="py-status-text">Python wird geladen…</span>
+  </div>
+
+  <div class="layout">
+    <site-sidebar active="pruefung/coding"></site-sidebar>
+
+    <main id="main-content" class="content">
+      <div class="pruef-hero">
+        <h1>💻 Coding-Aufgaben</h1>
+        <p>Prüfungsrealistische Aufgaben: nur die Daten sind gegeben — alle Imports, das Modell, Training und Evaluation schreibst du selbst. Klicke <strong>Ausführen</strong> um deine Lösung zu testen.</p>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-bar-wrap">
+        <div class="progress-label">
+          <span>Fortschritt: <strong id="progress-count">0 / 10</strong> Aufgaben gelöst</span>
+          <span id="progress-pct">0 %</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="coding-tasks-grid" id="tasks-container">
+        <!-- rendered by JS -->
+      </div>
+    </main>
+  </div>
+
+  <site-footer caption="PRM · Während der Prüfung · Coding-Aufgaben"></site-footer>
+
+  <script>
+  /* ══════════════════════════════════════════════════════════════
+     TASKS ARRAY
+  ══════════════════════════════════════════════════════════════ */
+  const TASKS = [
+    /* ─── K1 ──────────────────────────────────────────────────── */
+    {
+      id: 'k1-split',
+      kapitel: 'K1',
+      kColor: '#0d9488',
+      title: 'train_test_split',
+      difficulty: '⭐',
+      beschreibung: 'Die Daten sind gegeben. Schreibe alle Imports selbst und splitte stratifiziert auf (20 % Test, <code>random_state=42</code>). Gib Train-/Test-Größe und die Test-Klassen aus.',
+      template: `import numpy as np
+
+# Gegebene Daten:
+X = np.array([[1,2],[3,4],[5,6],[7,8],[9,10],
+              [11,12],[13,14],[15,16],[17,18],[19,20]])
+y = np.array([0,0,0,0,0,1,1,1,1,1])
+
+# Aufgabe:
+# 1. Importiere train_test_split aus sklearn.model_selection
+# 2. Splitte X, y: 20% Test, random_state=42, stratifiziert nach y
+# 3. Gib aus:
+#    print(f"Train: {X_train.shape[0]} Samples")
+#    print(f"Test:  {X_test.shape[0]} Samples")
+#    print(f"Test-Klassen: {sorted(y_test.tolist())}")
+
+`,
+      tests: [
+        { label: '8 Train-Samples',                      check: o => o.includes('Train: 8') },
+        { label: '2 Test-Samples',                       check: o => o.includes('Test:  2') },
+        { label: 'Beide Klassen im Test-Set (stratify)', check: o => /Test-Klassen:.*0.*1/.test(o) },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.model_selection import train_test_split<br>
+X_train, X_test, y_train, y_test = train_test_split(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;X, y, test_size=0.2, random_state=42, stratify=y)<br>
+print(f"Train: {X_train.shape[0]} Samples")<br>
+print(f"Test:  {X_test.shape[0]} Samples")<br>
+print(f"Test-Klassen: {sorted(y_test.tolist())}")</code>`,
+    },
+    {
+      id: 'k1-scaler',
+      kapitel: 'K1',
+      kColor: '#0d9488',
+      title: 'StandardScaler',
+      difficulty: '⭐',
+      beschreibung: 'Train- und Test-Daten sind bereits gesplittet. Importiere <code>StandardScaler</code>, wende <code>fit_transform</code> NUR auf Train an, <code>transform</code> auf Test (kein Data Leakage!).',
+      template: `import numpy as np
+
+# Gegebene Daten (bereits gesplittet):
+X_train = np.array([[10.,200.],[20.,400.],[30.,600.],[40.,800.],
+                    [50.,1000.],[60.,1200.],[70.,1400.],[80.,1600.]])
+X_test  = np.array([[90.,1800.],[100.,2000.]])
+
+# Aufgabe:
+# 1. Importiere StandardScaler aus sklearn.preprocessing
+# 2. Erstelle einen Scaler, fit_transform auf X_train, transform auf X_test
+# 3. Gib aus:
+#    print(f"Train-Mittelwert F1: {X_train_s[:,0].mean():.2f}")
+#    print(f"Train-Std F1:        {X_train_s[:,0].std():.2f}")
+#    print("Kein Data Leakage: OK")
+
+`,
+      tests: [
+        { label: 'Mittelwert ≈ 0.00 (fit auf Train)',  check: o => o.includes('Train-Mittelwert F1: 0.00') },
+        { label: 'Std ≈ 1.00 (korrekt normiert)',       check: o => o.includes('Train-Std F1:        1.00') },
+        { label: 'Kein Data Leakage bestätigt',         check: o => o.includes('OK') },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.preprocessing import StandardScaler<br>
+scaler = StandardScaler()<br>
+X_train_s = scaler.fit_transform(X_train)<br>
+X_test_s  = scaler.transform(X_test)<br>
+print(f"Train-Mittelwert F1: {X_train_s[:,0].mean():.2f}")<br>
+print(f"Train-Std F1:        {X_train_s[:,0].std():.2f}")<br>
+print("Kein Data Leakage: OK")</code>`,
+    },
+
+    /* ─── K2 ──────────────────────────────────────────────────── */
+    {
+      id: 'k2-cv',
+      kapitel: 'K2',
+      kColor: '#2563eb',
+      title: 'Cross-Validation',
+      difficulty: '⭐⭐',
+      beschreibung: 'Die Daten sind gegeben. Importiere alles selbst und führe eine 5-Fold Stratified Cross-Validation mit Logistic Regression durch. Gib Scores, Mean und Std aus.',
+      template: `import numpy as np
+np.random.seed(42)
+
+# Gegebene Daten:
+X = np.random.randn(100, 4)
+y = (X[:,0] + X[:,1] > 0).astype(int)
+
+# Aufgabe:
+# 1. Importiere LogisticRegression, cross_val_score, StratifiedKFold
+# 2. Modell: LogisticRegression(max_iter=1000, random_state=42)
+# 3. CV: StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+# 4. cross_val_score mit scoring='accuracy'
+# 5. Gib aus:
+#    print(f"CV-Scores: {[round(s,3) for s in scores]}")
+#    print(f"Mean: {scores.mean():.3f}")
+#    print(f"Std:  {scores.std():.3f}")
+#    print(f"Anzahl Folds: {len(scores)}")
+
+`,
+      tests: [
+        { label: '5 Folds berechnet',             check: o => o.includes('Anzahl Folds: 5') },
+        { label: 'Sinnvoller Mean-Score',          check: o => /Mean: 0\.[5-9]/.test(o) },
+        { label: 'Std ausgegeben',                 check: o => o.includes('Std:') },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.linear_model import LogisticRegression<br>
+from sklearn.model_selection import cross_val_score, StratifiedKFold<br>
+model = LogisticRegression(max_iter=1000, random_state=42)<br>
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)<br>
+scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')<br>
+print(f"CV-Scores: {[round(s,3) for s in scores]}")<br>
+print(f"Mean: {scores.mean():.3f}")<br>
+print(f"Std:  {scores.std():.3f}")<br>
+print(f"Anzahl Folds: {len(scores)}")</code>`,
+    },
+
+    /* ─── K3 ──────────────────────────────────────────────────── */
+    {
+      id: 'k3-gridsearch',
+      kapitel: 'K3',
+      kColor: '#7c3aed',
+      title: 'SVM + GridSearchCV',
+      difficulty: '⭐⭐',
+      beschreibung: 'Die Daten sind gegeben. Schreibe die komplette Pipeline: Split → Scaling → GridSearchCV für SVM (C, gamma) → Ausgabe der besten Parameter und Scores.',
+      template: `import numpy as np
+from sklearn.datasets import make_classification
+
+# Gegebene Daten:
+X, y = make_classification(n_samples=200, n_features=4, random_state=42)
+
+# Aufgabe:
+# 1. Importiere: train_test_split, StandardScaler, SVC, GridSearchCV
+# 2. Split: 20% Test, random_state=42
+# 3. Skaliere mit StandardScaler (fit nur auf Train)
+# 4. GridSearchCV für SVC(kernel='rbf', random_state=42):
+#    param_grid = {'C': [0.1, 1, 10], 'gamma': ['scale', 'auto']}
+#    cv=3, scoring='accuracy'
+# 5. Gib aus:
+#    print(f"Beste Parameter: {grid.best_params_}")
+#    print(f"Bester CV-Score: {grid.best_score_:.3f}")
+#    print(f"Test-Score:      {grid.score(X_test_s, y_test):.3f}")
+
+`,
+      tests: [
+        { label: "Beste Parameter ausgegeben (inkl. 'C')", check: o => o.includes("Beste Parameter:") && o.includes("'C'") },
+        { label: 'Bester CV-Score berechnet',              check: o => o.includes('Bester CV-Score:') },
+        { label: 'Test-Score ausgegeben',                  check: o => o.includes('Test-Score:') },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.model_selection import train_test_split, GridSearchCV<br>
+from sklearn.preprocessing import StandardScaler<br>
+from sklearn.svm import SVC<br>
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=42)<br>
+sc = StandardScaler()<br>
+X_train_s = sc.fit_transform(X_train); X_test_s = sc.transform(X_test)<br>
+param_grid = {'C':[0.1,1,10], 'gamma':['scale','auto']}<br>
+grid = GridSearchCV(SVC(kernel='rbf',random_state=42),param_grid,cv=3,scoring='accuracy')<br>
+grid.fit(X_train_s, y_train)<br>
+print(f"Beste Parameter: {grid.best_params_}")<br>
+print(f"Bester CV-Score: {grid.best_score_:.3f}")<br>
+print(f"Test-Score:      {grid.score(X_test_s,y_test):.3f}")</code>`,
+    },
+
+    /* ─── K4 ──────────────────────────────────────────────────── */
+    {
+      id: 'k4-kmeans',
+      kapitel: 'K4',
+      kColor: '#d97706',
+      title: 'KMeans + Silhouette',
+      difficulty: '⭐⭐',
+      beschreibung: 'Die Daten sind gegeben. Schreibe die Clustering-Pipeline: Skalierung → KMeans (k=3) → Silhouette Score → Ausgabe.',
+      template: `import numpy as np
+np.random.seed(42)
+
+# Gegebene Daten (3 natürliche Cluster):
+X = np.vstack([
+    np.random.randn(30, 2) + [0, 0],
+    np.random.randn(30, 2) + [5, 5],
+    np.random.randn(30, 2) + [0, 5]
+])
+
+# Aufgabe:
+# 1. Importiere: StandardScaler, KMeans, silhouette_score
+# 2. Skaliere X mit StandardScaler
+# 3. KMeans: n_clusters=3, n_init=10, random_state=42 → fit_predict
+# 4. silhouette_score berechnen
+# 5. Gib aus:
+#    print(f"Anzahl Cluster: {len(set(labels))}")
+#    print(f"Inertia: {km.inertia_:.1f}")
+#    print(f"Silhouette: {sil:.3f}")
+#    print(f"Gut getrennt: {'ja' if sil > 0.4 else 'nein'}")
+
+`,
+      tests: [
+        { label: 'Anzahl Cluster: 3',                    check: o => o.includes('Anzahl Cluster: 3') },
+        { label: 'Silhouette berechnet (> 0)',            check: o => /Silhouette: 0\.[1-9]/.test(o) },
+        { label: 'Cluster gut getrennt (Silh. > 0.4)',   check: o => o.includes('Gut getrennt: ja') },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.preprocessing import StandardScaler<br>
+from sklearn.cluster import KMeans<br>
+from sklearn.metrics import silhouette_score<br>
+scaler = StandardScaler()<br>
+X_s = scaler.fit_transform(X)<br>
+km = KMeans(n_clusters=3, n_init=10, random_state=42)<br>
+labels = km.fit_predict(X_s)<br>
+sil = silhouette_score(X_s, labels)<br>
+print(f"Anzahl Cluster: {len(set(labels))}")<br>
+print(f"Inertia: {km.inertia_:.1f}")<br>
+print(f"Silhouette: {sil:.3f}")<br>
+print(f"Gut getrennt: {'ja' if sil > 0.4 else 'nein'}")</code>`,
+    },
+    {
+      id: 'k4-pca',
+      kapitel: 'K4',
+      kColor: '#d97706',
+      title: 'PCA — Dimensionsreduktion',
+      difficulty: '⭐',
+      beschreibung: '8-dimensionale Daten sind gegeben. Schreibe die PCA-Pipeline: Skalierung → PCA auf 2 Komponenten → Ausgabe der erklärten Varianz.',
+      template: `import numpy as np
+np.random.seed(42)
+
+# Gegebene Daten (8 Features):
+X = np.random.randn(100, 8)
+
+# Aufgabe:
+# 1. Importiere: StandardScaler, PCA
+# 2. Skaliere X mit StandardScaler
+# 3. PCA mit n_components=2, fit_transform auf X_s
+# 4. Gib aus:
+#    print(f"Originale Dimensionen:   {X_s.shape[1]}")
+#    print(f"Reduzierte Dimensionen:  {X_pca.shape[1]}")
+#    print(f"Erklärte Varianz:        {[round(v,3) for v in pca.explained_variance_ratio_]}")
+#    print(f"Gesamt erklärt:          {pca.explained_variance_ratio_.sum():.3f}")
+
+`,
+      tests: [
+        { label: 'Ausgangsdimensionen korrekt (8)',   check: o => o.includes('Originale Dimensionen:   8') },
+        { label: 'Auf 2 Dimensionen reduziert',       check: o => o.includes('Reduzierte Dimensionen:  2') },
+        { label: 'Erklärte Varianz berechnet',        check: o => o.includes('Gesamt erklärt:') },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.preprocessing import StandardScaler<br>
+from sklearn.decomposition import PCA<br>
+scaler = StandardScaler()<br>
+X_s = scaler.fit_transform(X)<br>
+pca = PCA(n_components=2)<br>
+X_pca = pca.fit_transform(X_s)<br>
+print(f"Originale Dimensionen:   {X_s.shape[1]}")<br>
+print(f"Reduzierte Dimensionen:  {X_pca.shape[1]}")<br>
+print(f"Erklärte Varianz:        {[round(v,3) for v in pca.explained_variance_ratio_]}")<br>
+print(f"Gesamt erklärt:          {pca.explained_variance_ratio_.sum():.3f}")</code>`,
+    },
+
+    /* ─── K5 ──────────────────────────────────────────────────── */
+    {
+      id: 'k5-rf',
+      kapitel: 'K5',
+      kColor: '#db2777',
+      title: 'Random Forest + Feature Importance',
+      difficulty: '⭐⭐',
+      beschreibung: 'Die Daten sind gegeben. Schreibe alles selbst: Split → Random Forest (100 Bäume) → Accuracy → Top-Feature und alle Importances ausgeben.',
+      template: `import numpy as np
+from sklearn.datasets import make_classification
+
+# Gegebene Daten:
+X, y = make_classification(n_samples=300, n_features=6, n_informative=3, random_state=42)
+
+# Aufgabe:
+# 1. Importiere: train_test_split, RandomForestClassifier, accuracy_score
+# 2. Split: 20% Test, random_state=42
+# 3. RandomForestClassifier: n_estimators=100, random_state=42 → fit → predict
+# 4. Gib aus:
+#    print(f"Accuracy: {acc:.3f}")
+#    print(f"Wichtigstes Feature: {top_feature}")
+#    print(f"Feature Importance: {[round(i,3) for i in importances]}")
+#    print(f"Summe Importance: {importances.sum():.3f}")
+
+`,
+      tests: [
+        { label: 'Accuracy berechnet (> 0)',              check: o => /Accuracy: 0\.[5-9]/.test(o) },
+        { label: 'Feature Importances summieren zu 1.0',  check: o => o.includes('Summe Importance: 1.000') },
+        { label: 'Top-Feature ausgegeben',                check: o => o.includes('Wichtigstes Feature:') },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.model_selection import train_test_split<br>
+from sklearn.ensemble import RandomForestClassifier<br>
+from sklearn.metrics import accuracy_score<br>
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=42)<br>
+rf = RandomForestClassifier(n_estimators=100, random_state=42)<br>
+rf.fit(X_train, y_train)<br>
+y_pred = rf.predict(X_test)<br>
+acc = accuracy_score(y_test, y_pred)<br>
+importances = rf.feature_importances_<br>
+top_feature = np.argmax(importances)<br>
+print(f"Accuracy: {acc:.3f}")<br>
+print(f"Wichtigstes Feature: {top_feature}")<br>
+print(f"Feature Importance: {[round(i,3) for i in importances]}")<br>
+print(f"Summe Importance: {importances.sum():.3f}")</code>`,
+    },
+
+    /* ─── K6 ──────────────────────────────────────────────────── */
+    {
+      id: 'k6-gmm',
+      kapitel: 'K6',
+      kColor: '#059669',
+      title: 'GaussianMixture + BIC',
+      difficulty: '⭐⭐⭐',
+      beschreibung: 'Die Daten sind gegeben. Schreibe die GMM-Pipeline: Skalierung → GMM für k=2,3,4 trainieren → BIC vergleichen → bestes k ausgeben.',
+      template: `import numpy as np
+np.random.seed(42)
+
+# Gegebene Daten (3 natürliche Cluster):
+X = np.vstack([
+    np.random.randn(40, 2) + [0, 0],
+    np.random.randn(40, 2) + [4, 0],
+    np.random.randn(40, 2) + [2, 4]
+])
+
+# Aufgabe:
+# 1. Importiere: StandardScaler, GaussianMixture
+# 2. Skaliere X mit StandardScaler
+# 3. Trainiere GaussianMixture für k=2, k=3, k=4
+#    (covariance_type='full', random_state=42 für jedes)
+# 4. Berechne BIC für jedes k (bic-Methode braucht X_s als Argument)
+# 5. Gib aus:
+#    print(f"BIC k=2: {bic2:.1f}")
+#    print(f"BIC k=3: {bic3:.1f}")
+#    print(f"BIC k=4: {bic4:.1f}")
+#    print(f"Bestes k: {bestes_k}")
+
+`,
+      tests: [
+        { label: 'BIC für alle 3 k-Werte berechnet',              check: o => o.includes('BIC k=2:') && o.includes('BIC k=3:') && o.includes('BIC k=4:') },
+        { label: 'k=3 als bestes k erkannt (kleinster BIC)',       check: o => o.includes('Bestes k: 3') },
+        { label: 'Ausgabe vollständig',                            check: o => o.includes('BIC k=3:') },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.preprocessing import StandardScaler<br>
+from sklearn.mixture import GaussianMixture<br>
+scaler = StandardScaler()<br>
+X_s = scaler.fit_transform(X)<br>
+gmm2 = GaussianMixture(n_components=2, covariance_type='full', random_state=42).fit(X_s)<br>
+gmm3 = GaussianMixture(n_components=3, covariance_type='full', random_state=42).fit(X_s)<br>
+gmm4 = GaussianMixture(n_components=4, covariance_type='full', random_state=42).fit(X_s)<br>
+bic2, bic3, bic4 = gmm2.bic(X_s), gmm3.bic(X_s), gmm4.bic(X_s)<br>
+bestes_k = [2,3,4][[bic2,bic3,bic4].index(min(bic2,bic3,bic4))]<br>
+print(f"BIC k=2: {bic2:.1f}")<br>
+print(f"BIC k=3: {bic3:.1f}")<br>
+print(f"BIC k=4: {bic4:.1f}")<br>
+print(f"Bestes k: {bestes_k}")</code>`,
+    },
+
+    /* ─── K7 ──────────────────────────────────────────────────── */
+    {
+      id: 'k7-cm',
+      kapitel: 'K7',
+      kColor: '#dc2626',
+      title: 'Confusion Matrix + Metriken',
+      difficulty: '⭐⭐',
+      beschreibung: 'Ein trainiertes Modell und Test-Daten sind gegeben. Schreibe alles selbst: <code>y_pred</code> berechnen, Confusion Matrix, F1-Score, TP/TN/FP/FN ausgeben.',
+      template: `import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+# Gegebene Daten + trainiertes Modell:
+X, y = make_classification(n_samples=200, n_features=4, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+model = LogisticRegression(max_iter=1000, random_state=42).fit(X_train, y_train)
+
+# Aufgabe:
+# 1. Importiere: confusion_matrix, f1_score aus sklearn.metrics
+# 2. Berechne y_pred mit model.predict(X_test)
+# 3. Confusion Matrix berechnen
+# 4. F1-Score (average='weighted') berechnen
+# 5. Gib aus:
+#    print("Confusion Matrix:")
+#    print(cm)
+#    print(f"F1-Score (weighted): {f1:.3f}")
+#    print(f"TN: {cm[0,0]}, FP: {cm[0,1]}, FN: {cm[1,0]}, TP: {cm[1,1]}")
+
+`,
+      tests: [
+        { label: 'Confusion Matrix ausgegeben',         check: o => o.includes('Confusion Matrix:') },
+        { label: 'F1-Score berechnet (> 0)',             check: o => /F1-Score \(weighted\): 0\.[5-9]/.test(o) },
+        { label: 'TP/TN/FP/FN korrekt extrahiert',      check: o => o.includes('TP:') && o.includes('TN:') },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.metrics import confusion_matrix, f1_score<br>
+y_pred = model.predict(X_test)<br>
+cm = confusion_matrix(y_test, y_pred)<br>
+f1 = f1_score(y_test, y_pred, average='weighted')<br>
+print("Confusion Matrix:")<br>
+print(cm)<br>
+print(f"F1-Score (weighted): {f1:.3f}")<br>
+print(f"TN: {cm[0,0]}, FP: {cm[0,1]}, FN: {cm[1,0]}, TP: {cm[1,1]}")</code>`,
+    },
+    {
+      id: 'k7-pipeline',
+      kapitel: 'K7',
+      kColor: '#dc2626',
+      title: 'Vollständige ML-Pipeline',
+      difficulty: '⭐⭐⭐',
+      beschreibung: 'Die Daten sind gegeben. Schreibe eine vollständige Pipeline von Grund auf: Split → Scaling → SVM → Cross-Validation → alle Metriken ausgeben.',
+      template: `import numpy as np
+from sklearn.datasets import make_classification
+
+# Gegebene Daten:
+X, y = make_classification(n_samples=300, n_features=5, n_informative=3,
+                            n_classes=3, n_clusters_per_class=1, random_state=42)
+
+# Aufgabe — vollständige ML-Pipeline:
+# 1. Importiere alle nötigen Klassen selbst
+# 2. Stratifizierter Split: 20% Test, random_state=42
+# 3. StandardScaler (fit nur auf Train)
+# 4. SVC(kernel='rbf', C=1.0, gamma='scale', random_state=42) trainieren
+# 5. 5-Fold Stratified CV auf Train-Daten (scoring='accuracy')
+# 6. Gib aus:
+#    print(f"Test-Accuracy: {accuracy_score(y_test, y_pred):.3f}")
+#    print(f"CV Mean: {cv_scores.mean():.3f} +/- {cv_scores.std():.3f}")
+#    print(f"F1 (weighted): {f1_score(y_test, y_pred, average='weighted'):.3f}")
+#    print("Pipeline: OK")
+
+`,
+      tests: [
+        { label: 'Test-Accuracy berechnet (> 0)',       check: o => /Test-Accuracy: 0\.[3-9]/.test(o) },
+        { label: 'Cross-Validation durchgeführt',       check: o => o.includes('CV Mean:') },
+        { label: 'Pipeline vollständig ausgeführt',     check: o => o.includes('Pipeline: OK') },
+      ],
+      hinweis: `Musterlösung:<br>
+<code>from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold<br>
+from sklearn.preprocessing import StandardScaler<br>
+from sklearn.svm import SVC<br>
+from sklearn.metrics import accuracy_score, f1_score<br>
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=42,stratify=y)<br>
+sc = StandardScaler()<br>
+X_tr = sc.fit_transform(X_train); X_te = sc.transform(X_test)<br>
+model = SVC(kernel='rbf', C=1.0, gamma='scale', random_state=42)<br>
+model.fit(X_tr, y_train)<br>
+y_pred = model.predict(X_te)<br>
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)<br>
+cv_scores = cross_val_score(model, X_tr, y_train, cv=cv, scoring='accuracy')<br>
+print(f"Test-Accuracy: {accuracy_score(y_test,y_pred):.3f}")<br>
+print(f"CV Mean: {cv_scores.mean():.3f} +/- {cv_scores.std():.3f}")<br>
+print(f"F1 (weighted): {f1_score(y_test,y_pred,average='weighted'):.3f}")<br>
+print("Pipeline: OK")</code>`,
+    },
+  ];
+
+  /* ══════════════════════════════════════════════════════════════
+     PYODIDE
+  ══════════════════════════════════════════════════════════════ */
+  let pyodide = null;
+  let pyodideReady = false;
+
+  function updateStatus(msg, state) {
+    const el = document.getElementById('py-status');
+    const txt = document.getElementById('py-status-text');
+    if (txt) txt.textContent = msg;
+    if (el && state) {
+      el.className = 'py-status ' + state;
+    }
+  }
+
+  async function initPyodide() {
+    try {
+      updateStatus('Python wird geladen… (ca. 10–20 Sek, einmalig)', 'loading');
+      pyodide = await loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'
+      });
+      updateStatus('Pakete werden installiert (numpy, scikit-learn, pandas)…', 'loading');
+      await pyodide.loadPackage(['numpy', 'scikit-learn', 'pandas']);
+      pyodideReady = true;
+      updateStatus('Python bereit — alle Aufgaben können ausgeführt werden', 'ready');
+      // Enable all run buttons
+      document.querySelectorAll('.btn-run').forEach(btn => btn.disabled = false);
+    } catch(err) {
+      updateStatus('Fehler beim Laden von Python: ' + err.message, 'error');
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     CODE EXECUTION
+  ══════════════════════════════════════════════════════════════ */
+  async function runCode(taskId) {
+    const editor    = document.getElementById('code-' + taskId);
+    const resultDiv = document.getElementById('result-' + taskId);
+    const btn       = document.getElementById('run-btn-' + taskId);
+
+    if (!pyodideReady) {
+      resultDiv.innerHTML = '<div class="test-result fail">Python lädt noch — bitte kurz warten…</div>';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Läuft…';
+    resultDiv.innerHTML = '<div class="test-result" style="color:var(--color-text-muted)">Ausführen…</div>';
+
+    const code = editor.value;
+
+    try {
+      // capture stdout
+      pyodide.runPython(`
+import sys, io
+sys.stdout = io.StringIO()
+`);
+      pyodide.runPython(code);
+      const output = pyodide.runPython('sys.stdout.getvalue()');
+      checkTask(taskId, output.trim(), resultDiv);
+    } catch(e) {
+      const errMsg = e.message || String(e);
+      // Make error message more readable (strip long traceback preamble)
+      const lines = errMsg.split('\n');
+      const shortErr = lines.slice(-3).join('\n');
+      resultDiv.innerHTML = `<div class="test-result fail">Fehler beim Ausführen:</div><div class="code-output" style="color:#dc2626">${escHtml(shortErr)}</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '&#9654; Ausführen';
+    }
+  }
+
+  function checkTask(taskId, output, resultDiv) {
+    const task = TASKS.find(t => t.id === taskId);
+    if (!task) return;
+
+    let html = '';
+    let passedCount = 0;
+
+    for (const test of task.tests) {
+      const passed = test.check(output);
+      if (passed) passedCount++;
+      html += `<div class="test-result ${passed ? 'pass' : 'fail'}">${passed ? '✅' : '❌'} ${escHtml(test.label)}</div>`;
+    }
+
+    html += '<div class="output-label">Ausgabe</div>';
+    html += `<div class="code-output">${escHtml(output) || '<em style="color:var(--color-text-muted)">(kein Output)</em>'}</div>`;
+    resultDiv.innerHTML = html;
+
+    // Track progress
+    const allPassed = passedCount === task.tests.length;
+    const key = 'coding-done-' + taskId;
+    const wasDone = sessionStorage.getItem(key) === '1';
+    if (allPassed && !wasDone) {
+      sessionStorage.setItem(key, '1');
+    } else if (!allPassed) {
+      sessionStorage.removeItem(key);
+    }
+    updateProgress();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     PROGRESS
+  ══════════════════════════════════════════════════════════════ */
+  function updateProgress() {
+    let done = 0;
+    TASKS.forEach(t => {
+      if (sessionStorage.getItem('coding-done-' + t.id) === '1') done++;
+    });
+    const total = TASKS.length;
+    const pct = Math.round(done / total * 100);
+    document.getElementById('progress-count').textContent = done + ' / ' + total;
+    document.getElementById('progress-pct').textContent   = pct + ' %';
+    document.getElementById('progress-fill').style.width  = pct + '%';
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     HINT + RESET
+  ══════════════════════════════════════════════════════════════ */
+  function toggleHint(taskId) {
+    const hint = document.getElementById('hint-' + taskId);
+    if (!hint) return;
+    const isVisible = hint.style.display !== 'none' && hint.style.display !== '';
+    hint.style.display = isVisible ? 'none' : 'block';
+  }
+
+  function resetCode(taskId) {
+    const task = TASKS.find(t => t.id === taskId);
+    if (!task) return;
+    const editor = document.getElementById('code-' + taskId);
+    editor.value = task.template;
+    document.getElementById('result-' + taskId).innerHTML = '';
+    sessionStorage.removeItem('coding-done-' + taskId);
+    updateProgress();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     UTILS
+  ══════════════════════════════════════════════════════════════ */
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     RENDER
+  ══════════════════════════════════════════════════════════════ */
+  function renderTasks() {
+    const container = document.getElementById('tasks-container');
+    container.innerHTML = TASKS.map((task, i) => `
+      <article class="coding-task" id="task-${task.id}">
+        <div class="task-header">
+          <span class="task-kapitel-badge" style="background:${task.kColor}">${task.kapitel}</span>
+          <h2 class="task-title">${i + 1}. ${escHtml(task.title)}</h2>
+          <span class="task-difficulty" title="Schwierigkeit">${task.difficulty}</span>
+        </div>
+        <div class="task-body">
+          <p class="task-desc">${task.beschreibung}</p>
+          <textarea
+            id="code-${task.id}"
+            class="code-editor"
+            spellcheck="false"
+            autocorrect="off"
+            autocapitalize="off"
+            rows="${Math.max(20, task.template.split('\n').length + 4)}"
+          >${escHtml(task.template)}</textarea>
+          <div class="task-actions">
+            <button id="run-btn-${task.id}" class="btn-run" onclick="runCode('${task.id}')" disabled>
+              &#9654; Ausführen
+            </button>
+            <button class="btn-reset" onclick="resetCode('${task.id}')">🔄 Reset</button>
+            <button class="btn-hint-toggle" onclick="toggleHint('${task.id}')">💡 Musterlösung</button>
+          </div>
+          <div id="hint-${task.id}" class="task-hint" style="display:none">
+            ${task.hinweis}
+          </div>
+          <div id="result-${task.id}" class="task-result"></div>
+        </div>
+      </article>
+    `).join('');
+
+    // Tab support for all editors
+    document.querySelectorAll('.code-editor').forEach(editor => {
+      editor.addEventListener('keydown', e => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const s = editor.selectionStart;
+          editor.value = editor.value.substring(0, s) + '    ' + editor.value.substring(editor.selectionEnd);
+          editor.selectionStart = editor.selectionEnd = s + 4;
+        }
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     INIT
+  ══════════════════════════════════════════════════════════════ */
+  document.addEventListener('DOMContentLoaded', () => {
+    renderTasks();
+    updateProgress();
+    initPyodide();
+  });
+  </script>
+</body>
+</html>

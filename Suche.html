@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Suche · PRM V5</title>
+  <meta name="description" content="Volltextsuche über alle Kapitel, Karten und Code-Zellen der PRM-Lernplattform."/>
+  <script type="module" src="header.js"></script>
+  <script type="module" src="footer.js"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/vendor/highlight-github.min.css">
+  <script src="assets/vendor/highlight.min.js"></script>
+  <style>
+    .suche-hero{padding:var(--space-8) 0 var(--space-5)}
+    .suche-hero h1{
+      font-family:var(--font-display);font-size:clamp(2rem,4.5vw,3rem);
+      margin:var(--space-3) 0 var(--space-2);text-transform:none;letter-spacing:-.01em;
+    }
+    .suche-hero p{color:var(--color-text-muted);max-width:60ch}
+
+    .suche-input-row{
+      display:flex;align-items:center;gap:var(--space-3);
+      margin-top:var(--space-5);padding:var(--space-3) var(--space-4);
+      border:1px solid var(--color-border);border-radius:var(--radius-xl);
+      background:var(--color-surface);box-shadow:var(--shadow-sm);
+    }
+    .suche-input-row svg{color:var(--color-text-muted);flex-shrink:0}
+    .suche-input-row input{
+      flex:1;border:none;background:transparent;font-size:var(--text-lg);
+      color:var(--color-text);outline:none;font-family:inherit;
+    }
+
+    .filter-bar{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-4)}
+    .filter-bar + .filter-bar{margin-top:var(--space-2)}
+    .filter-chip{
+      padding:.35rem .9rem;border-radius:var(--radius-full);font-size:var(--text-xs);
+      font-weight:700;border:1px solid var(--color-border);background:var(--color-surface);
+      color:var(--color-text-muted);cursor:pointer;transition:all .15s;
+    }
+    .filter-chip:hover{border-color:var(--color-primary);color:var(--color-text)}
+    .filter-chip.is-active{
+      background:var(--color-primary);border-color:var(--color-primary);color:#fff;
+    }
+
+    .suche-count{
+      margin-top:var(--space-6);font-size:var(--text-sm);
+      color:var(--color-text-muted);font-weight:700;
+    }
+
+    .result-groups{
+      max-width:1100px;margin-inline:auto;
+      padding-bottom:var(--space-12);
+    }
+    .result-group{margin-top:var(--space-6)}
+    .result-group-title{
+      display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--space-2);
+      font-size:var(--text-sm);margin:0 0 var(--space-3);
+      padding-bottom:var(--space-2);border-bottom:1px solid var(--color-border);
+    }
+    .result-group-chapter{
+      font-weight:700;color:var(--color-primary);text-transform:uppercase;
+      letter-spacing:.05em;font-size:var(--text-xs);
+    }
+    .result-group-page{font-weight:700;color:var(--color-text)}
+    .result-group-link{
+      margin-left:auto;font-size:var(--text-xs);font-weight:700;
+      color:var(--color-text-muted);text-decoration:none;
+    }
+    .result-group-link:hover{color:var(--color-primary)}
+
+    .result-grid{
+      display:grid;gap:var(--space-4);
+      grid-template-columns:1fr;
+    }
+    @media (min-width:560px){
+      .result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media (min-width:980px){
+      .result-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+    .result-card{
+      display:flex;flex-direction:column;gap:var(--space-2);
+      border:1px solid var(--color-border);border-radius:var(--radius-xl);
+      background:var(--color-surface);padding:var(--space-3) var(--space-4);box-shadow:var(--shadow-sm);
+      min-width:0;max-width:600px;width:100%;
+    }
+    .result-card pre,.result-card code{min-width:0}
+    .result-card{
+      cursor:pointer;transition:box-shadow .15s,border-color .15s;
+    }
+    .result-card:hover,.result-card.is-expanded{
+      box-shadow:var(--shadow-lg);border-color:color-mix(in oklab,var(--color-primary) 30%,var(--color-border));
+    }
+    .result-card-head{display:flex;flex-direction:column;gap:.2rem}
+    .result-card-meta{
+      display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;
+      font-size:var(--text-xs);color:var(--color-primary);
+      text-transform:uppercase;letter-spacing:.05em;font-weight:700;
+    }
+    .result-card-meta .result-page{color:var(--color-text-muted);text-transform:none;letter-spacing:normal}
+    .result-card-meta .result-type{
+      margin-left:auto;background:var(--color-surface-2);color:var(--color-text-muted);
+      border-radius:var(--radius-full);padding:.05rem .55rem;text-transform:none;letter-spacing:normal;
+    }
+    .result-title{font-size:var(--text-base);font-weight:700;margin:0}
+    .result-snippet{
+      font-size:var(--text-sm);color:var(--color-text-muted);margin:0;
+      line-height:1.5;
+      display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+    }
+    .result-card:hover .result-snippet,.result-card.is-expanded .result-snippet{
+      -webkit-line-clamp:unset;overflow:visible;
+    }
+    .result-card .code-cell pre{
+      max-height:130px;overflow:auto;transition:max-height .2s ease;
+      font-size:var(--text-xs);
+    }
+    .result-card:hover .code-cell pre,.result-card.is-expanded .code-cell pre{
+      max-height:520px;font-size:var(--text-sm);
+    }
+    .result-card-expand-hint{
+      font-size:var(--text-xs);color:var(--color-text-faint);
+      text-align:center;padding-top:.2rem;
+    }
+    .result-card:hover .result-card-expand-hint,.result-card.is-expanded .result-card-expand-hint{
+      display:none;
+    }
+    .result-card mark, .result-snippet mark, .result-title mark{
+      background:color-mix(in oklab,var(--color-primary) 25%,transparent);
+      color:inherit;border-radius:.2rem;padding:0 .1rem;
+    }
+    .result-card .code-cell{border-radius:var(--radius-lg);margin:0}
+    .result-card .code-cell pre code mark{
+      background:color-mix(in oklab,var(--color-warning) 45%,transparent);
+      color:inherit;border-radius:.15rem;
+    }
+    .result-link{
+      align-self:flex-start;font-size:var(--text-sm);font-weight:700;
+      color:var(--color-primary);text-decoration:none;margin-top:auto;
+    }
+    .result-link:hover{text-decoration:underline}
+
+    .suche-empty{
+      padding:var(--space-10) var(--space-4);text-align:center;
+      color:var(--color-text-muted);font-size:var(--text-sm);
+      border:1px dashed var(--color-border);border-radius:var(--radius-xl);
+      margin-top:var(--space-5);
+    }
+
+    .suche-more{
+      display:block;width:100%;margin:var(--space-4) 0 var(--space-10);
+      padding:var(--space-3);border-radius:var(--radius-lg);
+      border:1px solid var(--color-border);background:var(--color-surface);
+      color:var(--color-text);font-weight:700;font-size:var(--text-sm);cursor:pointer;
+    }
+    .suche-more:hover{border-color:var(--color-primary);color:var(--color-primary)}
+    .suche-more[hidden]{display:none}
+  </style>
+</head>
+<body>
+  <site-header active="suche" title="Suche · PRM V5"></site-header>
+
+  <main id="main-content" class="container">
+    <section class="suche-hero">
+      <span class="eyebrow">🔎 Volltextsuche</span>
+      <h1>Alles finden — Konzepte, Formeln &amp; Code</h1>
+      <p>
+        Durchsucht alle Kapitel, Karten, Quizfragen und Code-Zellen. Steckt der
+        gesuchte Begriff in einer Code-Zelle, wird die komplette Zelle als
+        Karte angezeigt — genau wie auf der Ursprungsseite.
+      </p>
+
+      <div class="suche-input-row">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             width="20" height="20">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="M21 21l-4.3-4.3"/>
+        </svg>
+        <input type="text" data-suche-input placeholder="z.B. RandomForestClassifier, Overfitting, train_test_split …" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div class="filter-bar" data-filter-chapter></div>
+      <div class="filter-bar" data-filter-type></div>
+    </section>
+
+    <div class="suche-count" data-suche-count></div>
+    <div class="result-groups" data-suche-results></div>
+    <button class="suche-more" data-suche-more hidden></button>
+  </main>
+
+  <site-footer caption="Suche · PRM V5"></site-footer>
+
+  <script>
+    function copyCode(btn) {
+      const cell = btn.closest('.code-cell');
+      const code = cell.querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = '✓ Kopiert!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Kopieren'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+  </script>
+  <script type="module" src="assets/suche.js"></script>
+</body>
+</html>

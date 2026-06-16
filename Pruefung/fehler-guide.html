@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fehler-Guide – PRM V5</title>
+  <meta name="description" content="Häufige Python/sklearn-Fehlermeldungen während der Prüfung — sofortige Ursache + Fix für ValueError, NotFittedError, ConvergenceWarning und mehr."/>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <style>
+    /* ── Hero ── */
+    .pruef-hero{max-width:760px;margin:var(--space-6) 0 var(--space-4)}
+    .pruef-hero h1{font-family:var(--font-display);font-size:clamp(1.6rem,3.5vw,2.4rem);margin-bottom:var(--space-2)}
+    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:60ch;margin:0}
+
+    /* ── Section & headings ── */
+    .pruef-section{margin-bottom:var(--space-12)}
+    .pruef-section h2{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-5);padding-bottom:var(--space-3);border-bottom:3px solid var(--sec-color,var(--color-border));scroll-margin-top:4.5rem}
+    .pruef-num{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:var(--radius-md);background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 15%,var(--color-surface-2));color:var(--sec-color,var(--color-primary));font-weight:800;font-size:var(--text-sm);flex-shrink:0}
+
+    /* ── Per-section accent colours ── */
+    #daten    {--sec-color:#dc2626}
+    #modell   {--sec-color:#7c3aed}
+    #metriken {--sec-color:#0d9488}
+
+    /* ── Example-card grid (vertical stack, 3-col per card) ── */
+    .ref-grid{display:flex;flex-direction:column;gap:.4rem;margin-top:var(--space-4)}
+    .ref-ex{
+      display:grid;grid-template-columns:minmax(200px,26%) 1fr minmax(220px,28%);
+      align-items:stretch;border:1px solid var(--color-border);
+      border-left:3px solid var(--sec-color,var(--color-primary));
+      border-radius:var(--radius-md);background:var(--color-surface);
+      overflow:hidden;min-width:0;
+    }
+    .ref-ex-meta{
+      padding:.7rem 1rem;border-right:1px solid var(--color-border);
+      display:flex;flex-direction:column;gap:.35rem;justify-content:center;
+      background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 4%,var(--color-surface-2));
+    }
+    .ref-ex .ref-sub{
+      margin:0;font-size:.82rem;font-weight:800;
+      font-family:var(--font-mono);
+      color:var(--sec-color,var(--color-primary));
+      word-break:break-all;
+      line-height:1.4;
+    }
+    .ref-ex-meta > p{font-size:.88rem;color:var(--color-text-muted);line-height:1.5;margin:0}
+    .ref-ex pre{
+      margin:0;font-size:.84rem;line-height:1.6;padding:.7rem .9rem;
+      overflow-x:auto;border-radius:0;border:none;
+      border-right:1px solid var(--color-border);background:var(--color-surface-2);
+    }
+    .ref-ex pre code{font-size:1em}
+    /* Output column */
+    .ref-out{
+      margin:0;padding:.7rem .9rem;
+      background:color-mix(in oklab,var(--sec-color,#059669) 6%,var(--color-surface));
+      border:none;border-radius:0;
+      border-left:1px solid color-mix(in oklab,var(--sec-color,#059669) 20%,var(--color-border));
+      font-family:var(--font-mono);font-size:.84rem;line-height:1.6;
+      white-space:pre;overflow-x:auto;color:var(--color-text-muted);
+      display:flex;align-items:flex-start;
+    }
+    /* ── Info-box ── */
+    .info-box{padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);
+      background:color-mix(in oklab,var(--color-primary) 6%,var(--color-surface));
+      border:1px solid color-mix(in oklab,var(--color-primary) 20%,var(--color-border));
+      margin:0 0 var(--space-5);font-size:.9rem;line-height:1.7}
+    .info-box strong{color:var(--color-primary)}
+    /* ── Kapitel filter bar (button reset) ── */
+    .kapitel-filter-bar button.lernpfad-step{appearance:none;background:none;border:none;cursor:pointer;font-family:inherit}
+    .kapitel-filter-bar button.lernpfad-step.kf-all{--lp-color:var(--color-primary)}
+    .kf-hidden{display:none!important}
+
+    /* ── Responsive layout override for reference pages ── */
+    #main-content.content{max-width:none;padding:var(--space-6) var(--space-8)}
+    @media(max-width:900px){
+      #main-content.content{padding:var(--space-4) var(--space-4)}
+      .ref-ex{grid-template-columns:1fr;grid-template-rows:auto auto auto}
+      .ref-ex pre{border-right:none;border-bottom:1px solid var(--color-border)}
+      .ref-ex-meta{border-right:none;border-bottom:1px solid var(--color-border)}
+    }
+  </style>
+</head>
+<body>
+  <site-header active="pruefung" title="Fehler-Guide – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="pruefung/fehler"></site-sidebar>
+
+  <main id="main-content" class="content">
+
+    <nav class="lernpfad-bar kapitel-filter-bar" id="fehler-filter-bar" aria-label="Nach Thema filtern">
+      <button class="lernpfad-step kf-all active" data-kf="all">
+        <span class="lp-icon">📚</span><span>Alle</span>
+      </button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#dc2626" data-kf="daten">
+        <span class="lp-icon">🗄️</span><span>Datenfehler</span>
+      </button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#7c3aed" data-kf="modell">
+        <span class="lp-icon">🤖</span><span>Modellfehler</span>
+      </button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#0d9488" data-kf="metriken">
+        <span class="lp-icon">📊</span><span>Metrik-Fehler</span>
+      </button>
+    </nav>
+
+    <div class="pruef-hero">
+      <h1>🔧 Fehler-Guide</h1>
+      <p>Fehlermeldung gesehen → hier nachschlagen → in 30 Sekunden weiter.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>Tipp:</strong> Immer zuerst den vollständigen Fehlertext lesen — der Teil nach dem Doppelpunkt erklärt meistens direkt was fehlt.
+    </div>
+
+    <!-- ═══ DATENFEHLER ═══ -->
+    <section class="pruef-section" id="daten" data-topic="daten">
+      <h2><span class="pruef-num">1</span> Datenfehler — Shape, NaN, Typen</h2>
+      <div class="ref-grid">
+
+        <!-- Karte 1 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">ValueError: could not convert string to float</p>
+            <p>Kategorische Spalten in X, die nicht kodiert wurden</p>
+          </div>
+          <pre><code class="language-python">from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
+# Option A: Label-Encoding (für Zielvariable y)
+le = LabelEncoder()
+y = le.fit_transform(y_strings)
+
+# Option B: OneHot (für Feature-Spalten)
+from sklearn.preprocessing import OneHotEncoder
+ohe = OneHotEncoder(sparse_output=False)
+X_cat = ohe.fit_transform(df[['category_col']])</code></pre>
+          <pre class="ref-out"># Keine Fehlermeldung mehr
+# Numerische Arrays</pre>
+        </div>
+
+        <!-- Karte 2 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">ValueError: Input contains NaN, infinity or a value too large</p>
+            <p>Fehlende Werte in X oder y</p>
+          </div>
+          <pre><code class="language-python">import pandas as pd
+# Fehlende Werte prüfen
+print(df.isnull().sum())
+
+# Option A: Zeilen löschen
+df = df.dropna()
+
+# Option B: Mittelwert ersetzen
+from sklearn.impute import SimpleImputer
+imp = SimpleImputer(strategy='mean')
+X = imp.fit_transform(X)</code></pre>
+          <pre class="ref-out"># df.isnull().sum() → 0
+# X hat keine NaN-Werte mehr</pre>
+        </div>
+
+        <!-- Karte 3 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">ValueError: X has N features, but model was trained on M</p>
+            <p>Test-Daten haben andere Features als Training-Daten</p>
+          </div>
+          <pre><code class="language-python"># FALSCH: scaler auf allen Daten fitten
+# scaler.fit(X_all)
+
+# RICHTIG: scaler nur auf Train fitten
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)  # gleiche Features!</code></pre>
+          <pre class="ref-out"># Train-Shape: (80, 4)
+# Test-Shape:  (20, 4) ← gleiche Spalten</pre>
+        </div>
+
+        <!-- Karte 4 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">ValueError: array must be 2-dimensional</p>
+            <p>X ist 1D (ein Feature), sklearn erwartet 2D</p>
+          </div>
+          <pre><code class="language-python"># FALSCH: X = df['feature'].values  →  shape (100,)
+# RICHTIG: reshape auf 2D
+X = df['feature'].values.reshape(-1, 1)  # shape (100, 1)
+
+# oder bei numpy-Array:
+X = X[:, np.newaxis]</code></pre>
+          <pre class="ref-out"># X.shape == (100, 1)  ✓</pre>
+        </div>
+
+        <!-- Karte 5 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">ValueError: Unknown label type 'continuous'</p>
+            <p>y enthält float-Werte, aber Klassifikator erwartet Integer-Labels</p>
+          </div>
+          <pre><code class="language-python"># FALSCH: y = [0.0, 1.0, 0.0, ...]
+# RICHTIG: y als Integer
+y = y.astype(int)
+
+# oder bei String-Labels:
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+y = le.fit_transform(y)</code></pre>
+          <pre class="ref-out"># y.dtype == int64  ✓</pre>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ MODELLFEHLER ═══ -->
+    <section class="pruef-section" id="modell" data-topic="modell">
+      <h2><span class="pruef-num">2</span> Modellfehler — NotFitted, Konvergenz</h2>
+      <div class="ref-grid">
+
+        <!-- Karte 6 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">NotFittedError: This estimator is not fitted yet</p>
+            <p>model.predict() vor model.fit() aufgerufen</p>
+          </div>
+          <pre><code class="language-python"># Reihenfolge: IMMER erst fit, dann predict
+model = SVC(kernel='rbf', C=1.0)
+model.fit(X_train_s, y_train)   # ← nicht vergessen!
+y_pred = model.predict(X_test_s)</code></pre>
+          <pre class="ref-out"># Kein Fehler
+# y_pred.shape == (20,)</pre>
+        </div>
+
+        <!-- Karte 7 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">ConvergenceWarning: lbfgs failed to converge</p>
+            <p>Logistic Regression braucht mehr Iterationen</p>
+          </div>
+          <pre><code class="language-python"># max_iter erhöhen (Standard: 100)
+model = LogisticRegression(max_iter=1000, random_state=42)
+model.fit(X_train_s, y_train)
+
+# oder solver wechseln
+model = LogisticRegression(solver='saga', max_iter=500)</code></pre>
+          <pre class="ref-out"># Kein ConvergenceWarning
+# model.n_iter_  → Anzahl Iterationen</pre>
+        </div>
+
+        <!-- Karte 8 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">AttributeError: predict_proba is not available when probability=False</p>
+            <p>SVC ohne probability=True kann keine Wahrscheinlichkeiten ausgeben</p>
+          </div>
+          <pre><code class="language-python"># probability=True setzen (vor fit!)
+model = SVC(kernel='rbf', C=1.0, probability=True, random_state=42)
+model.fit(X_train_s, y_train)
+
+y_prob = model.predict_proba(X_test_s)  # jetzt verfügbar
+y_prob_pos = y_prob[:, 1]               # Wahrsch. für Klasse 1</code></pre>
+          <pre class="ref-out"># y_prob.shape == (20, 2)
+# Werte zwischen 0 und 1</pre>
+        </div>
+
+        <!-- Karte 9 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">ValueError: bad input shape (N,) — y muss 1D sein</p>
+            <p>y ist 2D (z.B. (100, 1)) statt 1D (100,)</p>
+          </div>
+          <pre><code class="language-python"># y glätten
+y = y.ravel()          # (100, 1) → (100,)
+# oder
+y = y.flatten()
+# oder
+y = y[:, 0]</code></pre>
+          <pre class="ref-out"># y.shape == (100,)  ✓</pre>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══ METRIK-FEHLER ═══ -->
+    <section class="pruef-section" id="metriken" data-topic="metriken">
+      <h2><span class="pruef-num">3</span> Metrik-Fehler</h2>
+      <div class="ref-grid">
+
+        <!-- Karte 10 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">UndefinedMetricWarning: Precision is ill-defined (Division by zero)</p>
+            <p>Keine Vorhersagen für eine Klasse → Division durch 0</p>
+          </div>
+          <pre><code class="language-python">from sklearn.metrics import precision_score, f1_score
+
+# zero_division=0 setzen
+p = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+f = f1_score(y_test, y_pred, average='weighted', zero_division=0)
+
+# oder classification_report mit zero_division
+print(classification_report(y_test, y_pred, zero_division=0))</code></pre>
+          <pre class="ref-out"># Kein Warning
+# 0.0 statt undefined</pre>
+        </div>
+
+        <!-- Karte 11 -->
+        <div class="ref-ex">
+          <div class="ref-ex-meta">
+            <p class="ref-sub">ValueError: Target is multiclass but average='binary'</p>
+            <p>precision_score etc. mit default average='binary' bei mehr als 2 Klassen</p>
+          </div>
+          <pre><code class="language-python">from sklearn.metrics import precision_score, recall_score, f1_score
+
+# average='weighted' für Mehrklassen
+p = precision_score(y_test, y_pred, average='weighted')
+r = recall_score(y_test, y_pred, average='weighted')
+f = f1_score(y_test, y_pred, average='weighted')
+
+# oder 'macro' für gleichgewichteten Durchschnitt
+f_macro = f1_score(y_test, y_pred, average='macro')</code></pre>
+          <pre class="ref-out"># Precision: 0.87
+# Recall:    0.85
+# F1:        0.86</pre>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+  </div>
+
+  <site-footer caption="PRM · Während der Prüfung · Fehler-Guide"></site-footer>
+
+  <script>
+  (function(){
+    const bar      = document.getElementById('fehler-filter-bar');
+    const sections = document.querySelectorAll('.pruef-section[data-topic]');
+    if (!bar) return;
+    bar.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-kf]');
+      if (!btn) return;
+      const kf = btn.dataset.kf;
+      bar.querySelectorAll('[data-kf]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sections.forEach(sec => {
+        sec.classList.toggle('kf-hidden', kf !== 'all' && sec.dataset.topic !== kf);
+      });
+      if (kf !== 'all'){
+        const first = [...sections].find(s => !s.classList.contains('kf-hidden'));
+        if (first) setTimeout(() => first.scrollIntoView({behavior:'smooth',block:'start'}), 40);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

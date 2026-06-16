@@ -181,6 +181,34 @@ Einzelner Baum Test:   94.74%</pre>
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Bagging vs. einzelner Baum (Entscheidungsgrenzen)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X_tr, y_tr)
+import matplotlib.pyplot as plt
+import numpy as np
+
+X2 = X_tr[:, :2]
+single2d = DecisionTreeClassifier(random_state=42).fit(X2, y_tr)
+bag2d = BaggingClassifierScratch(n_estimators=50)
+bag2d.fit(X2, y_tr)
+
+xx, yy = np.meshgrid(
+    np.linspace(X2[:, 0].min() - 1, X2[:, 0].max() + 1, 150),
+    np.linspace(X2[:, 1].min() - 1, X2[:, 1].max() + 1, 150)
+)
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6), sharey=True)
+for ax, model, title in zip(axes, [single2d, bag2d], ['Einzelner Baum', 'Bagging (50 Bäume)']):
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+    ax.contourf(xx, yy, Z, alpha=0.3, cmap='coolwarm')
+    ax.scatter(X2[:, 0], X2[:, 1], c=y_tr, cmap='coolwarm', s=15, edgecolors='k', linewidths=0.3)
+    ax.set_title(title)
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
           <div class="vis-box">
             <div class="vis-box-label">📊 Visualisierung — Bagging vs. einzelner Baum</div>
             <p>
@@ -188,8 +216,9 @@ Einzelner Baum Test:   94.74%</pre>
               Entscheidungsgrenzen — er passt sich an Ausreißer im Trainingsset an.
               Das Bagging-Ensemble aus 50 Bäumen mittelt über viele leicht unterschiedliche
               Bäume (jeder auf einer eigenen Bootstrap-Stichprobe trainiert) — die
-              resultierende Entscheidungsgrenze ist glatter und generalisiert besser,
-              wie man am OOB-Score (~95%) sieht, der nahe am Test-Score liegt.
+              resultierende Entscheidungsgrenze ist im Plot rechts deutlich glatter und
+              generalisiert besser, wie man am OOB-Score (~95%) sieht, der nahe am
+              Test-Score liegt.
             </p>
           </div>
         </div>
@@ -253,6 +282,30 @@ n=  50: Test=95.61%, OOB=96.04%
 n= 100: Test=95.61%, OOB=96.04%</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Test- &amp; OOB-Score vs. Ensemble-Größe</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (BaggingClassifier, X_tr, X_te, y_tr, y_te)
+import matplotlib.pyplot as plt
+
+ns = [1, 5, 10, 50, 100]
+test_scores, oob_scores = [], []
+for n in ns:
+    b = BaggingClassifier(n_estimators=n, oob_score=(n > 1), random_state=42)
+    b.fit(X_tr, y_tr)
+    test_scores.append(b.score(X_te, y_te))
+    oob_scores.append(b.oob_score_ if n > 1 else None)
+
+fig, ax = plt.subplots(figsize=(5.5, 4))
+ax.plot(ns, test_scores, 'o-', label='Test Accuracy')
+ax.plot(ns[1:], oob_scores[1:], 'o-', label='OOB Score')
+ax.set_xlabel("n_estimators")
+ax.set_ylabel("Accuracy")
+ax.set_title("Einfluss der Ensemble-Größe")
+ax.legend()
+plt.show()
+</code></pre>
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>

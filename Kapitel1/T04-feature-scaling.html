@@ -214,18 +214,6 @@ MIT Ausreißer:
               </div>
             </div>
 
-            <div class="vis-box">
-              <div class="vis-box-label">📊 Visualisierung — Effekt eines Ausreißers</div>
-              <p>
-                Plottet man die fünf skalierten Werte <code>[1, 2, 3, 4, 100]</code> auf einer Achse,
-                sieht man: beim <strong>StandardScaler</strong> rutschen die vier normalen Punkte
-                eng zusammen (der Ausreißer "zieht" die Skala), beim <strong>RobustScaler</strong>
-                bleiben sie an denselben relativen Positionen wie ohne Ausreißer — nur der Ausreißer
-                selbst bekommt einen extremen Wert (+48.5).
-              </p>
-              <img src="../assets/img/inhalt/k1-t04-scaler-outlier.png" alt="Vergleich StandardScaler vs RobustScaler bei einem Ausreißer: normale Punkte blau, Ausreißer orange">
-            </div>
-
             <div class="code-cell" data-runnable="true">
               <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — StandardScaler vs. RobustScaler</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
               <pre><code class="language-python">import numpy as np
@@ -252,6 +240,17 @@ axes[1].set_yticks([])
 fig.suptitle("Werte [1,2,3,4,100] skaliert — normale Punkte (blau) vs. Ausreißer (orange)")
 plt.show()
 </code></pre>
+            </div>
+
+            <div class="vis-box">
+              <div class="vis-box-label">📊 Visualisierung — Effekt eines Ausreißers</div>
+              <p>
+                Die fünf skalierten Werte <code>[1, 2, 3, 4, 100]</code> auf einer Achse zeigen:
+                beim <strong>StandardScaler</strong> rutschen die vier normalen Punkte
+                eng zusammen (der Ausreißer "zieht" die Skala), beim <strong>RobustScaler</strong>
+                bleiben sie an denselben relativen Positionen wie ohne Ausreißer — nur der Ausreißer
+                selbst bekommt einen extremen Wert (+48.5).
+              </p>
             </div>
 
             <div class="so-what"><div class="so-what-label">Einblick</div><p>Median und IQR sind <strong>robuste Statistiken</strong> — sie verändern sich kaum, wenn einzelne Extremwerte hinzukommen. Mean und Std dagegen werden von einem einzigen Ausreißer komplett verzerrt.</p></div>

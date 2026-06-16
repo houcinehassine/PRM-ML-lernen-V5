@@ -161,15 +161,36 @@ petal width (cm)          |     0.3568 |     0.4361</pre>
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: MDI Feature Importance (Scratch vs. sklearn)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (mdi_scratch, mdi_sklearn, feature_names)
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.arange(len(feature_names))
+width = 0.35
+
+fig, ax = plt.subplots(figsize=(6, 3.6))
+ax.barh(x - width/2, mdi_scratch, width, label='Scratch', color='#3a7ca5')
+ax.barh(x + width/2, mdi_sklearn, width, label='sklearn', color='#2e8b57')
+ax.set_yticks(x)
+ax.set_yticklabels(feature_names)
+ax.set_xlabel("MDI Feature Importance")
+ax.set_title("MDI: Scratch vs. sklearn (Iris)")
+ax.legend()
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
           <div class="vis-box">
             <div class="vis-box-label">📊 Visualisierung — Feature Importance als Balkendiagramm</div>
             <p>
-              Trägt man die MDI-Werte als horizontales Balkendiagramm auf, erkennt man sofort:
-              <code>petal length</code> und <code>petal width</code> dominieren mit Werten um
-              0.35–0.44 — sie tragen den Großteil zur Entscheidung bei. <code>sepal length</code>
-              und <code>sepal width</code> liegen deutlich niedriger. Genau dieses Muster
-              zeigt das Beispiel <code>k5-ex6-feature-importance.png</code> aus den Übungen:
-              wenige Features dominieren, der Rest trägt kaum etwas bei.
+              Der Plot oben zeigt sofort: <code>petal length</code> und <code>petal width</code>
+              dominieren mit Werten um 0.35–0.44 — sie tragen den Großteil zur Entscheidung bei.
+              <code>sepal length</code> und <code>sepal width</code> liegen deutlich niedriger.
+              Genau dieses Muster ist typisch: wenige Features dominieren, der Rest trägt
+              kaum etwas bei.
             </p>
           </div>
         </div>
@@ -259,6 +280,27 @@ Accuracy mit allen Features: 96.49%
 Accuracy mit sel. Features:  95.61%</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: MDI vs. Permutation Importance (Top 5)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (mdi, perm, top5_mdi, top5_perm, feature_names)
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 3.6))
+
+axes[0].barh([feature_names[i] for i in top5_mdi][::-1], mdi[top5_mdi][::-1], color='#3a7ca5')
+axes[0].set_title("Top 5 — MDI")
+axes[0].set_xlabel("Importance")
+
+axes[1].barh([feature_names[i] for i in top5_perm][::-1], perm.importances_mean[top5_perm][::-1],
+              xerr=perm.importances_std[top5_perm][::-1], color='#2e8b57')
+axes[1].set_title("Top 5 — Permutation Importance")
+axes[1].set_xlabel("Importance")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
 
           <div class="compare-grid">

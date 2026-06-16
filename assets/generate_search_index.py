@@ -94,6 +94,23 @@ def extract_tags(el, title=''):
     return sorted(tags)[:25]
 
 
+def extract_lang(code_tag):
+    for c in code_tag.get('class', []):
+        if c.startswith('language-'):
+            return c[len('language-'):]
+    return 'text'
+
+
+def attach_code(entry, el):
+    """Hängt vollständigen Code (für Code-Karten auf der Suchseite) an einen Eintrag an."""
+    pre = el.find('pre')
+    if pre:
+        code_tag = pre.find('code') or pre
+        entry['code'] = code_tag.get_text()
+        entry['lang'] = extract_lang(code_tag)
+    return entry
+
+
 def page_h1(soup):
     h1 = soup.find('h1')
     return clean_text(h1.get_text()) if h1 else ''
@@ -164,6 +181,31 @@ def index_topic_page(soup, chapter, rel_url):
                 "anchor": f"#{stufe_id}",
             })
 
+        # Jede Code-Zelle zusätzlich als eigener Treffer mit vollständigem Code,
+        # damit die Suchseite die komplette Zelle anzeigen kann.
+        for cell in body.find_all('div', class_='code-cell'):
+            pre = cell.find('pre')
+            if not pre:
+                continue
+            code_tag = pre.find('code') or pre
+            code_text = code_tag.get_text()
+            label_el = cell.find(class_='cell-lang')
+            cell_label = clean_text(label_el.get_text()) if label_el else 'Code-Zelle'
+            entries.append({
+                "chapter": chapter,
+                "page": h1,
+                "title": f"{title} — {cell_label}",
+                "h1": h1,
+                "text": clean_text(code_text, 600),
+                "tags": extract_tags(cell, cell_label),
+                "type": "code",
+                "url": rel_url,
+                "anchor": f"#{stufe_id}",
+                "code": code_text,
+                "lang": extract_lang(code_tag),
+                "cell_label": cell_label,
+            })
+
     return entries
 
 
@@ -215,15 +257,15 @@ def index_pruef_page(soup, chapter, rel_url):
         # Top-Level-Eintrag für die ganze Section (Übersicht)
         entries.append(make_entry(chapter, h1, sec_title, h1, section, rel_url, anchor))
 
-        # Zusätzlich: jede .cmd-card / .cheat-formula / .info-box einzeln,
+        # Zusätzlich: jede .cmd-card / .cheat-formula / .info-box / .ref / .ref-ex einzeln,
         # damit einzelne Befehle/Formeln gut auffindbar sind.
-        for card in section.find_all(class_=re.compile(r'^cmd-card$|cheat-formula|info-box')):
-            head = card.find(class_=re.compile(r'cmd-head|cheat-formula-head'))
+        for card in section.find_all(class_=re.compile(r'^cmd-card$|cheat-formula|info-box|^ref$|^ref-ex$')):
+            head = card.find(class_=re.compile(r'cmd-head|cheat-formula-head|ref-name|ref-sub'))
             card_title = clean_text(head.get_text()) if head else sec_title
             card_text = clean_text(card.get_text())
             if len(card_text) < 15:
                 continue
-            entries.append({
+            card_entry = {
                 "chapter": chapter,
                 "page": h1,
                 "title": f"{sec_title} — {card_title}" if head else sec_title,
@@ -233,7 +275,9 @@ def index_pruef_page(soup, chapter, rel_url):
                 "type": detect_type(card),
                 "url": rel_url,
                 "anchor": anchor,
-            })
+            }
+            attach_code(card_entry, card)
+            entries.append(card_entry)
 
     return entries
 
@@ -283,6 +327,14 @@ def main():
     out = ROOT / 'search-index.json'
     out.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f"\n✅ {len(index)} Einträge → {out.name} ({out.stat().st_size / 1024:.1f} KB)")
+
+    # search-index.js — für file://-Öffnung (fetch() blockiert auf file://)
+    js_out = ROOT / 'search-index.js'
+    js_out.write_text(
+        'window.__searchIndex__ = ' + json.dumps(index, ensure_ascii=False) + ';',
+        encoding='utf-8'
+    )
+    print(f"✅ search-index.js ({js_out.stat().st_size / 1024:.1f} KB)")
 
 
 if __name__ == '__main__':

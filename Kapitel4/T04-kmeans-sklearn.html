@@ -26,6 +26,7 @@
         <span class="eyebrow">K4 · Thema 4 von 5</span>
         <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">🚀 Clustering professionell mit sklearn</h1>
         <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Vollständiger Clustering-Workflow: KMeans für Kundensegmentierung, MiniBatchKMeans für große Daten, Clustering als Preprocessing.</p>
+        <a href="viz-kmeans.html" style="display:inline-flex;align-items:center;gap:.5rem;margin-top:var(--space-3);padding:.45rem 1rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary);font-size:var(--text-sm);font-weight:700;text-decoration:none;border:1px solid color-mix(in oklab,var(--color-primary) 30%,transparent)">▶ Interaktiver KMeans-Visualisierer</a>
       </section>
 
       <div class="stufe stufe-ziel" id="stufe-ziel">
@@ -177,6 +178,26 @@ sklearn MiniBatch Inertia: 59.68</pre>
               </div>
             </div>
           </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Mini-Batch k-means Scratch vs. sklearn</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, mb, sk_mb)
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6), sharey=True)
+
+axes[0].scatter(X[:, 0], X[:, 1], c=mb.labels_, cmap='viridis', s=15, alpha=0.6)
+axes[0].scatter(mb.centroids_[:, 0], mb.centroids_[:, 1], c='black', marker='X', s=120)
+axes[0].set_title(f"Scratch MiniBatch (Inertia={mb.inertia_:.2f})")
+
+axes[1].scatter(X[:, 0], X[:, 1], c=sk_mb.labels_, cmap='viridis', s=15, alpha=0.6)
+axes[1].scatter(sk_mb.cluster_centers_[:, 0], sk_mb.cluster_centers_[:, 1], c='black', marker='X', s=120)
+axes[1].set_title(f"sklearn MiniBatchKMeans (Inertia={sk_mb.inertia_:.2f})")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
       </div>
@@ -184,7 +205,7 @@ sklearn MiniBatch Inertia: 59.68</pre>
       <div class="stufe stufe-sklearn" id="stufe-sklearn">
         <div class="stufe-header"><span class="stufe-label">Stufe 5</span><h2 class="stufe-title">🚀 Vollständiger Clustering-Workflow</h2></div>
         <div class="stufe-body">
-          <div class="code-cell">
+          <div class="code-cell" data-runnable="true">
             <div class="code-cell-header"><span>Python · Kundensegmentierung mit KMeans</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
             <pre><code class="language-python">from sklearn.cluster import KMeans, DBSCAN
 from sklearn.preprocessing import StandardScaler
@@ -261,6 +282,22 @@ Cluster 3       50      54.8        60.3       77.9
 X_with_clusters shape: (200, 4)</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Kundensegmente (Alter vs. Ausgaben)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, labels, centroids_orig)
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(5.5, 4))
+ax.scatter(X[:, 0], X[:, 2], c=labels, cmap='viridis', s=25, alpha=0.7)
+ax.scatter(centroids_orig[:, 0], centroids_orig[:, 2], c='black', marker='X', s=150, label='Centroids')
+ax.set_xlabel("Alter")
+ax.set_ylabel("Ausgaben-Score")
+ax.set_title("Kundensegmente (k=4)")
+ax.legend()
+plt.show()
+</code></pre>
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ Clustering beherrscht</button></div>
