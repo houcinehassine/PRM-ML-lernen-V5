@@ -7,6 +7,8 @@
   <meta name="description" content="Comprehensions, itertools und collections — die Python-Standardbibliothek-Werkzeuge für Datenverarbeitung und Scratch-Implementierungen."/>
   <script type="module" src="../header.js"></script>
   <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
   <style>
     .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-6) var(--space-4) 0;text-align:center}
@@ -58,246 +60,318 @@
     }
     .cmd-card .cmd-out:before{content:"→ ";color:var(--color-success);font-weight:800}
     .cmd-out--wrap{white-space:pre-wrap;word-break:break-word;overflow-x:hidden}
+    #comprehensions {--sec-color:#2563eb}
+    #itertools      {--sec-color:#0d9488}
+    #collections    {--sec-color:#7c3aed}
+    #builtins       {--sec-color:#d97706}
+    .ref-grid{display:flex;flex-direction:column;gap:.4rem;margin-top:var(--space-4)}
+    .ref-ex{display:grid;grid-template-columns:minmax(160px,20%) 1fr minmax(220px,28%);align-items:stretch;border:1px solid var(--color-border);border-left:3px solid var(--sec-color,var(--color-primary));border-radius:var(--radius-md);background:var(--color-surface);overflow:hidden;min-width:0;}
+    .ref-ex-meta{padding:.7rem 1rem;border-right:1px solid var(--color-border);display:flex;flex-direction:column;gap:.35rem;justify-content:center;background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 4%,var(--color-surface-2));}
+    .ref-ex .ref-sub{margin:0;font-size:.84rem;font-weight:800;color:var(--sec-color,var(--color-primary));word-break:break-word;font-family:var(--font-mono);}
+    .ref-ex-meta > p{font-size:.9rem;color:var(--color-text-muted);line-height:1.5;margin:0}
+    .ref-ex pre{margin:0;font-size:.83rem;line-height:1.6;padding:.7rem .9rem;overflow-x:auto;border-radius:0;border:none;border-right:1px solid var(--color-border);background:var(--color-surface-2);}
+    .ref-ex pre code{font-size:1em}
+    .ref-out{margin:0;padding:.7rem .9rem;background:color-mix(in oklab,var(--sec-color,#059669) 6%,var(--color-surface));border:none;border-radius:0;border-left:1px solid color-mix(in oklab,var(--sec-color,#059669) 20%,var(--color-border));font-family:var(--font-mono);font-size:.83rem;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--color-text-muted);}
+    .kapitel-filter-bar button.lernpfad-step{appearance:none;background:none;border:none;cursor:pointer;font-family:inherit}
+    .kapitel-filter-bar button.lernpfad-step.kf-all{--lp-color:var(--color-primary)}
+    .kf-hidden{display:none!important}
+    /* ── Responsive layout override ── */
+    #main-content.content{max-width:none;padding:var(--space-6) var(--space-8)}
+    @media(max-width:900px){#main-content.content{padding:var(--space-4)}}
   </style>
 </head>
 <body>
   <site-header active="pruefung" title="Python-Stdlib-Referenz – PRM V5"></site-header>
 
-  <div class="pruef-layout">
-    <nav class="pruef-side">
-      <div class="pruef-side-group">
-        <div class="pruef-side-label">Während der Prüfung</div>
-        <a href="cheatsheet.html">📋 Cheat-Sheet</a>
-        <a href="entscheidungshilfe.html">🧭 Entscheidungshilfe</a>
-        <a href="numpy-referenz.html">🔢 NumPy</a>
-        <a href="sklearn-referenz.html">🚀 sklearn</a>
-        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
-        <a href="python-stdlib-referenz.html" class="active">🐍 Python-Stdlib</a>
-        <a href="code-scratch-referenz.html">🛠️ Von Scratch</a>
-      </div>
-      <div class="pruef-side-group" id="section-nav">
-        <div class="pruef-side-label">Auf dieser Seite</div>
-        <a href="#comprehensions">1 · Comprehensions</a>
-        <a href="#itertools">2 · itertools</a>
-        <a href="#collections">3 · collections</a>
-        <a href="#builtins">+ Built-ins</a>
-      </div>
-    </nav>
+  <div class="layout">
+    <site-sidebar active="pruefung/stdlib"></site-sidebar>
 
+  <main id="main-content" class="content">
     <div class="pruef-hero">
       <h1>🐍 Python-Stdlib-Referenz</h1>
       <p>Comprehensions, <code>itertools</code> und <code>collections</code> — kompakte Werkzeuge der Standardbibliothek, die in Scratch-Implementierungen häufig Schleifen ersetzen.</p>
     </div>
-
-  <main id="main-content" class="pruef-main">
+    <nav class="lernpfad-bar kapitel-filter-bar" id="topic-filter-bar" aria-label="Nach Thema filtern">
+      <button class="lernpfad-step kf-all active" data-kf="all"><span class="lp-icon">📚</span><span>Alle</span></button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#2563eb" data-kf="comprehensions"><span class="lp-icon">🔁</span><span>Comprehensions</span></button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#0d9488" data-kf="itertools"><span class="lp-icon">⚙️</span><span>itertools</span></button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#7c3aed" data-kf="collections"><span class="lp-icon">📦</span><span>collections</span></button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#d97706" data-kf="builtins"><span class="lp-icon">🔧</span><span>Built-ins</span></button>
+    </nav>
 
     <!-- ═══ 1 · COMPREHENSIONS ═══ -->
-    <section class="pruef-section" id="comprehensions">
+    <section class="pruef-section" id="comprehensions" data-topic="comprehensions">
       <h2><span class="pruef-num">1</span> Comprehensions</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card">
-          <code class="cmd-head">List Comprehension</code>
-          <p class="cmd-desc">Neue Liste aus einer Iterable erzeugen</p>
-          <pre class="cmd-code"><code class="language-python">[x**2 for x in range(6)]</code></pre>
-          <pre class="cmd-out">[0, 1, 4, 9, 16, 25]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">List Comprehension mit if</code>
-          <p class="cmd-desc">Filter — nur Elemente, die die Bedingung erfüllen</p>
-          <pre class="cmd-code"><code class="language-python">[x for x in range(10) if x % 2 == 0]</code></pre>
-          <pre class="cmd-out">[0, 2, 4, 6, 8]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">Dict Comprehension</code>
-          <p class="cmd-desc"><code>{key: value for ...}</code> — z.B. Label-Mapping</p>
-          <pre class="cmd-code"><code class="language-python">{x: x**2 for x in range(5)}</code></pre>
-          <pre class="cmd-out">{0: 0, 1: 1, 2: 4, 3: 9, 4: 16}</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">Set Comprehension</code>
-          <p class="cmd-desc">Eindeutige Werte aus einer Iterable</p>
-          <pre class="cmd-code"><code class="language-python">{x % 3 for x in range(10)}</code></pre>
-          <pre class="cmd-out">{0, 1, 2}</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Verschachtelte Comprehension</code>
-          <p class="cmd-desc">Mehrere <code>for</code>-Klauseln — äußere Schleife zuerst</p>
-          <pre class="cmd-code"><code class="language-python">[x*y for x in range(1, 3) for y in range(1, 4)]</code></pre>
-          <pre class="cmd-out">[1, 2, 3, 2, 4, 6]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Generator-Ausdruck</code>
-          <p class="cmd-desc">Wie List Comprehension, aber mit <code>()</code> — lazy, spart Speicher bei großen Daten</p>
-          <pre class="cmd-code"><code class="language-python">total = sum(x**2 for x in range(1000000))  # baut keine Liste auf</code></pre>
-          <pre class="cmd-out cmd-out--wrap"># Generator wird nur einmal durchlaufen, Element für Element berechnet</pre>
-        </div>
+        <div class="ref-grid">
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">List Comprehension</p>
+        <p>Neue Liste aus einer Iterable erzeugen</p>
       </div>
+      <pre><code class="language-python">[x**2 for x in range(6)]</code></pre>
+      <pre class="ref-out">[0, 1, 4, 9, 16, 25]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">List Comprehension mit if</p>
+        <p>Filter — nur Elemente, die die Bedingung erfüllen</p>
+      </div>
+      <pre><code class="language-python">[x for x in range(10) if x % 2 == 0]</code></pre>
+      <pre class="ref-out">[0, 2, 4, 6, 8]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Dict Comprehension</p>
+        <p><code>{key: value for ...}</code> — z.B. Label-Mapping</p>
+      </div>
+      <pre><code class="language-python">{x: x**2 for x in range(5)}</code></pre>
+      <pre class="ref-out">{0: 0, 1: 1, 2: 4, 3: 9, 4: 16}</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Set Comprehension</p>
+        <p>Eindeutige Werte aus einer Iterable</p>
+      </div>
+      <pre><code class="language-python">{x % 3 for x in range(10)}</code></pre>
+      <pre class="ref-out">{0, 1, 2}</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Verschachtelte Comprehension</p>
+        <p>Mehrere <code>for</code>-Klauseln — äußere Schleife zuerst</p>
+      </div>
+      <pre><code class="language-python">[x*y for x in range(1, 3) for y in range(1, 4)]</code></pre>
+      <pre class="ref-out">[1, 2, 3, 2, 4, 6]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Generator-Ausdruck</p>
+        <p>Wie List Comprehension, aber mit <code>()</code> — lazy, spart Speicher bei großen Daten</p>
+      </div>
+      <pre><code class="language-python">total = sum(x**2 for x in range(1000000))  # baut keine Liste auf</code></pre>
+      <pre class="ref-out"># Generator wird nur einmal durchlaufen, Element für Element berechnet</pre>
+    </div>
+  </div>
+  
     </section>
 
     <!-- ═══ 2 · ITERTOOLS ═══ -->
-    <section class="pruef-section" id="itertools">
+    <section class="pruef-section" id="itertools" data-topic="itertools">
       <h2><span class="pruef-num">2</span> itertools</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">import itertools</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">itertools.combinations(iterable, r)</code>
-          <p class="cmd-desc">Alle <code>r</code>-elementigen Teilmengen, Reihenfolge egal — z.B. Feature-Paare</p>
-          <pre class="cmd-code"><code class="language-python">list(itertools.combinations([1, 2, 3, 4], 2))</code></pre>
-          <pre class="cmd-out">[(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">itertools.permutations(iterable, r)</code>
-          <p class="cmd-desc">Alle <code>r</code>-elementigen Anordnungen, Reihenfolge zählt</p>
-          <pre class="cmd-code"><code class="language-python">list(itertools.permutations([1, 2, 3], 2))</code></pre>
-          <pre class="cmd-out">[(1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2)]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">itertools.product(*iterables)</code>
-          <p class="cmd-desc">Kartesisches Produkt — z.B. alle Hyperparameter-Kombinationen für GridSearch</p>
-          <pre class="cmd-code"><code class="language-python">list(itertools.product([0, 1], [10, 20]))</code></pre>
-          <pre class="cmd-out">[(0, 10), (0, 20), (1, 10), (1, 20)]</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">itertools.chain(*iterables)</code>
-          <p class="cmd-desc">Mehrere Iterables nacheinander durchlaufen, ohne sie zu kopieren</p>
-          <pre class="cmd-code"><code class="language-python">list(itertools.chain([1, 2], [3, 4], [5]))</code></pre>
-          <pre class="cmd-out">[1, 2, 3, 4, 5]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">itertools.zip_longest(*iterables, fillvalue=)</code>
-          <p class="cmd-desc">Wie <code>zip()</code>, aber bis zum längsten Iterable — kürzere werden mit <code>fillvalue</code> aufgefüllt</p>
-          <pre class="cmd-code"><code class="language-python">list(itertools.zip_longest([1, 2, 3], [10, 20], fillvalue=0))</code></pre>
-          <pre class="cmd-out">[(1, 10), (2, 20), (3, 0)]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">itertools.count(start, step) + islice</code>
-          <p class="cmd-desc">Unendlicher Zähler — mit <code>itertools.islice</code> auf <code>n</code> Werte begrenzen</p>
-          <pre class="cmd-code"><code class="language-python">list(itertools.islice(itertools.count(10, 2), 5))</code></pre>
-          <pre class="cmd-out">[10, 12, 14, 16, 18]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">itertools.groupby(iterable)</code>
-          <p class="cmd-desc">Aufeinanderfolgende gleiche Elemente gruppieren — Eingabe muss vorsortiert sein</p>
-          <pre class="cmd-code"><code class="language-python">data = [1, 1, 2, 2, 2, 3, 1]
-[(k, list(g)) for k, g in itertools.groupby(data)]</code></pre>
-          <pre class="cmd-out">[(1, [1, 1]), (2, [2, 2, 2]), (3, [3]), (1, [1])]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">itertools.accumulate(iterable)</code>
-          <p class="cmd-desc">Laufende Summe (oder andere Funktion via <code>func=</code>) — kumulative Werte</p>
-          <pre class="cmd-code"><code class="language-python">list(itertools.accumulate([1, 2, 3, 4]))</code></pre>
-          <pre class="cmd-out">[1, 3, 6, 10]</pre>
-        </div>
+        <div class="ref-grid">
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Setup</p>
       </div>
+      <pre><code class="language-python">import itertools</code></pre>
+      <pre class="ref-out"></pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">itertools.combinations(iterable, r)</p>
+        <p>Alle <code>r</code>-elementigen Teilmengen, Reihenfolge egal — z.B. Feature-Paare</p>
+      </div>
+      <pre><code class="language-python">list(itertools.combinations([1, 2, 3, 4], 2))</code></pre>
+      <pre class="ref-out">[(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">itertools.permutations(iterable, r)</p>
+        <p>Alle <code>r</code>-elementigen Anordnungen, Reihenfolge zählt</p>
+      </div>
+      <pre><code class="language-python">list(itertools.permutations([1, 2, 3], 2))</code></pre>
+      <pre class="ref-out">[(1, 2), (1, 3), (2, 1), (2, 3), (3, 1), (3, 2)]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">itertools.product(*iterables)</p>
+        <p>Kartesisches Produkt — z.B. alle Hyperparameter-Kombinationen für GridSearch</p>
+      </div>
+      <pre><code class="language-python">list(itertools.product([0, 1], [10, 20]))</code></pre>
+      <pre class="ref-out">[(0, 10), (0, 20), (1, 10), (1, 20)]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">itertools.chain(*iterables)</p>
+        <p>Mehrere Iterables nacheinander durchlaufen, ohne sie zu kopieren</p>
+      </div>
+      <pre><code class="language-python">list(itertools.chain([1, 2], [3, 4], [5]))</code></pre>
+      <pre class="ref-out">[1, 2, 3, 4, 5]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">itertools.zip_longest(*iterables, fillvalue=)</p>
+        <p>Wie <code>zip()</code>, aber bis zum längsten Iterable — kürzere werden mit <code>fillvalue</code> aufgefüllt</p>
+      </div>
+      <pre><code class="language-python">list(itertools.zip_longest([1, 2, 3], [10, 20], fillvalue=0))</code></pre>
+      <pre class="ref-out">[(1, 10), (2, 20), (3, 0)]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">itertools.count(start, step) + islice</p>
+        <p>Unendlicher Zähler — mit <code>itertools.islice</code> auf <code>n</code> Werte begrenzen</p>
+      </div>
+      <pre><code class="language-python">list(itertools.islice(itertools.count(10, 2), 5))</code></pre>
+      <pre class="ref-out">[10, 12, 14, 16, 18]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">itertools.groupby(iterable)</p>
+        <p>Aufeinanderfolgende gleiche Elemente gruppieren — Eingabe muss vorsortiert sein</p>
+      </div>
+      <pre><code class="language-python">data = [1, 1, 2, 2, 2, 3, 1]
+[(k, list(g)) for k, g in itertools.groupby(data)]</code></pre>
+      <pre class="ref-out">[(1, [1, 1]), (2, [2, 2, 2]), (3, [3]), (1, [1])]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">itertools.accumulate(iterable)</p>
+        <p>Laufende Summe (oder andere Funktion via <code>func=</code>) — kumulative Werte</p>
+      </div>
+      <pre><code class="language-python">list(itertools.accumulate([1, 2, 3, 4]))</code></pre>
+      <pre class="ref-out">[1, 3, 6, 10]</pre>
+    </div>
+  </div>
+  
       <div class="info-box">
         <code>itertools.product</code> ist nützlich, um alle Kombinationen eines Parameter-Grids manuell zu erzeugen — <code>GridSearchCV</code> macht das intern genauso.
       </div>
     </section>
 
     <!-- ═══ 3 · COLLECTIONS ═══ -->
-    <section class="pruef-section" id="collections">
+    <section class="pruef-section" id="collections" data-topic="collections">
       <h2><span class="pruef-num">3</span> collections</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">from collections import Counter, defaultdict, namedtuple, deque</code></pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Counter(iterable)</code>
-          <p class="cmd-desc">Häufigkeiten zählen — z.B. Klassenverteilung, Mehrheitsentscheid bei kNN</p>
-          <pre class="cmd-code"><code class="language-python">c = Counter(['a', 'b', 'a', 'c', 'a', 'b'])
+        <div class="ref-grid">
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Setup</p>
+      </div>
+      <pre><code class="language-python">from collections import Counter, defaultdict, namedtuple, deque</code></pre>
+      <pre class="ref-out"></pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Counter(iterable)</p>
+        <p>Häufigkeiten zählen — z.B. Klassenverteilung, Mehrheitsentscheid bei kNN</p>
+      </div>
+      <pre><code class="language-python">c = Counter(['a', 'b', 'a', 'c', 'a', 'b'])
 c</code></pre>
-          <pre class="cmd-out">Counter({'a': 3, 'b': 2, 'c': 1})</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Counter.most_common(n)</code>
-          <p class="cmd-desc">Die <code>n</code> häufigsten Elemente, absteigend sortiert</p>
-          <pre class="cmd-code"><code class="language-python">c.most_common(2)</code></pre>
-          <pre class="cmd-out">[('a', 3), ('b', 2)]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">Counter-Arithmetik (+, -)</code>
-          <p class="cmd-desc">Counter addieren/subtrahieren wie Mengen</p>
-          <pre class="cmd-code"><code class="language-python">c2 = Counter(['a', 'a', 'd'])
+      <pre class="ref-out">Counter({'a': 3, 'b': 2, 'c': 1})</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Counter.most_common(n)</p>
+        <p>Die <code>n</code> häufigsten Elemente, absteigend sortiert</p>
+      </div>
+      <pre><code class="language-python">c.most_common(2)</code></pre>
+      <pre class="ref-out">[('a', 3), ('b', 2)]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Counter-Arithmetik (+, -)</p>
+        <p>Counter addieren/subtrahieren wie Mengen</p>
+      </div>
+      <pre><code class="language-python">c2 = Counter(['a', 'a', 'd'])
 c + c2</code></pre>
-          <pre class="cmd-out">Counter({'a': 5, 'b': 2, 'c': 1, 'd': 1})</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">defaultdict(list)</code>
-          <p class="cmd-desc">Dict mit automatischem Default-Wert — kein <code>KeyError</code>, kein <code>if key not in dict</code></p>
-          <pre class="cmd-code"><code class="language-python">dd = defaultdict(list)
+      <pre class="ref-out">Counter({'a': 5, 'b': 2, 'c': 1, 'd': 1})</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">defaultdict(list)</p>
+        <p>Dict mit automatischem Default-Wert — kein <code>KeyError</code>, kein <code>if key not in dict</code></p>
+      </div>
+      <pre><code class="language-python">dd = defaultdict(list)
 for k, v in [('a', 1), ('a', 2), ('b', 3)]:
     dd[k].append(v)
 dict(dd)</code></pre>
-          <pre class="cmd-out">{'a': [1, 2], 'b': [3]}</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">namedtuple('Name', [...])</code>
-          <p class="cmd-desc">Leichtgewichtige, unveränderliche Klasse mit benannten Feldern — lesbarer als Tupel-Indizes</p>
-          <pre class="cmd-code"><code class="language-python">Point = namedtuple('Point', ['x', 'y'])
+      <pre class="ref-out">{'a': [1, 2], 'b': [3]}</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">namedtuple('Name', [...])</p>
+        <p>Leichtgewichtige, unveränderliche Klasse mit benannten Feldern — lesbarer als Tupel-Indizes</p>
+      </div>
+      <pre><code class="language-python">Point = namedtuple('Point', ['x', 'y'])
 p = Point(1, 2)
 p, p.x, p.y</code></pre>
-          <pre class="cmd-out">(Point(x=1, y=2), 1, 2)</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">deque — appendleft / rotate</code>
-          <p class="cmd-desc">Doppelt verkettete Liste — O(1) Einfügen/Entfernen an beiden Enden, z.B. Sliding Window</p>
-          <pre class="cmd-code"><code class="language-python">dq = deque([1, 2, 3])
+      <pre class="ref-out">(Point(x=1, y=2), 1, 2)</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">deque — appendleft / rotate</p>
+        <p>Doppelt verkettete Liste — O(1) Einfügen/Entfernen an beiden Enden, z.B. Sliding Window</p>
+      </div>
+      <pre><code class="language-python">dq = deque([1, 2, 3])
 dq.appendleft(0)
 dq.append(4)
 dq.rotate(1)
 dq</code></pre>
-          <pre class="cmd-out">deque([4, 0, 1, 2, 3])</pre>
-        </div>
-      </div>
+      <pre class="ref-out">deque([4, 0, 1, 2, 3])</pre>
+    </div>
+  </div>
+  
     </section>
 
     <!-- ═══ BONUS: BUILT-INS ═══ -->
-    <section class="pruef-section" id="builtins">
+    <section class="pruef-section" id="builtins" data-topic="builtins">
       <h2><span class="pruef-num">+</span> Häufige Built-ins</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">zip(*iterables)</code>
-          <p class="cmd-desc">Mehrere Iterables elementweise kombinieren — endet beim kürzesten</p>
-          <pre class="cmd-code"><code class="language-python">list(zip([1, 2, 3], ['a', 'b', 'c']))</code></pre>
-          <pre class="cmd-out">[(1, 'a'), (2, 'b'), (3, 'c')]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">enumerate(iterable, start=0)</code>
-          <p class="cmd-desc">Index + Element gleichzeitig — vermeidet manuelle Zähler</p>
-          <pre class="cmd-code"><code class="language-python">list(enumerate(['a', 'b', 'c'], start=1))</code></pre>
-          <pre class="cmd-out">[(1, 'a'), (2, 'b'), (3, 'c')]</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">sorted(iterable, key=, reverse=)</code>
-          <p class="cmd-desc">Sortierte Kopie — <code>key</code> als Funktion, z.B. nach zweitem Tupel-Element</p>
-          <pre class="cmd-code"><code class="language-python">sorted([('b', 2), ('a', 1)], key=lambda t: t[0])</code></pre>
-          <pre class="cmd-out">[('a', 1), ('b', 2)]</pre>
-        </div>
+        <div class="ref-grid">
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">zip(*iterables)</p>
+        <p>Mehrere Iterables elementweise kombinieren — endet beim kürzesten</p>
       </div>
+      <pre><code class="language-python">list(zip([1, 2, 3], ['a', 'b', 'c']))</code></pre>
+      <pre class="ref-out">[(1, 'a'), (2, 'b'), (3, 'c')]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">enumerate(iterable, start=0)</p>
+        <p>Index + Element gleichzeitig — vermeidet manuelle Zähler</p>
+      </div>
+      <pre><code class="language-python">list(enumerate(['a', 'b', 'c'], start=1))</code></pre>
+      <pre class="ref-out">[(1, 'a'), (2, 'b'), (3, 'c')]</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">sorted(iterable, key=, reverse=)</p>
+        <p>Sortierte Kopie — <code>key</code> als Funktion, z.B. nach zweitem Tupel-Element</p>
+      </div>
+      <pre><code class="language-python">sorted([('b', 2), ('a', 1)], key=lambda t: t[0])</code></pre>
+      <pre class="ref-out">[('a', 1), ('b', 2)]</pre>
+    </div>
+  </div>
+  
     </section>
 
   </main>
   </div>
 
   <site-footer caption="PRM · Während der Prüfung · Python-Stdlib-Referenz"></site-footer>
-
   <script>
-    const sideLinks = document.querySelectorAll('#section-nav a');
-    const sections = document.querySelectorAll('.pruef-section');
-    const setActive = () => {
-      let current = sections[0]?.id;
-      const probe = window.scrollY + 140;
+  (function(){
+    const bar      = document.getElementById('topic-filter-bar');
+    const sections = document.querySelectorAll('.pruef-section[data-topic]');
+    if (!bar) return;
+    bar.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-kf]');
+      if (!btn) return;
+      const kf = btn.dataset.kf;
+      bar.querySelectorAll('[data-kf]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       sections.forEach(sec => {
-        if (sec.offsetTop <= probe) current = sec.id;
+        sec.classList.toggle('kf-hidden', kf !== 'all' && sec.dataset.topic !== kf);
       });
-      sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
-    };
-    document.addEventListener('scroll', setActive, { passive: true });
-    setActive();
+      if (kf !== 'all'){
+        const first = [...sections].find(s => !s.classList.contains('kf-hidden'));
+        if (first) setTimeout(() => first.scrollIntoView({behavior:'smooth',block:'start'}), 40);
+      }
+    });
+  })();
   </script>
 </body>
 </html>

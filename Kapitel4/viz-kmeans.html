@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KMeans Schritt-für-Schritt Visualisierer – K4 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .viz-wrap {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+    .viz-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+    .viz-controls label {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+    .viz-controls input[type="range"] {
+      accent-color: var(--color-primary);
+      width: 120px;
+    }
+    .viz-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--color-text);
+      transition: all 0.15s;
+    }
+    .viz-btn:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: var(--color-primary-highlight);
+    }
+    .viz-btn.active {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+    .viz-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    #kmeans-canvas {
+      width: 100%;
+      height: 380px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      display: block;
+      cursor: crosshair;
+      background: var(--color-surface-2);
+    }
+    .stats-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+    }
+    .stat-card {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.4rem 0.9rem;
+      min-width: 120px;
+    }
+    .stat-card-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-faint);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .stat-card-value {
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--color-text);
+      font-family: var(--font-mono);
+      margin-top: 0.1rem;
+    }
+    .status-text {
+      margin-top: var(--space-3);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      background: var(--color-primary-highlight);
+      border-left: 3px solid var(--color-primary);
+      font-size: var(--text-sm);
+      color: var(--color-text);
+      min-height: 2.2rem;
+    }
+    .info-box {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4) var(--space-5);
+      margin-top: var(--space-5);
+    }
+    .info-box h4 {
+      margin: 0 0 var(--space-3);
+      font-size: var(--text-base);
+      font-weight: 700;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+    @media (max-width: 600px) {
+      .info-grid { grid-template-columns: 1fr; }
+    }
+    .info-step {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+    }
+    .info-step strong {
+      display: block;
+      color: var(--color-primary);
+      margin-bottom: 0.3rem;
+    }
+    .info-step p {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin: 0;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: var(--text-sm);
+      color: var(--color-primary);
+      margin-top: var(--space-6);
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--color-primary-highlight);
+      border-radius: var(--radius-full);
+      background: var(--color-primary-highlight);
+      transition: all 0.15s;
+    }
+    .back-link:hover {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+    .hint-text {
+      font-size: var(--text-xs);
+      color: var(--color-text-faint);
+      margin-top: var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k4" title="KMeans Visualisierer – K4 · PRM V5"></site-header>
+  <div class="layout">
+    <site-sidebar active="k4/t04"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K4 · Interaktive Visualisierung</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">KMeans Schritt-für-Schritt Visualisierer</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Beobachte jeden E-Schritt (Zuweisung) und M-Schritt (Centroid-Update) live. Generiere Daten, wähle k und führe den Algorithmus manuell oder automatisch aus.</p>
+      </section>
+
+      <div class="viz-wrap">
+        <!-- Steuerung -->
+        <div class="viz-controls">
+          <label for="k-slider">k = <span id="k-display">3</span></label>
+          <input type="range" id="k-slider" min="2" max="6" value="3" step="1">
+          <button class="viz-btn" id="btn-new-data">Neue Daten</button>
+          <button class="viz-btn" id="btn-init">Initialisieren (k-means++)</button>
+          <button class="viz-btn" id="btn-step">Schritt</button>
+          <button class="viz-btn" id="btn-auto">Auto-Run</button>
+        </div>
+
+        <!-- Canvas -->
+        <canvas id="kmeans-canvas"></canvas>
+        <p class="hint-text">Tipp: Klicke auf den Canvas, um eigene Datenpunkte hinzuzufügen.</p>
+
+        <!-- Status -->
+        <div class="status-text" id="status-text">Klicke auf "Neue Daten" um zu beginnen.</div>
+
+        <!-- Stats -->
+        <div class="stats-bar">
+          <div class="stat-card">
+            <span class="stat-card-label">Iteration</span>
+            <span class="stat-card-value" id="stat-iter">–</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card-label">Inertia (WCSS)</span>
+            <span class="stat-card-value" id="stat-inertia">–</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card-label">Silhouette Score</span>
+            <span class="stat-card-value" id="stat-sil">–</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card-label">Punkte / Centroids</span>
+            <span class="stat-card-value" id="stat-pts">–</span>
+          </div>
+        </div>
+
+        <!-- Info-Box -->
+        <div class="info-box">
+          <h4>Wie funktioniert KMeans?</h4>
+          <div class="info-grid">
+            <div class="info-step">
+              <strong>E-Schritt (Expectation / Zuweisung)</strong>
+              <p>Jeden Datenpunkt dem nächstgelegenen Centroid zuweisen. Die Clusterzugehörigkeit wird per euklidischem Abstand bestimmt: <code>asgn(i) = argmin_j ||x_i – μ_j||²</code></p>
+            </div>
+            <div class="info-step">
+              <strong>M-Schritt (Maximization / Update)</strong>
+              <p>Jeden Centroid als Schwerpunkt (Mittelwert) seiner zugewiesenen Punkte neu berechnen: <code>μ_j = (1/|C_j|) Σ x_i</code> für alle i in Cluster j.</p>
+            </div>
+            <div class="info-step">
+              <strong>Inertia (WCSS)</strong>
+              <p>Within-Cluster Sum of Squares: Summe der quadrierten Abstände jedes Punktes zu seinem Centroid. Minimieren ist das Ziel von KMeans.</p>
+            </div>
+            <div class="info-step">
+              <strong>Silhouette Score</strong>
+              <p>Misst Trennungsqualität: <code>s(i) = (b(i)−a(i)) / max(a,b)</code>. Wert zwischen −1 und 1. Nahe 1 = gut getrennte Cluster.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a href="T04-kmeans-sklearn.html" class="back-link">← Zurück zu T04 KMeans sklearn</a>
+
+    </main>
+  </div>
+  <site-footer caption="K4 · Viz · KMeans Schritt-für-Schritt"></site-footer>
+
+  <script>
+  (function() {
+    const COLS = ['#2563eb','#dc2626','#0d9488','#d97706','#7c3aed','#db2777'];
+    const canvas = document.getElementById('kmeans-canvas');
+    const ctx = canvas.getContext('2d');
+
+    let k = 3;
+    let pts = [];
+    let centers = [];
+    let asgn = [];
+    let iter = 0;
+    let phase = 'idle'; // idle | initialized | assigned | moved | converged
+    let autoTimer = null;
+
+    // --- Hilfsfunktionen ---
+    function dist2(a, b) {
+      const dx = a.x - b.x, dy = a.y - b.y;
+      return dx * dx + dy * dy;
+    }
+
+    function gauss(mu, sigma) {
+      const u = 1 - Math.random(), v = Math.random();
+      return mu + sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    // Kanonische Koordinaten: 0..1 Raum, gemappt auf Canvas-Pixel beim Render
+    function genData() {
+      pts = [];
+      asgn = [];
+      centers = [];
+      iter = 0;
+      phase = 'idle';
+
+      const clusterCount = k;
+      const ptsPerCluster = 15;
+      const margin = 0.1;
+
+      for (let c = 0; c < clusterCount; c++) {
+        const cx = margin + Math.random() * (1 - 2 * margin);
+        const cy = margin + Math.random() * (1 - 2 * margin);
+        for (let i = 0; i < ptsPerCluster; i++) {
+          pts.push({
+            x: Math.max(0.02, Math.min(0.98, gauss(cx, 0.07))),
+            y: Math.max(0.02, Math.min(0.98, gauss(cy, 0.07)))
+          });
+        }
+      }
+      asgn = new Array(pts.length).fill(-1);
+    }
+
+    function initCenters() {
+      centers = [];
+      const fi = Math.floor(Math.random() * pts.length);
+      centers.push({ ...pts[fi] });
+      while (centers.length < k) {
+        const ds = pts.map(p => Math.min(...centers.map(c => dist2(p, c))));
+        const s = ds.reduce((a, b) => a + b, 0);
+        let r = Math.random() * s;
+        for (let i = 0; i < pts.length; i++) {
+          r -= ds[i];
+          if (r <= 0) { centers.push({ ...pts[i] }); break; }
+        }
+        // Fallback falls r nie <= 0
+        if (centers.length < k + 1 - 1 && centers.length === centers.length) {
+          centers.push({ ...pts[pts.length - 1] });
+        }
+      }
+      asgn = new Array(pts.length).fill(-1);
+      iter = 0;
+      phase = 'initialized';
+    }
+
+    function assign() {
+      for (let i = 0; i < pts.length; i++) {
+        let md = Infinity, mc = 0;
+        for (let j = 0; j < centers.length; j++) {
+          const d = dist2(pts[i], centers[j]);
+          if (d < md) { md = d; mc = j; }
+        }
+        asgn[i] = mc;
+      }
+    }
+
+    function moveCenters() {
+      let moved = false;
+      for (let j = 0; j < centers.length; j++) {
+        const cluster = pts.filter((_, i) => asgn[i] === j);
+        if (cluster.length === 0) continue;
+        const nx = cluster.reduce((s, p) => s + p.x, 0) / cluster.length;
+        const ny = cluster.reduce((s, p) => s + p.y, 0) / cluster.length;
+        if (Math.abs(nx - centers[j].x) > 1e-6 || Math.abs(ny - centers[j].y) > 1e-6) {
+          moved = true;
+        }
+        centers[j] = { x: nx, y: ny };
+      }
+      return moved;
+    }
+
+    function calcInertia() {
+      if (centers.length === 0 || asgn.every(a => a === -1)) return null;
+      return Math.round(pts.reduce((s, p, i) => {
+        if (asgn[i] < 0 || !centers[asgn[i]]) return s;
+        return s + dist2(p, centers[asgn[i]]);
+      }, 0) * 10000) / 10000;
+    }
+
+    function calcSilhouette() {
+      if (centers.length < 2 || asgn.every(a => a === -1)) return null;
+      const unique = [...new Set(asgn.filter(a => a >= 0))];
+      if (unique.length < 2) return null;
+
+      let total = 0, count = 0;
+      for (let i = 0; i < pts.length; i++) {
+        const ci = asgn[i];
+        if (ci < 0) continue;
+        const same = pts.filter((_, j) => j !== i && asgn[j] === ci);
+        if (same.length === 0) continue;
+        const a = same.reduce((s, p) => s + Math.sqrt(dist2(pts[i], p)), 0) / same.length;
+
+        let b = Infinity;
+        for (const cj of unique) {
+          if (cj === ci) continue;
+          const other = pts.filter((_, j) => asgn[j] === cj);
+          if (other.length === 0) continue;
+          const avg = other.reduce((s, p) => s + Math.sqrt(dist2(pts[i], p)), 0) / other.length;
+          if (avg < b) b = avg;
+        }
+        if (b === Infinity) continue;
+        total += (b - a) / Math.max(a, b);
+        count++;
+      }
+      return count > 0 ? Math.round(total / count * 1000) / 1000 : null;
+    }
+
+    // --- Render ---
+    function toCanvas(v, size) { return v * size; }
+
+    function render() {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      // Hintergrund
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-surface-2').trim() || '#fbfbf9';
+      ctx.fillRect(0, 0, W, H);
+
+      // Datenpunkte
+      for (let i = 0; i < pts.length; i++) {
+        const x = toCanvas(pts[i].x, W);
+        const y = toCanvas(pts[i].y, H);
+        const col = asgn[i] >= 0 ? COLS[asgn[i] % COLS.length] : '#9d9a93';
+
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = col + '33'; // 20% opacity fill
+        ctx.fill();
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Centroids
+      for (let j = 0; j < centers.length; j++) {
+        const x = toCanvas(centers[j].x, W);
+        const y = toCanvas(centers[j].y, H);
+        const col = COLS[j % COLS.length];
+        const r = 12;
+
+        // Hintergrundkreis
+        ctx.beginPath();
+        ctx.arc(x, y, r + 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff88';
+        ctx.fill();
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // X-Symbol
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x - r, y - r);
+        ctx.lineTo(x + r, y + r);
+        ctx.moveTo(x + r, y - r);
+        ctx.lineTo(x - r, y + r);
+        ctx.stroke();
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('stat-iter').textContent = iter > 0 ? iter : '–';
+      const ine = calcInertia();
+      document.getElementById('stat-inertia').textContent = ine !== null ? ine.toFixed(4) : '–';
+      const sil = calcSilhouette();
+      document.getElementById('stat-sil').textContent = sil !== null ? sil.toFixed(3) : '–';
+      document.getElementById('stat-pts').textContent = pts.length + ' / ' + centers.length;
+    }
+
+    function setStatus(msg) {
+      document.getElementById('status-text').textContent = msg;
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      canvas.style.height = '380px';
+    }
+
+    // --- Event-Handler ---
+    document.getElementById('k-slider').addEventListener('input', function() {
+      k = parseInt(this.value);
+      document.getElementById('k-display').textContent = k;
+    });
+
+    document.getElementById('btn-new-data').addEventListener('click', function() {
+      stopAuto();
+      genData();
+      render();
+      updateStats();
+      setStatus('Neue Datenpunkte generiert. Klicke auf "Initialisieren", um k-means++ zu starten.');
+    });
+
+    document.getElementById('btn-init').addEventListener('click', function() {
+      if (pts.length === 0) { setStatus('Zuerst Daten generieren!'); return; }
+      stopAuto();
+      initCenters();
+      render();
+      updateStats();
+      setStatus('Centroids mit k-means++ initialisiert (×-Symbole). Klicke auf "Schritt" für den ersten E-Schritt.');
+    });
+
+    document.getElementById('btn-step').addEventListener('click', function() {
+      doStep();
+    });
+
+    document.getElementById('btn-auto').addEventListener('click', function() {
+      if (autoTimer) {
+        stopAuto();
+      } else {
+        if (pts.length === 0) { setStatus('Zuerst Daten generieren!'); return; }
+        if (centers.length === 0) {
+          initCenters();
+          render();
+        }
+        document.getElementById('btn-auto').textContent = 'Stop';
+        document.getElementById('btn-auto').classList.add('active');
+        autoTimer = setInterval(() => {
+          const done = doStep();
+          if (done) stopAuto();
+        }, 500);
+      }
+    });
+
+    function doStep() {
+      if (pts.length === 0) { setStatus('Zuerst Daten generieren!'); return true; }
+      if (centers.length === 0) {
+        initCenters();
+        render();
+        updateStats();
+        setStatus('Centroids initialisiert. Nächster Schritt: E-Schritt.');
+        return false;
+      }
+
+      if (phase === 'initialized' || phase === 'moved') {
+        // E-Schritt
+        assign();
+        phase = 'assigned';
+        iter++;
+        render();
+        updateStats();
+        setStatus(`Iteration ${iter} – E-Schritt: Jeder Punkt wurde dem nächsten Centroid zugewiesen.`);
+        return false;
+      } else if (phase === 'assigned') {
+        // M-Schritt
+        const moved = moveCenters();
+        if (!moved) {
+          phase = 'converged';
+          render();
+          updateStats();
+          setStatus(`Konvergiert nach ${iter} Iteration(en)! Die Centroids haben sich nicht mehr bewegt.`);
+          return true;
+        }
+        phase = 'moved';
+        render();
+        updateStats();
+        setStatus(`Iteration ${iter} – M-Schritt: Centroids wurden als Schwerpunkt der Cluster neu berechnet.`);
+        return false;
+      } else if (phase === 'converged') {
+        setStatus('Algorithmus ist bereits konvergiert. Klicke "Neue Daten" oder "Initialisieren" für einen neuen Durchlauf.');
+        return true;
+      }
+      return false;
+    }
+
+    function stopAuto() {
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+      document.getElementById('btn-auto').textContent = 'Auto-Run';
+      document.getElementById('btn-auto').classList.remove('active');
+    }
+
+    // Klick auf Canvas → Punkt hinzufügen
+    canvas.addEventListener('click', function(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      pts.push({ x, y });
+      asgn.push(-1);
+      if (centers.length > 0) {
+        assign();
+      }
+      render();
+      updateStats();
+      setStatus(`Punkt hinzugefügt (${pts.length} Punkte gesamt). ${centers.length > 0 ? 'Punkt wurde zugewiesen.' : ''}`);
+    });
+
+    // Init
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      render();
+    });
+
+    resizeCanvas();
+    genData();
+    render();
+    updateStats();
+    setStatus('Klicke auf "Neue Daten" und dann "Initialisieren (k-means++)", um zu starten.');
+  })();
+  </script>
+</body>
+</html>

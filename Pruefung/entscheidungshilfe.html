@@ -7,6 +7,8 @@
   <meta name="description" content="Entscheidungshilfen für die Prüfung: Problem erkennen, richtige Metrik/Methode wählen, konkret umsetzen — für Klassifikation, Modellwahl, Scaling, Encoding und CV-Strategie."/>
   <script type="module" src="../header.js"></script>
   <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
   <style>
     .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-5) var(--space-4) 0;text-align:center}
@@ -25,42 +27,48 @@
       background:var(--color-primary-highlight);color:var(--color-primary);
       font-weight:800;font-size:var(--text-sm);flex-shrink:0;
     }
+    #metrik   {--sec-color:#dc2626}
+    #modell   {--sec-color:#2563eb}
+    #scaling  {--sec-color:#0d9488}
+    #encoding {--sec-color:#7c3aed}
+    #cv       {--sec-color:#d97706}
+    .pruef-section h2{border-bottom-color:color-mix(in oklab,var(--sec-color,var(--color-border)) 50%,var(--color-border));scroll-margin-top:7rem}
+    .pruef-num{background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 15%,var(--color-surface-2))!important;color:var(--sec-color,var(--color-primary))!important}
+    .kapitel-filter-bar button.lernpfad-step{appearance:none;background:none;border:none;cursor:pointer;font-family:inherit}
+    .kapitel-filter-bar button.lernpfad-step.kf-all{--lp-color:var(--color-primary)}
+    .kf-hidden{display:none!important}
+    /* ── Responsive layout override ── */
+    #main-content.content{max-width:none;padding:var(--space-6) var(--space-8)}
+    @media(max-width:900px){#main-content.content{padding:var(--space-4)}}
   </style>
 </head>
 <body>
   <site-header active="pruefung" title="Entscheidungshilfe – PRM V5"></site-header>
 
-  <div class="pruef-layout">
-    <nav class="pruef-side">
-      <div class="pruef-side-group">
-        <div class="pruef-side-label">Während der Prüfung</div>
-        <a href="cheatsheet.html">📋 Cheat-Sheet</a>
-        <a href="entscheidungshilfe.html" class="active">🧭 Entscheidungshilfe</a>
-        <a href="numpy-referenz.html">🔢 NumPy</a>
-        <a href="sklearn-referenz.html">🚀 sklearn</a>
-        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
-        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
-        <a href="code-scratch-referenz.html">🛠️ Von Scratch</a>
-      </div>
-      <div class="pruef-side-group" id="section-nav">
-        <div class="pruef-side-label">Auf dieser Seite</div>
-        <a href="#metrik">1 · Metrik-Wahl</a>
-        <a href="#modell">2 · Modell-Wahl</a>
-        <a href="#scaling">3 · Scaling</a>
-        <a href="#encoding">4 · Encoding</a>
-        <a href="#cv">5 · CV-Strategie</a>
-      </div>
-    </nav>
+  <div class="layout">
+    <site-sidebar active="pruefung/entscheidung"></site-sidebar>
 
+  <main id="main-content" class="content">
     <div class="pruef-hero">
       <h1>🧭 Entscheidungshilfe</h1>
       <p>Jede Karte folgt demselben Schema: <strong>Problem erkennen → woran erkenne ich es? → Lösung → wie setze ich sie um?</strong> So findest du in der Prüfung schnell die richtige Methode UND den Weg dorthin.</p>
     </div>
-
-    <main id="main-content" class="pruef-main">
+    <nav class="lernpfad-bar kapitel-filter-bar" id="topic-filter-bar" aria-label="Nach Thema filtern">
+      <button class="lernpfad-step kf-all active" data-kf="all"><span class="lp-icon">🧭</span><span>Alle</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#dc2626" data-kf="metrik"><span class="lp-icon">📊</span><span>Metrik</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#2563eb" data-kf="modell"><span class="lp-icon">🤖</span><span>Modell</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#0d9488" data-kf="scaling"><span class="lp-icon">⚖️</span><span>Scaling</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#7c3aed" data-kf="encoding"><span class="lp-icon">🔤</span><span>Encoding</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#d97706" data-kf="cv"><span class="lp-icon">✂️</span><span>CV-Strategie</span></button>
+    </nav>
 
       <!-- ═══ 1 · METRIK-WAHL ═══ -->
-      <section class="pruef-section" id="metrik">
+      <section class="pruef-section" id="metrik" data-topic="metrik">
         <h2><span class="pruef-num">1</span> Welche Metrik bei Klassifikation?</h2>
 
         <div class="diag-card warn">
@@ -175,7 +183,7 @@
       </section>
 
       <!-- ═══ 2 · MODELL-WAHL ═══ -->
-      <section class="pruef-section" id="modell">
+      <section class="pruef-section" id="modell" data-topic="modell">
         <h2><span class="pruef-num">2</span> Welches Modell für welches Problem?</h2>
 
         <div class="diag-card">
@@ -309,10 +317,92 @@
             </div>
           </div>
         </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🌫️ Problem: KMeans oder GMM?</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Clustering-Aufgabe ohne klare Vorgabe des Algorithmus.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">
+                <strong>KMeans:</strong> sphärische, ähnlich große Cluster, harte Zuweisung, Elbow+Silhouette zur k-Wahl.<br>
+                <strong>GMM:</strong> überlappende/elliptische Cluster, weiche Zuweisung (Wahrscheinlichkeiten), BIC/AIC zur k-Wahl.
+              </div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body">
+                KMeans: <code>KMeans(n_clusters=k).fit_predict(X_s)</code> + <code>silhouette_score</code><br>
+                GMM: <code>GaussianMixture(n_components=k).fit(X_s)</code> → <code>bic(X_s)</code> für Modellvergleich
+              </div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">GMM ist probabilistisch → kennt Unsicherheit (weiche Zuordnung), kann auch zur Dichteschätzung genutzt werden. KMeans ist schneller, aber starr (harte Grenzen, sphärische Annahme).</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">🌳 Problem: Random Forest oder Gradient Boosting?</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Ensemble-Modell gesucht; Aufgabenstellung lässt die Wahl offen.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">
+                <strong>Random Forest:</strong> parallel, robust, wenig Tuning nötig — guter Startpunkt.<br>
+                <strong>GradientBoosting:</strong> sequentiell, oft besser mit Tuning, empfindlicher ggü. Ausreißern und Overfitting.
+              </div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body">
+                <code>RandomForestClassifier(n_estimators=100, random_state=42)</code><br>
+                <code>GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3)</code>
+              </div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">RF: Bagging → Variance reduzieren, Bäume sind unabhängig. GBC: Boosting → Bias reduzieren, Bäume bauen aufeinander auf. RF ist robuster gegen Overfitting; GBC erreicht mit richtigen Hyperparametern oft höhere Genauigkeit.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card">
+          <div class="diag-head">📐 Problem: Wann PCA verwenden?</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Aufgabe erwähnt "Dimensionsreduktion", "Visualisierung", "hohe Dimensionalität" oder "erklärte Varianz".</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">
+                <code>n_components=2</code> → Visualisierung (2D-Scatter).<br>
+                <code>n_components=0.95</code> → 95% Varianz erhalten, Rest weglassen.<br>
+                <code>explained_variance_ratio_.cumsum()</code> → optimales k ablesen.
+              </div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body"><code>StandardScaler()</code> zuerst → <code>PCA(n_components=k).fit_transform(X_s)</code>. <strong>Immer skalieren!</strong> PCA ist varianzbasiert.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">Ohne Scaling dominieren Features mit großer Skala die Hauptkomponenten — die Richtungen der größten Varianz wären verzerrt.</div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ═══ 3 · SCALING ═══ -->
-      <section class="pruef-section" id="scaling">
+      <section class="pruef-section" id="scaling" data-topic="scaling">
         <h2><span class="pruef-num">3</span> Ist Feature Scaling nötig?</h2>
 
         <div class="diag-card warn">
@@ -383,7 +473,7 @@
       </section>
 
       <!-- ═══ 4 · ENCODING ═══ -->
-      <section class="pruef-section" id="encoding">
+      <section class="pruef-section" id="encoding" data-topic="encoding">
         <h2><span class="pruef-num">4</span> Welches Encoding für kategoriale Features?</h2>
 
         <div class="diag-card">
@@ -431,6 +521,34 @@
         </div>
 
         <div class="diag-card warn">
+          <div class="diag-head">⚠️ Problem: OHE oder LabelEncoder für Features X?</div>
+          <div class="diag-grid">
+            <div class="diag-cell">
+              <div class="diag-label">🔍 Woran erkennst du es?</div>
+              <div class="diag-body">Kategoriales Feature X ohne natürliche Reihenfolge — unklar, welcher Encoder genutzt werden soll.</div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">✅ Lösung</div>
+              <div class="diag-body">
+                <strong>OneHotEncoder</strong> für alle Features X → jede Kategorie eigene Spalte, keine falsche Reihenfolge.<br>
+                <strong>LabelEncoder</strong> ausschließlich für Ziel y — niemals für Feature-Spalten in X verwenden!
+              </div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">🛠️ Umsetzung</div>
+              <div class="diag-body">
+                <code>ohe = OneHotEncoder(sparse_output=False); X_enc = ohe.fit_transform(X[['col']])</code><br>
+                <code>le = LabelEncoder(); y_enc = le.fit_transform(y)</code>
+              </div>
+            </div>
+            <div class="diag-cell">
+              <div class="diag-label">💡 Warum</div>
+              <div class="diag-body">LabelEncoder auf X kodiert z.B. "rot"→0, "blau"→1, "grün"→2 — das Modell interpretiert das als Rangfolge (0&lt;1&lt;2), die es nicht gibt, und lernt falsche Muster.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="diag-card warn">
           <div class="diag-head">🌐 Problem: Kategorie mit sehr vielen Werten</div>
           <div class="diag-grid">
             <div class="diag-cell">
@@ -454,7 +572,7 @@
       </section>
 
       <!-- ═══ 5 · CV-STRATEGIE ═══ -->
-      <section class="pruef-section" id="cv">
+      <section class="pruef-section" id="cv" data-topic="cv">
         <h2><span class="pruef-num">5</span> Welche CV-Strategie?</h2>
 
         <div class="diag-card">
@@ -550,20 +668,26 @@
   </div>
 
   <site-footer caption="PRM · Während der Prüfung · Entscheidungshilfe"></site-footer>
-
   <script>
-    const sideLinks = document.querySelectorAll('#section-nav a');
-    const sections = document.querySelectorAll('.pruef-section');
-    const setActive = () => {
-      let current = sections[0]?.id;
-      const probe = window.scrollY + 140;
+  (function(){
+    const bar      = document.getElementById('topic-filter-bar');
+    const sections = document.querySelectorAll('.pruef-section[data-topic]');
+    if (!bar) return;
+    bar.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-kf]');
+      if (!btn) return;
+      const kf = btn.dataset.kf;
+      bar.querySelectorAll('[data-kf]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       sections.forEach(sec => {
-        if (sec.offsetTop <= probe) current = sec.id;
+        sec.classList.toggle('kf-hidden', kf !== 'all' && sec.dataset.topic !== kf);
       });
-      sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
-    };
-    document.addEventListener('scroll', setActive, { passive: true });
-    setActive();
+      if (kf !== 'all'){
+        const first = [...sections].find(s => !s.classList.contains('kf-hidden'));
+        if (first) setTimeout(() => first.scrollIntoView({behavior:'smooth',block:'start'}), 40);
+      }
+    });
+  })();
   </script>
 </body>
 </html>

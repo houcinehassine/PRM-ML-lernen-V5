@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ROC-Kurve & AUC Visualisierer – K7 · PRM V5</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .viz-wrap {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .viz-two-col {
+      display: grid;
+      grid-template-columns: 370px 1fr;
+      gap: var(--space-5);
+      align-items: start;
+    }
+    @media (max-width: 760px) {
+      .viz-two-col { grid-template-columns: 1fr; }
+    }
+
+    .canvas-col {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    #roc-canvas {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      max-width: 360px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      display: block;
+      background: var(--color-surface-2);
+    }
+
+    #hist-canvas {
+      width: 100%;
+      max-width: 360px;
+      height: 100px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      display: block;
+      background: var(--color-surface-2);
+    }
+
+    .control-col {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .slider-group label {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .slider-group input[type="range"] {
+      width: 100%;
+      accent-color: #dc2626;
+    }
+    .slider-value {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    .toggle-row {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+    .toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.9rem;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--color-text);
+      transition: all 0.15s;
+    }
+    .toggle-btn.active {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+    .toggle-btn:hover:not(.active) {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    /* Confusion Matrix */
+    .conf-matrix {
+      display: grid;
+      grid-template-columns: auto 1fr 1fr;
+      grid-template-rows: auto 1fr 1fr;
+      gap: 3px;
+      max-width: 280px;
+    }
+    .cm-header {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-text-faint);
+      text-align: center;
+      padding: 0.3rem;
+    }
+    .cm-axis {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-text-faint);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      writing-mode: initial;
+      padding: 0 0.3rem;
+    }
+    .cm-cell {
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.4rem;
+      text-align: center;
+      font-size: var(--text-xs);
+      font-weight: 700;
+    }
+    .cm-cell .cm-label { font-size: 0.65rem; display: block; color: #fff; opacity: 0.85; margin-bottom: 2px; }
+    .cm-cell .cm-val { font-size: var(--text-base); color: #fff; font-family: var(--font-mono); }
+    .cm-tp { background: #437a22; }
+    .cm-fp { background: #d97706; }
+    .cm-fn { background: #d97706; }
+    .cm-tn { background: #437a22; }
+
+    /* Metriken */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2);
+    }
+    .metric-card {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0.4rem 0.7rem;
+    }
+    .metric-card-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--color-text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .metric-card-value {
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--color-text);
+      font-family: var(--font-mono);
+    }
+    .metric-card.highlight .metric-card-value {
+      color: var(--color-primary);
+    }
+    .metric-card.highlight {
+      border-color: var(--color-primary-highlight);
+      background: var(--color-primary-highlight);
+    }
+
+    /* Labels */
+    .section-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-faint);
+      margin-bottom: var(--space-2);
+    }
+
+    .info-box {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4) var(--space-5);
+      margin-top: var(--space-5);
+    }
+    .info-box h4 { margin: 0 0 var(--space-3); font-size: var(--text-base); font-weight: 700; }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+    @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+    .info-step {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+    }
+    .info-step strong { display: block; color: var(--color-primary); margin-bottom: 0.3rem; }
+    .info-step p { font-size: var(--text-sm); color: var(--color-text-muted); margin: 0; }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: var(--text-sm);
+      color: var(--color-primary);
+      margin-top: var(--space-6);
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--color-primary-highlight);
+      border-radius: var(--radius-full);
+      background: var(--color-primary-highlight);
+      transition: all 0.15s;
+    }
+    .back-link:hover {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+    }
+
+    .canvas-label {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-text-faint);
+      margin-bottom: 0.2rem;
+    }
+  </style>
+</head>
+<body>
+  <site-header active="k7" title="ROC & AUC Visualisierer – K7 · PRM V5"></site-header>
+  <div class="layout">
+    <site-sidebar active="k7/t02"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section style="background:none;border:none;box-shadow:none;padding-top:var(--space-6)">
+        <span class="eyebrow">K7 · Interaktive Visualisierung</span>
+        <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">ROC-Kurve &amp; AUC Visualisierer</h1>
+        <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Bewege den Schwellenwert-Slider und beobachte, wie sich Confusion Matrix, TPR, FPR und alle Metriken in Echtzeit ändern.</p>
+      </section>
+
+      <div class="viz-wrap">
+        <!-- Toggle Klassen -->
+        <div style="margin-bottom:var(--space-4)">
+          <p class="section-label" style="margin-bottom:var(--space-2)">Klassen-Verteilung</p>
+          <div class="toggle-row">
+            <button class="toggle-btn active" id="btn-balanced">Ausgewogene Klassen (50:50)</button>
+            <button class="toggle-btn" id="btn-imbalanced">Unbalancierte Klassen (80:20)</button>
+          </div>
+        </div>
+
+        <div class="viz-two-col">
+          <!-- Linke Spalte: Canvas -->
+          <div class="canvas-col">
+            <p class="canvas-label">ROC-Kurve</p>
+            <canvas id="roc-canvas"></canvas>
+            <p class="canvas-label">Score-Verteilung (Blau = Positiv, Rot = Negativ)</p>
+            <canvas id="hist-canvas"></canvas>
+          </div>
+
+          <!-- Rechte Spalte: Steuerung & Metriken -->
+          <div class="control-col">
+
+            <!-- Schwellenwert -->
+            <div class="slider-group">
+              <label>Schwellenwert: <span class="slider-value" id="thresh-display">0.50</span></label>
+              <input type="range" id="thresh-slider" min="0" max="1" step="0.01" value="0.5">
+            </div>
+
+            <!-- Confusion Matrix -->
+            <div>
+              <p class="section-label">Konfusionsmatrix</p>
+              <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
+                <div>
+                  <p style="font-size:0.65rem;color:var(--color-text-faint);margin:0 0 4px;text-align:center">Vorhergesagt →</p>
+                  <div class="conf-matrix">
+                    <div></div>
+                    <div class="cm-header">Positiv</div>
+                    <div class="cm-header">Negativ</div>
+
+                    <div class="cm-axis" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.6rem">
+                      Tats. Pos.
+                    </div>
+                    <div class="cm-cell cm-tp">
+                      <span class="cm-label">TP</span>
+                      <span class="cm-val" id="cm-tp">–</span>
+                    </div>
+                    <div class="cm-cell cm-fn">
+                      <span class="cm-label">FN</span>
+                      <span class="cm-val" id="cm-fn">–</span>
+                    </div>
+
+                    <div class="cm-axis" style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:0.6rem">
+                      Tats. Neg.
+                    </div>
+                    <div class="cm-cell cm-fp">
+                      <span class="cm-label">FP</span>
+                      <span class="cm-val" id="cm-fp">–</span>
+                    </div>
+                    <div class="cm-cell cm-tn">
+                      <span class="cm-label">TN</span>
+                      <span class="cm-val" id="cm-tn">–</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metriken -->
+            <div>
+              <p class="section-label">Metriken</p>
+              <div class="metrics-grid">
+                <div class="metric-card">
+                  <div class="metric-card-label">Accuracy</div>
+                  <div class="metric-card-value" id="met-acc">–</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-card-label">Precision</div>
+                  <div class="metric-card-value" id="met-prec">–</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-card-label">Recall (TPR)</div>
+                  <div class="metric-card-value" id="met-rec">–</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-card-label">F1-Score</div>
+                  <div class="metric-card-value" id="met-f1">–</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-card-label">FPR</div>
+                  <div class="metric-card-value" id="met-fpr">–</div>
+                </div>
+                <div class="metric-card highlight">
+                  <div class="metric-card-label">AUC</div>
+                  <div class="metric-card-value" id="met-auc">–</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Info-Box -->
+        <div class="info-box">
+          <h4>ROC-Kurve &amp; AUC erklärt</h4>
+          <div class="info-grid">
+            <div class="info-step">
+              <strong>ROC-Kurve (Receiver Operating Characteristic)</strong>
+              <p>Zeigt den Trade-off zwischen True Positive Rate (Recall) und False Positive Rate für alle möglichen Schwellenwerte. Ein idealer Klassifikator hat Punkt (0,1) – 100% TPR bei 0% FPR.</p>
+            </div>
+            <div class="info-step">
+              <strong>AUC (Area Under the Curve)</strong>
+              <p>Die Fläche unter der ROC-Kurve. AUC=1.0 = perfekter Klassifikator, AUC=0.5 = zufällige Vorhersage (gestrichelte Diagonale), AUC&lt;0.5 = schlechter als Zufall.</p>
+            </div>
+            <div class="info-step">
+              <strong>Schwellenwert-Effekt</strong>
+              <p>Niedriger Schwellenwert → mehr Positive vorhergesagt → hoher Recall, hoher FPR. Hoher Schwellenwert → weniger Positive → niedrige FPR, niedrige Recall. Kein Schwellenwert ist für alle Szenarien optimal.</p>
+            </div>
+            <div class="info-step">
+              <strong>Unbalancierte Klassen</strong>
+              <p>Bei unbalancierten Daten (z.B. 80% Negativ) kann Accuracy täuschen. ROC-AUC ist stabiler, weil es TPR und FPR separat betrachtet. Precision-Recall-Kurve ist oft noch aussagekräftiger.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a href="T02-roc-auc.html" class="back-link">← Zurück zu T02 ROC &amp; AUC</a>
+
+    </main>
+  </div>
+  <site-footer caption="K7 · Viz · ROC-Kurve &amp; AUC"></site-footer>
+
+  <script>
+  (function() {
+    const rocCanvas = document.getElementById('roc-canvas');
+    const histCanvas = document.getElementById('hist-canvas');
+    const rocCtx = rocCanvas.getContext('2d');
+    const histCtx = histCanvas.getContext('2d');
+
+    let scores = { pos: [], neg: [] };
+    let rocPoints = [];
+    let auc = 0;
+    let threshold = 0.5;
+    let balanced = true;
+
+    // Box-Muller Normalverteilung
+    function gauss(mu, sigma) {
+      const u = 1 - Math.random(), v = Math.random();
+      return Math.max(0, Math.min(1, mu + sigma * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v)));
+    }
+
+    function genScores(nPos, nNeg) {
+      const pos = Array.from({ length: nPos }, () => gauss(0.65, 0.18));
+      const neg = Array.from({ length: nNeg }, () => gauss(0.35, 0.18));
+      return { pos, neg };
+    }
+
+    function computeROC(pos, neg) {
+      const all = [...pos, ...neg, 0, 1];
+      const thresholds = [...new Set(all)].sort((a, b) => b - a);
+      return thresholds.map(t => ({
+        t,
+        tpr: pos.filter(s => s >= t).length / pos.length,
+        fpr: neg.filter(s => s >= t).length / neg.length
+      }));
+    }
+
+    function computeAUC(roc) {
+      let area = 0;
+      for (let i = 1; i < roc.length; i++) {
+        const dFPR = roc[i].fpr - roc[i - 1].fpr;
+        const avgTPR = (roc[i].tpr + roc[i - 1].tpr) / 2;
+        area += dFPR * avgTPR;
+      }
+      return Math.abs(area);
+    }
+
+    function getMetrics(t) {
+      const { pos, neg } = scores;
+      const TP = pos.filter(s => s >= t).length;
+      const FN = pos.filter(s => s < t).length;
+      const FP = neg.filter(s => s >= t).length;
+      const TN = neg.filter(s => s < t).length;
+      const total = TP + FN + FP + TN;
+      const acc = total > 0 ? (TP + TN) / total : 0;
+      const prec = (TP + FP) > 0 ? TP / (TP + FP) : 0;
+      const rec = (TP + FN) > 0 ? TP / (TP + FN) : 0;
+      const f1 = (prec + rec) > 0 ? 2 * prec * rec / (prec + rec) : 0;
+      const fpr = (FP + TN) > 0 ? FP / (FP + TN) : 0;
+      const tpr = rec;
+      return { TP, FN, FP, TN, acc, prec, rec, f1, fpr, tpr };
+    }
+
+    function fmt3(v) { return isNaN(v) ? '–' : v.toFixed(3); }
+
+    function updateMetrics() {
+      const m = getMetrics(threshold);
+      document.getElementById('cm-tp').textContent = m.TP;
+      document.getElementById('cm-fn').textContent = m.FN;
+      document.getElementById('cm-fp').textContent = m.FP;
+      document.getElementById('cm-tn').textContent = m.TN;
+      document.getElementById('met-acc').textContent = fmt3(m.acc);
+      document.getElementById('met-prec').textContent = fmt3(m.prec);
+      document.getElementById('met-rec').textContent = fmt3(m.rec);
+      document.getElementById('met-f1').textContent = fmt3(m.f1);
+      document.getElementById('met-fpr').textContent = fmt3(m.fpr);
+      document.getElementById('met-auc').textContent = fmt3(auc);
+    }
+
+    // --- ROC Canvas ---
+    function renderROC() {
+      const W = rocCanvas.width / window.devicePixelRatio;
+      const H = rocCanvas.height / window.devicePixelRatio;
+      const pad = { top: 28, right: 20, bottom: 40, left: 44 };
+      const cW = W - pad.left - pad.right;
+      const cH = H - pad.top - pad.bottom;
+
+      rocCtx.clearRect(0, 0, rocCanvas.width, rocCanvas.height);
+
+      // Achsen-Hintergrund
+      rocCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-surface-2').trim() || '#fbfbf9';
+      rocCtx.fillRect(0, 0, W, H);
+
+      function toX(fpr) { return pad.left + fpr * cW; }
+      function toY(tpr) { return pad.top + (1 - tpr) * cH; }
+
+      // Gitterlinien
+      rocCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim() || '#d4d1ca';
+      rocCtx.lineWidth = 1;
+      [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+        rocCtx.beginPath();
+        rocCtx.moveTo(toX(v), pad.top);
+        rocCtx.lineTo(toX(v), pad.top + cH);
+        rocCtx.stroke();
+        rocCtx.beginPath();
+        rocCtx.moveTo(pad.left, toY(v));
+        rocCtx.lineTo(pad.left + cW, toY(v));
+        rocCtx.stroke();
+      });
+
+      // Achsen-Beschriftung
+      rocCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-text-faint').trim() || '#9d9a93';
+      rocCtx.font = '10px monospace';
+      rocCtx.textAlign = 'center';
+      [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+        rocCtx.fillText(v.toFixed(2), toX(v), pad.top + cH + 14);
+      });
+      rocCtx.textAlign = 'right';
+      [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+        rocCtx.fillText(v.toFixed(2), pad.left - 6, toY(v) + 4);
+      });
+
+      // Achsen-Labels
+      rocCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted').trim() || '#686761';
+      rocCtx.font = 'bold 10px sans-serif';
+      rocCtx.textAlign = 'center';
+      rocCtx.fillText('FPR (False Positive Rate)', pad.left + cW / 2, H - 4);
+
+      rocCtx.save();
+      rocCtx.translate(10, pad.top + cH / 2);
+      rocCtx.rotate(-Math.PI / 2);
+      rocCtx.fillText('TPR (Recall)', 0, 0);
+      rocCtx.restore();
+
+      // AUC-Fläche
+      if (rocPoints.length > 1) {
+        rocCtx.beginPath();
+        rocCtx.moveTo(toX(rocPoints[0].fpr), toY(rocPoints[0].tpr));
+        for (let i = 1; i < rocPoints.length; i++) {
+          rocCtx.lineTo(toX(rocPoints[i].fpr), toY(rocPoints[i].tpr));
+        }
+        rocCtx.lineTo(toX(1), toY(0));
+        rocCtx.lineTo(toX(0), toY(0));
+        rocCtx.closePath();
+        rocCtx.fillStyle = '#2563eb22';
+        rocCtx.fill();
+      }
+
+      // Zufalls-Diagonale (gestrichelt)
+      rocCtx.beginPath();
+      rocCtx.setLineDash([5, 5]);
+      rocCtx.strokeStyle = '#9d9a93';
+      rocCtx.lineWidth = 1.5;
+      rocCtx.moveTo(toX(0), toY(0));
+      rocCtx.lineTo(toX(1), toY(1));
+      rocCtx.stroke();
+      rocCtx.setLineDash([]);
+
+      // ROC-Kurve
+      if (rocPoints.length > 1) {
+        rocCtx.beginPath();
+        rocCtx.moveTo(toX(rocPoints[0].fpr), toY(rocPoints[0].tpr));
+        for (let i = 1; i < rocPoints.length; i++) {
+          rocCtx.lineTo(toX(rocPoints[i].fpr), toY(rocPoints[i].tpr));
+        }
+        rocCtx.strokeStyle = '#2563eb';
+        rocCtx.lineWidth = 2.5;
+        rocCtx.lineJoin = 'round';
+        rocCtx.stroke();
+      }
+
+      // Aktueller Punkt
+      const m = getMetrics(threshold);
+      const cx = toX(m.fpr);
+      const cy = toY(m.tpr);
+
+      // Gestrichelte Linien zu den Achsen
+      rocCtx.beginPath();
+      rocCtx.setLineDash([4, 4]);
+      rocCtx.strokeStyle = '#dc2626';
+      rocCtx.lineWidth = 1;
+      rocCtx.moveTo(cx, cy);
+      rocCtx.lineTo(cx, toY(0));
+      rocCtx.moveTo(cx, cy);
+      rocCtx.lineTo(toX(0), cy);
+      rocCtx.stroke();
+      rocCtx.setLineDash([]);
+
+      // Roter Punkt
+      rocCtx.beginPath();
+      rocCtx.arc(cx, cy, 8, 0, Math.PI * 2);
+      rocCtx.fillStyle = '#dc2626';
+      rocCtx.fill();
+      rocCtx.strokeStyle = '#fff';
+      rocCtx.lineWidth = 2;
+      rocCtx.stroke();
+
+      // AUC-Label
+      rocCtx.fillStyle = '#2563eb';
+      rocCtx.font = 'bold 11px sans-serif';
+      rocCtx.textAlign = 'left';
+      rocCtx.fillText('AUC = ' + fmt3(auc), pad.left + 6, pad.top + 16);
+    }
+
+    // --- Histogramm Canvas ---
+    function renderHist() {
+      const W = histCanvas.width / window.devicePixelRatio;
+      const H = histCanvas.height / window.devicePixelRatio;
+      const pad = { top: 10, right: 10, bottom: 20, left: 10 };
+      const cW = W - pad.left - pad.right;
+      const cH = H - pad.top - pad.bottom;
+      const bins = 20;
+      const binW = cW / bins;
+
+      histCtx.clearRect(0, 0, histCanvas.width, histCanvas.height);
+      histCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-surface-2').trim() || '#fbfbf9';
+      histCtx.fillRect(0, 0, W, H);
+
+      const posCount = new Array(bins).fill(0);
+      const negCount = new Array(bins).fill(0);
+
+      scores.pos.forEach(s => {
+        const b = Math.min(bins - 1, Math.floor(s * bins));
+        posCount[b]++;
+      });
+      scores.neg.forEach(s => {
+        const b = Math.min(bins - 1, Math.floor(s * bins));
+        negCount[b]++;
+      });
+
+      const maxCount = Math.max(...posCount, ...negCount, 1);
+
+      for (let i = 0; i < bins; i++) {
+        const x = pad.left + i * binW;
+
+        // Negativ (rot, unten)
+        const negH = (negCount[i] / maxCount) * cH * 0.45;
+        histCtx.fillStyle = '#dc262688';
+        histCtx.fillRect(x + 1, pad.top + cH / 2, binW - 2, negH);
+
+        // Positiv (blau, oben gespiegelt)
+        const posH = (posCount[i] / maxCount) * cH * 0.45;
+        histCtx.fillStyle = '#2563eb88';
+        histCtx.fillRect(x + 1, pad.top + cH / 2 - posH, binW - 2, posH);
+      }
+
+      // Mittellinie
+      histCtx.beginPath();
+      histCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-border').trim() || '#d4d1ca';
+      histCtx.lineWidth = 1;
+      histCtx.moveTo(pad.left, pad.top + cH / 2);
+      histCtx.lineTo(pad.left + cW, pad.top + cH / 2);
+      histCtx.stroke();
+
+      // Schwellenwert-Linie
+      const threshX = pad.left + threshold * cW;
+      histCtx.beginPath();
+      histCtx.strokeStyle = '#dc2626';
+      histCtx.lineWidth = 2;
+      histCtx.moveTo(threshX, pad.top);
+      histCtx.lineTo(threshX, pad.top + cH);
+      histCtx.stroke();
+
+      // Beschriftung
+      histCtx.fillStyle = '#dc2626';
+      histCtx.font = 'bold 10px sans-serif';
+      histCtx.textAlign = threshX > cW * 0.8 ? 'right' : 'left';
+      histCtx.fillText('t=' + threshold.toFixed(2), threshX + (threshX > cW * 0.8 ? -4 : 4), pad.top + 12);
+
+      // Achsen-Labels
+      histCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--color-text-faint').trim() || '#9d9a93';
+      histCtx.font = '9px sans-serif';
+      histCtx.textAlign = 'left';
+      histCtx.fillText('0.0', pad.left, H - 4);
+      histCtx.textAlign = 'right';
+      histCtx.fillText('1.0', pad.left + cW, H - 4);
+      histCtx.textAlign = 'center';
+      histCtx.fillText('Score', pad.left + cW / 2, H - 4);
+    }
+
+    function resizeCanvases() {
+      const dpr = window.devicePixelRatio || 1;
+
+      const rocRect = rocCanvas.getBoundingClientRect();
+      rocCanvas.width = rocRect.width * dpr;
+      rocCanvas.height = rocRect.height * dpr;
+      rocCtx.scale(dpr, dpr);
+
+      const histRect = histCanvas.getBoundingClientRect();
+      histCanvas.width = histRect.width * dpr;
+      histCanvas.height = histRect.height * dpr;
+      histCtx.scale(dpr, dpr);
+    }
+
+    function rebuild() {
+      const nPos = balanced ? 50 : 20;
+      const nNeg = balanced ? 50 : 80;
+      scores = genScores(nPos, nNeg);
+      rocPoints = computeROC(scores.pos, scores.neg);
+      auc = computeAUC(rocPoints);
+      renderROC();
+      renderHist();
+      updateMetrics();
+    }
+
+    function renderAll() {
+      renderROC();
+      renderHist();
+      updateMetrics();
+    }
+
+    // --- Events ---
+    document.getElementById('thresh-slider').addEventListener('input', function() {
+      threshold = parseFloat(this.value);
+      document.getElementById('thresh-display').textContent = threshold.toFixed(2);
+      renderAll();
+    });
+
+    document.getElementById('btn-balanced').addEventListener('click', function() {
+      balanced = true;
+      this.classList.add('active');
+      document.getElementById('btn-imbalanced').classList.remove('active');
+      rebuild();
+    });
+
+    document.getElementById('btn-imbalanced').addEventListener('click', function() {
+      balanced = false;
+      this.classList.add('active');
+      document.getElementById('btn-balanced').classList.remove('active');
+      rebuild();
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvases();
+      renderAll();
+    });
+
+    // Init
+    resizeCanvases();
+    rebuild();
+  })();
+  </script>
+</body>
+</html>

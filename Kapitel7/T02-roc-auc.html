@@ -27,6 +27,7 @@
         <span class="eyebrow">K7 · Thema 2 von 4</span>
         <h1 style="text-align:left;text-transform:none;font-size:var(--text-xl);margin-top:var(--space-4)">📈 ROC &amp; AUC</h1>
         <p style="color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch">Die Receiver Operating Characteristic kurve und Area Under the Curve — threshold-unabhängige Modellbewertung.</p>
+        <a href="viz-roc.html" style="display:inline-flex;align-items:center;gap:.5rem;margin-top:var(--space-3);padding:.45rem 1rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary);font-size:var(--text-sm);font-weight:700;text-decoration:none;border:1px solid color-mix(in oklab,var(--color-primary) 30%,transparent)">▶ Interaktiver ROC-Visualisierer</a>
       </section>
 
       <div class="stufe stufe-ziel" id="stufe-ziel">
@@ -205,6 +206,23 @@ AUC (sklearn): 0.9953</pre>
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: ROC-Kurve mit AUC</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (fpr_s, tpr_s, auc_s)
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(5.5, 5))
+plt.plot(fpr_s, tpr_s, label=f"ROC (AUC = {auc_s:.3f})")
+plt.plot([0, 1], [0, 1], linestyle='--', color='gray', label='Zufalls-Baseline')
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC-Kurve mit AUC")
+plt.legend()
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
           <div class="vis-box">
             <div class="vis-box-label">📊 Visualisierung — ROC-Kurve mit AUC</div>
             <p>
@@ -214,7 +232,6 @@ AUC (sklearn): 0.9953</pre>
               (hier AUC ≈ 0.995). Die gestrichelte Diagonale ist die Baseline eines
               zufälligen Klassifikators (AUC = 0.5).
             </p>
-            <img src="../assets/img/inhalt/k7-t02-roc-curve.png" alt="ROC-Kurve eines Random Forest mit AUC=0.995, deutlich über der Diagonalen-Baseline">
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
@@ -349,6 +366,35 @@ Pro Klasse (OvR): [1.     0.9811 0.9856]</pre>
               </div>
             </div>
           </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Youden-Threshold &amp; Multi-Class AUC</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (fpr, tpr, thresholds, j_scores, best_threshold, auc_per_class)
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+
+best_idx = np.argmax(j_scores)
+axes[0].plot(fpr, tpr, label="ROC")
+axes[0].plot([0, 1], [0, 1], linestyle='--', color='gray')
+axes[0].scatter(fpr[best_idx], tpr[best_idx], color='red', zorder=5,
+                 label=f"Youden-Optimum (t={best_threshold:.2f})")
+axes[0].set_xlabel("False Positive Rate")
+axes[0].set_ylabel("True Positive Rate")
+axes[0].set_title("Optimaler Threshold (Youden-Index)")
+axes[0].legend()
+
+axes[1].bar(['Setosa', 'Versicolor', 'Virginica'], auc_per_class, color='steelblue')
+axes[1].set_ylim(0.9, 1.01)
+axes[1].set_ylabel("AUC (OvR)")
+axes[1].set_title("Pro-Klasse AUC (Iris)")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
           <div class="info-box warning">
             <strong>Prüfungsfalle:</strong> <code>roc_auc_score</code> braucht bei <code>multi_class='ovr'/'ovo'</code> die <em>vollständige</em> <code>predict_proba()</code>-Matrix (eine Spalte pro Klasse), nicht <code>predict()</code>-Labels und nicht nur eine Spalte wie bei binärer Klassifikation.
           </div>

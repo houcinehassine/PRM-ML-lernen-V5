@@ -197,10 +197,26 @@ Gelernte Mittelwerte: [[0.12650212 0.15786879]
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: EM-Konvergenz der Log-Likelihood</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (gmm.log_likelihoods_)
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(6, 4))
+plt.plot(gmm.log_likelihoods_, marker='o', markersize=3)
+plt.xlabel("Iteration")
+plt.ylabel("Log-Likelihood")
+plt.title("EM-Konvergenz der Log-Likelihood")
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
           <div class="vis-box">
             <div class="vis-box-label">📊 Visualisierung — EM-Konvergenz der Log-Likelihood</div>
             <p>
-              Trägt man <code>gmm.log_likelihoods_</code> über die Iterationen auf, zeigt sich eine
+              Die Kurve von <code>gmm.log_likelihoods_</code> über die Iterationen zeigt eine
               <strong>monoton steigende Kurve</strong>, die sich nach wenigen Iterationen abflacht —
               das ist die EM-Konvergenzgarantie in Aktion: jede Iteration verbessert (oder hält) die
               Log-Likelihood, bis die Änderung unter <code>tol</code> fällt und der Algorithmus stoppt.
@@ -264,6 +280,26 @@ print(f"Generierte Punkte: {X_new.shape}")</code></pre>
 Generierte Punkte: (50, 2)</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Cluster &amp; gesampelte Punkte</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, probs, X_new, labels_new, gmm)
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 4))
+
+axes[0].scatter(X[:, 0], X[:, 1], c=probs[:, 0], cmap='coolwarm', s=20, edgecolors='k', linewidths=0.3)
+axes[0].scatter(gmm.means_[:, 0], gmm.means_[:, 1], c='black', marker='X', s=120, label='Zentren')
+axes[0].set_title("Weiche Zuweisung (Responsibilities)")
+axes[0].legend()
+
+axes[1].scatter(X_new[:, 0], X_new[:, 1], c=labels_new, cmap='coolwarm', s=20, edgecolors='k', linewidths=0.3)
+axes[1].set_title("Neu gesampelte Punkte")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="sklearn">✓ sklearn beherrscht</button></div>

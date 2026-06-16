@@ -152,16 +152,33 @@ MSE: 0.01591</pre>
             Vergleich mit <code>sklearn.ensemble.GradientBoostingRegressor(n_estimators=20, learning_rate=0.5, max_depth=1, random_state=42)</code> liefert exakt die gleichen Vorhersagen und MSE=0.01591 — die Scratch-Implementierung entspricht dem sklearn-Algorithmus für <code>loss='squared_error'</code>.
           </div>
 
-          <div class="vis-box">
-            <div class="vis-box-label">📊 Visualisierung — Boosting-Lernkurve</div>
-            <p>
-              Trägt man das Test-MSE über die Anzahl der Boosting-Runden (n_estimators) auf,
-              fällt die Kurve zunächst steil ab — jeder neue flache Baum korrigiert die
-              Residuen des bisherigen Modells. Nach einer optimalen Anzahl Runden flacht
-              die Kurve ab und kann sogar wieder leicht ansteigen: ein Zeichen für
-              Overfitting durch zu viele sequentielle Korrekturen.
-            </p>
-            <img src="../assets/img/uebung/k5-ex5-boosting-curve.png" alt="Lernkurve: Test-MSE über die Anzahl der Boosting-Runden, mit Minimum und anschließendem leichten Anstieg">
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: GB-Fit &amp; Lernkurve über Boosting-Runden</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, y, F0, models, preds)
+import matplotlib.pyplot as plt
+import numpy as np
+
+stage_preds = []
+pred = np.full(len(y), F0)
+for tree in models:
+    pred = pred + 0.5 * tree.predict(X)
+    stage_preds.append(pred.copy())
+mse_curve = [np.mean((y - p)**2) for p in stage_preds]
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6))
+axes[0].scatter(X.ravel(), y, label='Daten')
+axes[0].plot(X.ravel(), preds, 'r-', label='GB-Vorhersage (20 Runden)')
+axes[0].set_title("Gradient Boosting Fit")
+axes[0].legend()
+
+axes[1].plot(range(1, len(mse_curve) + 1), mse_curve, 'o-')
+axes[1].set_xlabel("Boosting-Runden")
+axes[1].set_ylabel("MSE")
+axes[1].set_title("Lernkurve")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
         </div>
         <div class="stufe-footer"><button class="mark-btn" data-mark-stufe="scratch">✓ Scratch implementiert</button></div>
@@ -259,6 +276,33 @@ Random Forest Accuracy:  0.9649</pre>
           </div>
           <div class="info-box">
             Aus einem einzelnen "weak learner" (89.5% Accuracy) macht AdaBoost durch 100 sequentiell gewichtete Stumps einen Klassifikator mit 97.4% — sogar leicht besser als Random Forest in diesem Beispiel. Das zeigt das Kernprinzip von Boosting: <strong>viele schwache, fokussierte Modelle &gt; ein starkes Modell</strong>.
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: GB-Lernkurve &amp; AdaBoost vs. Stump vs. RF</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (test_mse, stump, ada, rf, X_te, y_te)
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6))
+
+axes[0].plot(range(1, len(test_mse) + 1), test_mse)
+axes[0].set_xlabel("n_estimators")
+axes[0].set_ylabel("Test MSE")
+axes[0].set_title("GradientBoosting Lernkurve (Diabetes)")
+
+model_names = ['Single Stump', 'AdaBoost', 'Random Forest']
+accs = [
+    accuracy_score(y_te, stump.predict(X_te)),
+    accuracy_score(y_te, ada.predict(X_te)),
+    accuracy_score(y_te, rf.predict(X_te)),
+]
+axes[1].bar(model_names, accs, color=['#888', '#e07a5f', '#2e8b57'])
+axes[1].set_ylim(0.8, 1.0)
+axes[1].set_title("AdaBoost vs. Stump vs. RF")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
 
           <div class="compare-grid">

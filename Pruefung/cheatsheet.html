@@ -7,6 +7,8 @@
   <meta name="description" content="Kompakte Formelsammlung aller 7 Kapitel: Gini, Entropie, ROC/AUC, Bootstrap-CI, GMM-Update-Regeln und mehr – für die Prüfungsvorbereitung."/>
   <script type="module" src="../header.js"></script>
   <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
   <style>
     .cheat-toc{
@@ -134,36 +136,28 @@
       .cheat-section{page-break-inside:auto}
       .cheat-topic{page-break-inside:avoid}
     }
+    .kapitel-filter-bar button.lernpfad-step{appearance:none;background:none;border:none;cursor:pointer;font-family:inherit}
+    .kapitel-filter-bar button.lernpfad-step.kf-all{--lp-color:var(--color-primary)}
+    .kf-hidden{display:none!important}
+    /* ── Responsive layout override ── */
+    #main-content.content{max-width:none;padding:var(--space-6) var(--space-8)}
+    @media(max-width:900px){#main-content.content{padding:var(--space-4)}}
+    .cheat-code{
+      font-family:var(--font-mono);font-size:.75rem;line-height:1.55;
+      background:var(--color-surface);border:1px solid var(--color-border);
+      border-radius:var(--radius-md);padding:.6rem .9rem;
+      margin-top:var(--space-2);overflow-x:auto;white-space:pre;
+      color:var(--color-text);
+    }
   </style>
 </head>
 <body>
   <site-header active="pruefung" title="Cheat-Sheet · Formelsammlung – PRM V5"></site-header>
 
-  <div class="pruef-layout">
-    <nav class="pruef-side">
-      <div class="pruef-side-group">
-        <div class="pruef-side-label">Während der Prüfung</div>
-        <a href="cheatsheet.html" class="active">📋 Cheat-Sheet</a>
-        <a href="entscheidungshilfe.html">🧭 Entscheidungshilfe</a>
-        <a href="numpy-referenz.html">🔢 NumPy</a>
-        <a href="sklearn-referenz.html">🚀 sklearn</a>
-        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
-        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
-        <a href="code-scratch-referenz.html">🛠️ Von Scratch</a>
-      </div>
-      <div class="pruef-side-group" id="section-nav">
-        <div class="pruef-side-label">Auf dieser Seite</div>
-        <a href="#k1">1 · Data Prep</a>
-        <a href="#k2">2 · ML Grundlagen</a>
-        <a href="#k3">3 · SVM</a>
-        <a href="#k4">4 · Clustering &amp; PCA</a>
-        <a href="#k5">5 · Random Forest</a>
-        <a href="#k6">6 · GMM</a>
-        <a href="#k7">7 · Evaluation</a>
-      </div>
-    </nav>
+  <div class="layout">
+    <site-sidebar active="pruefung/cheatsheet"></site-sidebar>
 
-  <main id="main-content" class="pruef-main">
+  <main id="main-content" class="content">
 
     <div class="cheat-hero">
       <h1>📋 Cheat-Sheet · Formelsammlung</h1>
@@ -195,6 +189,8 @@
           n_test = int(N × test_size)<br>
           stratify=y → Klassenverteilung in Train &amp; Test erhalten
         </div>
+        <pre class="cheat-code">from sklearn.model_selection import train_test_split
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)</pre>
       </div>
 
       <div class="cheat-topic">
@@ -203,6 +199,10 @@
           Min-Max:&nbsp; x' = (x − x_min) / (x_max − x_min) &nbsp;→ [0,1]<br>
           Z-Score:&nbsp; x' = (x − μ) / σ &nbsp;→ μ≈0, σ≈1
         </div>
+        <pre class="cheat-code">from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_tr_s = scaler.fit_transform(X_tr)  # fit+transform auf Train
+X_te_s  = scaler.transform(X_te)     # nur transform auf Test</pre>
         <div class="info-box warning">⚠️ Scaler nur auf <strong>X_train</strong> fitten, dann <code>transform()</code> auf X_train &amp; X_test anwenden — niemals <code>fit_transform</code> auf Testdaten!</div>
       </div>
 
@@ -343,6 +343,18 @@
       <div class="cheat-topic">
         <h3>SVC mit sklearn <a class="cheat-link" href="../Kapitel3/T04-svc-sklearn.html">→ Thema</a></h3>
         <div class="info-box" style="font-family:var(--font-mono)">f(x) = sign(Σᵢ αᵢ·yᵢ·K(xᵢ,x) + b)</div>
+        <pre class="cheat-code">from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+
+model = SVC(kernel='rbf', C=1.0, gamma='scale', random_state=42)
+model.fit(X_tr_s, y_tr)
+y_pred = model.predict(X_te_s)
+
+# Hyperparameter-Tuning
+param_grid = {'C': [0.1, 1, 10], 'gamma': [0.01, 0.1, 'scale']}
+grid = GridSearchCV(SVC(kernel='rbf'), param_grid, cv=5, scoring='accuracy')
+grid.fit(X_tr_s, y_tr)
+print(grid.best_params_, grid.best_score_)</pre>
       </div>
       <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
     </section>
@@ -398,6 +410,17 @@
       <div class="cheat-topic">
         <h3>KMeans mit sklearn <a class="cheat-link" href="../Kapitel4/T04-kmeans-sklearn.html">→ Thema</a></h3>
         <div class="info-box">k-means++ Init: erster Centroid zufällig, jeder weitere proportional zu Abstand² vom nächsten bestehenden Centroid — verhindert Zusammenfallen.</div>
+        <pre class="cheat-code">from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+# Elbow: optimales k finden
+inertias = [KMeans(n_clusters=k, random_state=42, n_init=10).fit(X_s).inertia_
+            for k in range(1, 11)]
+
+# Mit bestem k fitten
+km = KMeans(n_clusters=3, random_state=42, n_init=10)
+labels = km.fit_predict(X_s)
+print(f"Inertia: {km.inertia_:.2f}  Silhouette: {silhouette_score(X_s, labels):.3f}")</pre>
       </div>
 
       <div class="cheat-topic">
@@ -407,6 +430,12 @@
           Eigenzerlegung:&nbsp; Σ · v = λ · v &nbsp;(v = Hauptkomponente, λ = erklärte Varianz)<br>
           Erklärte Varianz (Anteil)ᵢ:&nbsp; λᵢ / Σⱼ λⱼ
         </div>
+        <pre class="cheat-code">from sklearn.decomposition import PCA
+
+pca = PCA(n_components=2)           # oder n_components=0.95 (95% Varianz erhalten)
+X_pca = pca.fit_transform(X_s)     # immer StandardScaler vorher!
+print(pca.explained_variance_ratio_)            # Anteil pro Komponente
+print(pca.explained_variance_ratio_.cumsum())   # kumuliert → wo ist 95%?</pre>
         <div class="info-box">PCA ist <strong>unüberwacht</strong> und varianz-basiert → immer <code>StandardScaler</code> vorher anwenden. <strong>Scree-Plot:</strong> erklärte Varianz pro Komponente absteigend auftragen — der "Ellbogen" zeigt ein sinnvolles k (analog zur Elbow-Methode).</div>
       </div>
       <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
@@ -513,6 +542,14 @@
           <strong>BIC/AIC:</strong> kleiner = besser (Modellwahl) · <strong>Log-Likelihood:</strong> höher = besser<br>
           <code>score(X)</code> → log p(X) für Density Estimation.
         </div>
+        <pre class="cheat-code">from sklearn.mixture import GaussianMixture
+
+gmm = GaussianMixture(n_components=3, covariance_type='full', random_state=42)
+gmm.fit(X_s)
+labels  = gmm.predict(X_s)         # harte Zuweisung
+probs   = gmm.predict_proba(X_s)   # weiche Zuweisung (Responsibilities)
+bic     = gmm.bic(X_s)             # kleiner = besser → k vergleichen
+log_lik = gmm.score(X_s)           # log p(X) / n → höher = besser</pre>
       </div>
       <a class="cheat-back-top" href="#cheat-toc">↑ Kapitelübersicht</a>
     </section>
@@ -528,6 +565,11 @@
           Precision = TP/(TP+FP) &nbsp;·&nbsp; Recall = TP/(TP+FN) &nbsp;·&nbsp; Specificity = TN/(TN+FP)<br>
           F1 = 2·(P·R)/(P+R) &nbsp;·&nbsp; F_β = (1+β²)·P·R / (β²·P+R)
         </div>
+        <pre class="cheat-code">from sklearn.metrics import classification_report, confusion_matrix
+
+print(classification_report(y_te, y_pred, zero_division=0))
+cm = confusion_matrix(y_te, y_pred)  # Zeilen = tatsächlich, Spalten = vorhergesagt
+# binär: [[TN FP] [FN TP]]</pre>
         <div class="info-box">Eselsbrücke: Precision = "Wenn ich Alarm schlage, habe ich recht" (FP vermeiden) · Recall = "Wenn Gefahr da ist, erkenne ich sie" (FN vermeiden).</div>
         <div class="info-box">
           <strong>Multiklass-Averaging:</strong> Macro = ungewichteter Mittelwert über alle Klassen (jede Klasse zählt gleich) · Weighted = nach Klassenhäufigkeit gewichtet · Micro = global über alle TP/FP/FN gepoolt (= Accuracy bei Single-Label).
@@ -556,6 +598,15 @@
           FPR = FP/(FP+TN) &nbsp;(x-Achse) &nbsp;·&nbsp; TPR = Recall = TP/(TP+FN) &nbsp;(y-Achse)<br>
           AUC = 1.0 perfekt · AUC = 0.5 zufällig · AUC &lt; 0.5 schlechter als Zufall
         </div>
+        <pre class="cheat-code">from sklearn.metrics import roc_auc_score
+
+# Binär: predict_proba → Wahrscheinlichkeit für Klasse 1
+y_prob = model.predict_proba(X_te_s)[:, 1]
+auc = roc_auc_score(y_te, y_prob)
+print(f"AUC: {auc:.3f}")
+
+# Mehrklassen (OvR):
+# roc_auc_score(y_te, model.predict_proba(X_te_s), multi_class='ovr', average='weighted')</pre>
         <div class="info-box">AUC = Wahrscheinlichkeit, dass ein zufälliger positiver Punkt höher bewertet wird als ein zufälliger negativer.</div>
         <div class="info-box">
           <strong>Multi-Class:</strong> <code>roc_auc_score(y_true, y_proba, multi_class='ovr'|'ovo', average='macro'|'weighted')</code> — <code>y_proba</code> = volle <code>predict_proba()</code>-Matrix (eine Spalte pro Klasse). OvR: k Kurven ("Klasse vs. Rest"). OvO: k·(k−1)/2 Kurven (Klassenpaare).

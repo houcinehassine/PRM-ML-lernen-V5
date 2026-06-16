@@ -7,6 +7,8 @@
   <meta name="description" content="Die wichtigsten Matplotlib-, Pandas- und Seaborn-Befehle für ML-Aufgaben: Plots, DataFrames, Gruppieren & Aggregieren, Visualisierung."/>
   <script type="module" src="../header.js"></script>
   <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
   <style>
     .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-6) var(--space-4) 0;text-align:center}
@@ -58,185 +60,230 @@
     }
     .cmd-card .cmd-out:before{content:"→ ";color:var(--color-success);font-weight:800}
     .cmd-out--wrap{white-space:pre-wrap;word-break:break-word;overflow-x:hidden}
+    #matplotlib    {--sec-color:#2563eb}
+    #pandas-basics {--sec-color:#0d9488}
+    #pandas-group  {--sec-color:#7c3aed}
+    #seaborn       {--sec-color:#d97706}
+    .ref-grid{display:flex;flex-direction:column;gap:.4rem;margin-top:var(--space-4)}
+    .ref-ex{display:grid;grid-template-columns:minmax(160px,20%) 1fr minmax(220px,28%);align-items:stretch;border:1px solid var(--color-border);border-left:3px solid var(--sec-color,var(--color-primary));border-radius:var(--radius-md);background:var(--color-surface);overflow:hidden;min-width:0;}
+    .ref-ex-meta{padding:.7rem 1rem;border-right:1px solid var(--color-border);display:flex;flex-direction:column;gap:.35rem;justify-content:center;background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 4%,var(--color-surface-2));}
+    .ref-ex .ref-sub{margin:0;font-size:.84rem;font-weight:800;color:var(--sec-color,var(--color-primary));word-break:break-word}
+    .ref-ex-meta > p{font-size:.9rem;color:var(--color-text-muted);line-height:1.5;margin:0}
+    .ref-ex pre{margin:0;font-size:.83rem;line-height:1.6;padding:.7rem .9rem;overflow-x:auto;border-radius:0;border:none;border-right:1px solid var(--color-border);background:var(--color-surface-2);}
+    .ref-ex pre code{font-size:1em}
+    .ref-out{margin:0;padding:.7rem .9rem;background:color-mix(in oklab,var(--sec-color,#059669) 6%,var(--color-surface));border:none;border-radius:0;border-left:1px solid color-mix(in oklab,var(--sec-color,#059669) 20%,var(--color-border));font-family:var(--font-mono);font-size:.83rem;line-height:1.6;white-space:pre;overflow-x:auto;color:var(--color-text-muted);}
+    .kapitel-filter-bar button.lernpfad-step{appearance:none;background:none;border:none;cursor:pointer;font-family:inherit}
+    .kapitel-filter-bar button.lernpfad-step.kf-all{--lp-color:var(--color-primary)}
+    .kf-hidden{display:none!important}
+    /* ── Responsive layout override ── */
+    #main-content.content{max-width:none;padding:var(--space-6) var(--space-8)}
+    @media(max-width:900px){#main-content.content{padding:var(--space-4)}}
   </style>
 </head>
 <body>
   <site-header active="pruefung" title="Matplotlib &amp; Pandas-Referenz – PRM V5"></site-header>
 
-  <div class="pruef-layout">
-    <nav class="pruef-side">
-      <div class="pruef-side-group">
-        <div class="pruef-side-label">Während der Prüfung</div>
-        <a href="cheatsheet.html">📋 Cheat-Sheet</a>
-        <a href="entscheidungshilfe.html">🧭 Entscheidungshilfe</a>
-        <a href="numpy-referenz.html">🔢 NumPy</a>
-        <a href="sklearn-referenz.html">🚀 sklearn</a>
-        <a href="matplotlib-pandas-referenz.html" class="active">📊 Matplotlib &amp; Pandas</a>
-        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
-        <a href="code-scratch-referenz.html">🛠️ Von Scratch</a>
-      </div>
-      <div class="pruef-side-group" id="section-nav">
-        <div class="pruef-side-label">Auf dieser Seite</div>
-        <a href="#matplotlib">1 · Matplotlib Grundlagen</a>
-        <a href="#pandas-basics">2 · Pandas DataFrame &amp; Series</a>
-        <a href="#pandas-group">3 · Gruppieren &amp; Aggregieren</a>
-        <a href="#seaborn">4 · Seaborn Plots</a>
-      </div>
-    </nav>
+  <div class="layout">
+    <site-sidebar active="pruefung/matplotlib"></site-sidebar>
 
+  <main id="main-content" class="content">
     <div class="pruef-hero">
       <h1>📊 Matplotlib, Pandas &amp; Seaborn-Referenz</h1>
       <p>Die Befehle, die für Datenexploration und Visualisierung in K1–K7 am häufigsten vorkommen — gruppiert nach Anwendungsfall.</p>
     </div>
-
-  <main id="main-content" class="pruef-main">
+    <nav class="lernpfad-bar kapitel-filter-bar" id="topic-filter-bar" aria-label="Nach Thema filtern">
+      <button class="lernpfad-step kf-all active" data-kf="all"><span class="lp-icon">📚</span><span>Alle</span></button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#2563eb" data-kf="matplotlib"><span class="lp-icon">📈</span><span>Matplotlib</span></button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#0d9488" data-kf="pandas-basics"><span class="lp-icon">🐼</span><span>Pandas Basics</span></button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#7c3aed" data-kf="pandas-group"><span class="lp-icon">📊</span><span>Gruppieren</span></button>
+      <span class="lp-sep" aria-hidden="true">›</span>
+      <button class="lernpfad-step" style="--lp-color:#d97706" data-kf="seaborn"><span class="lp-icon">🎨</span><span>Seaborn</span></button>
+    </nav>
 
     <!-- ═══ 1 · MATPLOTLIB GRUNDLAGEN ═══ -->
-    <section class="pruef-section" id="matplotlib">
+    <section class="pruef-section" id="matplotlib" data-topic="matplotlib">
       <h2><span class="pruef-num">1</span> Matplotlib Grundlagen</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">import matplotlib.pyplot as plt
+        <div class="ref-grid">
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Setup</p>
+      </div>
+      <pre><code class="language-python">import matplotlib.pyplot as plt
 import numpy as np</code></pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">plt.plot(x, y)</code>
-          <p class="cmd-desc">Liniendiagramm — z.B. Lernkurve, Verlustfunktion</p>
-          <pre class="cmd-code"><code class="language-python">x = np.linspace(0, 10, 100)
+      <pre class="ref-out"></pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.plot(x, y)</p>
+        <p>Liniendiagramm — z.B. Lernkurve, Verlustfunktion</p>
+      </div>
+      <pre><code class="language-python">x = np.linspace(0, 10, 100)
 plt.plot(x, np.sin(x))
 plt.show()</code></pre>
-          <pre class="cmd-out"># zeigt Liniendiagramm (Sinuskurve)</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">plt.scatter(x, y)</code>
-          <p class="cmd-desc">Streudiagramm — z.B. Datenpunkte, Cluster-Ergebnisse</p>
-          <pre class="cmd-code"><code class="language-python">plt.scatter(X[:, 0], X[:, 1], 
+      <pre class="ref-out"># zeigt Liniendiagramm (Sinuskurve)</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.scatter(x, y)</p>
+        <p>Streudiagramm — z.B. Datenpunkte, Cluster-Ergebnisse</p>
+      </div>
+      <pre><code class="language-python">plt.scatter(X[:, 0], X[:, 1], 
             c=labels, cmap='viridis')
 plt.show()</code></pre>
-          <pre class="cmd-out"># zeigt Punktwolke, Farbe = Cluster-Label</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">plt.bar(x, height) / plt.hist(data)</code>
-          <p class="cmd-desc">Balkendiagramm bzw. Histogramm — Verteilungen</p>
-          <pre class="cmd-code"><code class="language-python">plt.hist(data, bins=20)
+      <pre class="ref-out"># zeigt Punktwolke, Farbe = Cluster-Label</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.bar(x, height) / plt.hist(data)</p>
+        <p>Balkendiagramm bzw. Histogramm — Verteilungen</p>
+      </div>
+      <pre><code class="language-python">plt.hist(data, bins=20)
 plt.show()</code></pre>
-          <pre class="cmd-out"># zeigt Häufigkeitsverteilung in 20 Bins</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">plt.title() / plt.xlabel() / plt.ylabel()</code>
-          <p class="cmd-desc">Titel und Achsenbeschriftung setzen</p>
-          <pre class="cmd-code"><code class="language-python">plt.title("Lernkurve")
+      <pre class="ref-out"># zeigt Häufigkeitsverteilung in 20 Bins</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.title() / plt.xlabel() / plt.ylabel()</p>
+        <p>Titel und Achsenbeschriftung setzen</p>
+      </div>
+      <pre><code class="language-python">plt.title("Lernkurve")
 plt.xlabel("Trainingsgröße")
 plt.ylabel("Score")</code></pre>
-          <pre class="cmd-out"># beschriftet Titel, x- und y-Achse</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">plt.legend()</code>
-          <p class="cmd-desc">Legende anzeigen — benötigt <code>label=</code> in <code>plot()</code>/<code>scatter()</code></p>
-          <pre class="cmd-code"><code class="language-python">plt.plot(x, y1, label="Train")
+      <pre class="ref-out"># beschriftet Titel, x- und y-Achse</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.legend()</p>
+        <p>Legende anzeigen — benötigt <code>label=</code> in <code>plot()</code>/<code>scatter()</code></p>
+      </div>
+      <pre><code class="language-python">plt.plot(x, y1, label="Train")
 plt.plot(x, y2, label="Validation")
 plt.legend()</code></pre>
-          <pre class="cmd-out"># zeigt Legende mit 
+      <pre class="ref-out"># zeigt Legende mit 
             "Train" und "Validation"</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">plt.subplots(nrows, ncols)</code>
-          <p class="cmd-desc">Mehrere Plots in einer Figure anordnen — gibt <code>fig, axes</code> zurück</p>
-          <pre class="cmd-code"><code class="language-python">fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.subplots(nrows, ncols)</p>
+        <p>Mehrere Plots in einer Figure anordnen — gibt <code>fig, axes</code> zurück</p>
+      </div>
+      <pre><code class="language-python">fig, axes = plt.subplots(1, 2, figsize=(10, 4))
 axes[0].plot(x, np.sin(x))
 axes[0].set_title("Sinus")
 axes[1].scatter(X[:, 0], X[:, 1])
 axes[1].set_title("Daten")
 plt.tight_layout()
 plt.show()</code></pre>
-          <pre class="cmd-out cmd-out--wrap"># axes ist ein Array von Axes-Objekten — axes.shape == (2,) bei 1 Zeile, (nrows, ncols) bei mehreren Zeilen</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">plt.figure(figsize=(w,h))</code>
-          <p class="cmd-desc">Größe der Figure in Zoll festlegen</p>
-          <pre class="cmd-code"><code class="language-python">plt.figure(figsize=(8, 5))
+      <pre class="ref-out"># axes ist ein Array von Axes-Objekten — axes.shape == (2,) bei 1 Zeile, (nrows, ncols) bei mehreren Zeilen</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.figure(figsize=(w,h))</p>
+        <p>Größe der Figure in Zoll festlegen</p>
+      </div>
+      <pre><code class="language-python">plt.figure(figsize=(8, 5))
 plt.plot(x, y)</code></pre>
-          <pre class="cmd-out"># Figure mit Breite 8", Höhe 5"</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">plt.savefig(path)</code>
-          <p class="cmd-desc">Plot als Datei speichern — vor <code>plt.show()</code> aufrufen</p>
-          <pre class="cmd-code"><code class="language-python">plt.plot(x, y)
+      <pre class="ref-out"># Figure mit Breite 8", Höhe 5"</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.savefig(path)</p>
+        <p>Plot als Datei speichern — vor <code>plt.show()</code> aufrufen</p>
+      </div>
+      <pre><code class="language-python">plt.plot(x, y)
 plt.savefig("plot.png", dpi=150, 
             bbox_inches='tight')
 plt.show()</code></pre>
-          <pre class="cmd-out"># speichert plot.png mit 150 dpi, 
+      <pre class="ref-out"># speichert plot.png mit 150 dpi, 
             ohne überschüssigen Rand</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">plt.axhline() / plt.axvline()</code>
-          <p class="cmd-desc">Horizontale/vertikale Referenzlinie — z.B. Threshold, Mittelwert</p>
-          <pre class="cmd-code"><code class="language-python">plt.axhline(y=0.5, color='r', 
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.axhline() / plt.axvline()</p>
+        <p>Horizontale/vertikale Referenzlinie — z.B. Threshold, Mittelwert</p>
+      </div>
+      <pre><code class="language-python">plt.axhline(y=0.5, color='r', 
             linestyle='--', 
             label='Threshold')</code></pre>
-          <pre class="cmd-out"># gestrichelte rote Linie bei y=0.5</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">plt.colorbar()</code>
-          <p class="cmd-desc">Farbskala neben Scatter/Heatmap anzeigen</p>
-          <pre class="cmd-code"><code class="language-python">sc = plt.scatter(X[:, 0], X[:, 1], c=y)
-plt.colorbar(sc, label="Klasse")</code></pre>
-          <pre class="cmd-out"># zeigt Farbskala mit Beschriftung "Klasse"</pre>
-        </div>
+      <pre class="ref-out"># gestrichelte rote Linie bei y=0.5</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">plt.colorbar()</p>
+        <p>Farbskala neben Scatter/Heatmap anzeigen</p>
       </div>
+      <pre><code class="language-python">sc = plt.scatter(X[:, 0], X[:, 1], c=y)
+plt.colorbar(sc, label="Klasse")</code></pre>
+      <pre class="ref-out"># zeigt Farbskala mit Beschriftung "Klasse"</pre>
+    </div>
+  </div>
+  
       <div class="info-box">
         Matplotlib-Plots erzeugen <strong>keinen Text-Output</strong> — in Prüfungs-Notebooks reicht meist der korrekte Code (Achsenbeschriftung, Legende, Titel). Wichtig: <code>plt.show()</code> am Ende, sonst bleiben Plots evtl. unsichtbar.
       </div>
     </section>
 
     <!-- ═══ 2 · PANDAS DATAFRAME & SERIES ═══ -->
-    <section class="pruef-section" id="pandas-basics">
+    <section class="pruef-section" id="pandas-basics" data-topic="pandas-basics">
       <h2><span class="pruef-num">2</span> Pandas DataFrame &amp; Series</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">import pandas as pd
+        <div class="ref-grid">
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Setup</p>
+      </div>
+      <pre><code class="language-python">import pandas as pd
 
 df = pd.DataFrame({
     'species': ['setosa','setosa','versicolor','versicolor','virginica'],
     'sepal_length': [5.1, 4.9, 6.0, 5.7, 6.3],
     'petal_width': [0.2, 0.2, 1.5, 1.3, 2.5]
 })</code></pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df</code>
-          <p class="cmd-desc">DataFrame anzeigen — Zeilen = Beobachtungen, Spalten = Features</p>
-          <pre class="cmd-code"><code class="language-python">df</code></pre>
-          <pre class="cmd-out">      species  sepal_length  petal_width
+      <pre class="ref-out"></pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df</p>
+        <p>DataFrame anzeigen — Zeilen = Beobachtungen, Spalten = Features</p>
+      </div>
+      <pre><code class="language-python">df</code></pre>
+      <pre class="ref-out">species  sepal_length  petal_width
 0      setosa           5.1          0.2
 1      setosa           4.9          0.2
 2  versicolor           6.0          1.5
 3  versicolor           5.7          1.3
 4   virginica           6.3          2.5</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df.head(n) / df.tail(n)</code>
-          <p class="cmd-desc">Erste/letzte <code>n</code> Zeilen — schneller Überblick</p>
-          <pre class="cmd-code"><code class="language-python">df.head(2)</code></pre>
-          <pre class="cmd-out">  species  sepal_length  petal_width
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.head(n) / df.tail(n)</p>
+        <p>Erste/letzte <code>n</code> Zeilen — schneller Überblick</p>
+      </div>
+      <pre><code class="language-python">df.head(2)</code></pre>
+      <pre class="ref-out">species  sepal_length  petal_width
 0  setosa           5.1          0.2
 1  setosa           4.9          0.2</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df.dtypes / df.shape / df.columns</code>
-          <p class="cmd-desc">Datentypen, Form (Zeilen, Spalten), Spaltennamen</p>
-          <pre class="cmd-code"><code class="language-python">df.dtypes</code></pre>
-          <pre class="cmd-out">species          object
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.dtypes / df.shape / df.columns</p>
+        <p>Datentypen, Form (Zeilen, Spalten), Spaltennamen</p>
+      </div>
+      <pre><code class="language-python">df.dtypes</code></pre>
+      <pre class="ref-out">species          object
 sepal_length    float64
 petal_width     float64
 dtype: object</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df.describe()</code>
-          <p class="cmd-desc">Statistische Übersicht aller numerischen Spalten</p>
-          <pre class="cmd-code"><code class="language-python">df.describe()</code></pre>
-          <pre class="cmd-out">       sepal_length  petal_width
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.describe()</p>
+        <p>Statistische Übersicht aller numerischen Spalten</p>
+      </div>
+      <pre><code class="language-python">df.describe()</code></pre>
+      <pre class="ref-out">sepal_length  petal_width
 count      5.000000     5.000000
 mean       5.600000     1.140000
 std        0.591608     0.971082
@@ -245,236 +292,286 @@ min        4.900000     0.200000
 50%        5.700000     1.300000
 75%        6.000000     1.500000
 max        6.300000     2.500000</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df.loc[condition]</code>
-          <p class="cmd-desc">Zeilen per Label/Bedingung auswählen — Boolean-Maske</p>
-          <pre class="cmd-code"><code class="language-python">df.loc[df['sepal_length'] > 5.5]</code></pre>
-          <pre class="cmd-out">      species  sepal_length  petal_width
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.loc[condition]</p>
+        <p>Zeilen per Label/Bedingung auswählen — Boolean-Maske</p>
+      </div>
+      <pre><code class="language-python">df.loc[df['sepal_length'] > 5.5]</code></pre>
+      <pre class="ref-out">species  sepal_length  petal_width
 2  versicolor           6.0          1.5
 3  versicolor           5.7          1.3
 4   virginica           6.3          2.5</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df.iloc[rows, cols]</code>
-          <p class="cmd-desc">Zeilen/Spalten per Integer-Position auswählen</p>
-          <pre class="cmd-code"><code class="language-python">df.iloc[1:3, 0:2]</code></pre>
-          <pre class="cmd-out">      species  sepal_length
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.iloc[rows, cols]</p>
+        <p>Zeilen/Spalten per Integer-Position auswählen</p>
+      </div>
+      <pre><code class="language-python">df.iloc[1:3, 0:2]</code></pre>
+      <pre class="ref-out">species  sepal_length
 1      setosa           4.9
 2  versicolor           6.0</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df['col'] / df[['c1','c2']]</code>
-          <p class="cmd-desc">Eine Spalte (Series) bzw. mehrere Spalten (DataFrame) auswählen</p>
-          <pre class="cmd-code"><code class="language-python">df['petal_width']</code></pre>
-          <pre class="cmd-out">0    0.2
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df['col'] / df[['c1','c2']]</p>
+        <p>Eine Spalte (Series) bzw. mehrere Spalten (DataFrame) auswählen</p>
+      </div>
+      <pre><code class="language-python">df['petal_width']</code></pre>
+      <pre class="ref-out">0    0.2
 1    0.2
 2    1.5
 3    1.3
 4    2.5
 Name: petal_width, dtype: float64</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df.sort_values('col', ascending=False)</code>
-          <p class="cmd-desc">Nach Spalte sortieren</p>
-          <pre class="cmd-code"><code class="language-python">df.sort_values('petal_width', ascending=False)</code></pre>
-          <pre class="cmd-out">      species  sepal_length  petal_width
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.sort_values('col', ascending=False)</p>
+        <p>Nach Spalte sortieren</p>
+      </div>
+      <pre><code class="language-python">df.sort_values('petal_width', ascending=False)</code></pre>
+      <pre class="ref-out">species  sepal_length  petal_width
 4   virginica           6.3          2.5
 2  versicolor           6.0          1.5
 3  versicolor           5.7          1.3
 0      setosa           5.1          0.2
 1      setosa           4.9          0.2</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df['col'].value_counts()</code>
-          <p class="cmd-desc">Häufigkeit jedes Werts — z.B. Klassenverteilung</p>
-          <pre class="cmd-code"><code class="language-python">df['species'].value_counts()</code></pre>
-          <pre class="cmd-out">species
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df['col'].value_counts()</p>
+        <p>Häufigkeit jedes Werts — z.B. Klassenverteilung</p>
+      </div>
+      <pre><code class="language-python">df['species'].value_counts()</code></pre>
+      <pre class="ref-out">species
 setosa        2
 versicolor    2
 virginica     1
 Name: count, dtype: int64</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df.isnull().sum()</code>
-          <p class="cmd-desc">Fehlende Werte pro Spalte zählen</p>
-          <pre class="cmd-code"><code class="language-python">df2.isnull().sum()</code></pre>
-          <pre class="cmd-out">species         0
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.isnull().sum()</p>
+        <p>Fehlende Werte pro Spalte zählen</p>
+      </div>
+      <pre><code class="language-python">df2.isnull().sum()</code></pre>
+      <pre class="ref-out">species         0
 sepal_length    0
 petal_width     1
 dtype: int64</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df['col'].fillna(value)</code>
-          <p class="cmd-desc">Fehlende Werte ersetzen — z.B. mit 0, Mittelwert, Median</p>
-          <pre class="cmd-code"><code class="language-python">df2['petal_width'].fillna(0)</code></pre>
-          <pre class="cmd-out">0    0.2
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df['col'].fillna(value)</p>
+        <p>Fehlende Werte ersetzen — z.B. mit 0, Mittelwert, Median</p>
+      </div>
+      <pre><code class="language-python">df2['petal_width'].fillna(0)</code></pre>
+      <pre class="ref-out">0    0.2
 1    0.0
 2    1.5
 3    1.3
 4    2.5
 Name: petal_width, dtype: float64</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df['col'].apply(func)</code>
-          <p class="cmd-desc">Funktion elementweise auf eine Spalte anwenden</p>
-          <pre class="cmd-code"><code class="language-python">df['sepal_length'].apply(lambda x: x * 2)</code></pre>
-          <pre class="cmd-out">0    10.2
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df['col'].apply(func)</p>
+        <p>Funktion elementweise auf eine Spalte anwenden</p>
+      </div>
+      <pre><code class="language-python">df['sepal_length'].apply(lambda x: x * 2)</code></pre>
+      <pre class="ref-out">0    10.2
 1     9.8
 2    12.0
 3    11.4
 4    12.6
 Name: sepal_length, dtype: float64</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df.assign(new_col=...)</code>
-          <p class="cmd-desc">Neue Spalte berechnen, ohne <code>df</code> zu verändern</p>
-          <pre class="cmd-code"><code class="language-python">df.assign(ratio=df['petal_width'] / 
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.assign(new_col=...)</p>
+        <p>Neue Spalte berechnen, ohne <code>df</code> zu verändern</p>
+      </div>
+      <pre><code class="language-python">df.assign(ratio=df['petal_width'] / 
 df['sepal_length']).head(1)</code></pre>
-          <pre class="cmd-out">  species  sepal_length  petal_width     ratio
+      <pre class="ref-out">species  sepal_length  petal_width     ratio
 0  setosa           5.1          0.2  0.039216</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df.rename(columns={...}) / df.drop(columns=[...])</code>
-          <p class="cmd-desc">Spalten umbenennen bzw. entfernen — beide geben Kopie zurück</p>
-          <pre class="cmd-code"><code class="language-python">df.rename(columns={'sepal_length':'sl'}).head(1)
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.rename(columns={...}) / df.drop(columns=[...])</p>
+        <p>Spalten umbenennen bzw. entfernen — beide geben Kopie zurück</p>
+      </div>
+      <pre><code class="language-python">df.rename(columns={'sepal_length':'sl'}).head(1)
 df.drop(columns=['species']).head(1)</code></pre>
-          <pre class="cmd-out">  species   sl  petal_width
+      <pre class="ref-out">species   sl  petal_width
 0  setosa  5.1          0.2
 
    sepal_length  petal_width
 0           5.1          0.2</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">df[['c1','c2']].to_numpy()</code>
-          <p class="cmd-desc">DataFrame/Series in NumPy-Array umwandeln — für sklearn</p>
-          <pre class="cmd-code"><code class="language-python">df[['sepal_length','petal_width']].to_numpy()</code></pre>
-          <pre class="cmd-out">[[5.1 0.2]
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df[['c1','c2']].to_numpy()</p>
+        <p>DataFrame/Series in NumPy-Array umwandeln — für sklearn</p>
+      </div>
+      <pre><code class="language-python">df[['sepal_length','petal_width']].to_numpy()</code></pre>
+      <pre class="ref-out">[[5.1 0.2]
  [4.9 0.2]
  [6.  1.5]
  [5.7 1.3]
  [6.3 2.5]]</pre>
-        </div>
-      </div>
+    </div>
+  </div>
+  
     </section>
 
     <!-- ═══ 3 · PANDAS GRUPPIEREN & AGGREGIEREN ═══ -->
-    <section class="pruef-section" id="pandas-group">
+    <section class="pruef-section" id="pandas-group" data-topic="pandas-group">
       <h2><span class="pruef-num">3</span> Gruppieren &amp; Aggregieren</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">df.groupby('col')['x'].mean()</code>
-          <p class="cmd-desc">Mittelwert pro Gruppe — Grundmuster für Gruppenstatistiken</p>
-          <pre class="cmd-code"><code class="language-python">df.groupby('species')['petal_width'].mean()</code></pre>
-          <pre class="cmd-out">species
+        <div class="ref-grid">
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.groupby('col')['x'].mean()</p>
+        <p>Mittelwert pro Gruppe — Grundmuster für Gruppenstatistiken</p>
+      </div>
+      <pre><code class="language-python">df.groupby('species')['petal_width'].mean()</code></pre>
+      <pre class="ref-out">species
 setosa        0.2
 versicolor    1.4
 virginica     2.5
 Name: petal_width, dtype: float64</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">df.groupby('col')['x'].agg([...])</code>
-          <p class="cmd-desc">Mehrere Statistiken pro Gruppe gleichzeitig berechnen</p>
-          <pre class="cmd-code"><code class="language-python">df.groupby('species')['sepal_length'].agg(['mean', 'max', 'count'])</code></pre>
-          <pre class="cmd-out">            mean  max  count
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.groupby('col')['x'].agg([...])</p>
+        <p>Mehrere Statistiken pro Gruppe gleichzeitig berechnen</p>
+      </div>
+      <pre><code class="language-python">df.groupby('species')['sepal_length'].agg(['mean', 'max', 'count'])</code></pre>
+      <pre class="ref-out">mean  max  count
 species
 setosa      5.00  5.1      2
 versicolor  5.85  6.0      2
 virginica   6.30  6.3      1</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">df.pivot_table(values=, index=, aggfunc=)</code>
-          <p class="cmd-desc">Kreuztabelle — Alternative zu <code>groupby</code> mit Tabellenform</p>
-          <pre class="cmd-code"><code class="language-python">df.pivot_table(values='petal_width', index='species', aggfunc='mean')</code></pre>
-          <pre class="cmd-out">            petal_width
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.pivot_table(values=, index=, aggfunc=)</p>
+        <p>Kreuztabelle — Alternative zu <code>groupby</code> mit Tabellenform</p>
+      </div>
+      <pre><code class="language-python">df.pivot_table(values='petal_width', index='species', aggfunc='mean')</code></pre>
+      <pre class="ref-out">petal_width
 species
 setosa              0.2
 versicolor          1.4
 virginica           2.5</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">df.merge(other, on='col')</code>
-          <p class="cmd-desc">Zwei DataFrames anhand einer gemeinsamen Spalte verbinden (wie SQL JOIN)</p>
-          <pre class="cmd-code"><code class="language-python">extra = pd.DataFrame({
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">df.merge(other, on='col')</p>
+        <p>Zwei DataFrames anhand einer gemeinsamen Spalte verbinden (wie SQL JOIN)</p>
+      </div>
+      <pre><code class="language-python">extra = pd.DataFrame({
     'species': ['setosa','versicolor','virginica'],
     'farbe': ['blau','grün','lila']
 })
 df.merge(extra, on='species')</code></pre>
-          <pre class="cmd-out">      species  sepal_length  petal_width farbe
+      <pre class="ref-out">species  sepal_length  petal_width farbe
 0      setosa           5.1          0.2  blau
 1      setosa           4.9          0.2  blau
 2  versicolor           6.0          1.5  grün
 3  versicolor           5.7          1.3  grün
 4   virginica           6.3          2.5  lila</pre>
-        </div>
-        <div class="cmd-card cmd-card--wide">
-          <code class="cmd-head">pd.concat([df1, df2])</code>
-          <p class="cmd-desc">DataFrames stapeln — z.B. Train- und Test-Teile wieder zusammenführen</p>
-          <pre class="cmd-code"><code class="language-python">pd.concat([df.head(1), df.tail(1)])</code></pre>
-          <pre class="cmd-out">     species  sepal_length  petal_width
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">pd.concat([df1, df2])</p>
+        <p>DataFrames stapeln — z.B. Train- und Test-Teile wieder zusammenführen</p>
+      </div>
+      <pre><code class="language-python">pd.concat([df.head(1), df.tail(1)])</code></pre>
+      <pre class="ref-out">species  sepal_length  petal_width
 0     setosa           5.1          0.2
 4  virginica           6.3          2.5</pre>
-        </div>
-      </div>
+    </div>
+  </div>
+  
     </section>
 
     <!-- ═══ 4 · SEABORN PLOTS ═══ -->
-    <section class="pruef-section" id="seaborn">
+    <section class="pruef-section" id="seaborn" data-topic="seaborn">
       <h2><span class="pruef-num">4</span> Seaborn Plots</h2>
-      <div class="cmd-grid">
-        <div class="cmd-card cmd-setup">
-          <code class="cmd-head">Setup</code>
-          <pre class="cmd-code"><code class="language-python">import seaborn as sns</code></pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">sns.scatterplot(data=df, x=, y=, hue=)</code>
-          <p class="cmd-desc">Streudiagramm mit automatischer Farbgebung nach Kategorie</p>
-          <pre class="cmd-code"><code class="language-python">sns.scatterplot(data=df, x='sepal_length', 
+        <div class="ref-grid">
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">Setup</p>
+      </div>
+      <pre><code class="language-python">import seaborn as sns</code></pre>
+      <pre class="ref-out"></pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">sns.scatterplot(data=df, x=, y=, hue=)</p>
+        <p>Streudiagramm mit automatischer Farbgebung nach Kategorie</p>
+      </div>
+      <pre><code class="language-python">sns.scatterplot(data=df, x='sepal_length', 
         y='petal_width', hue='species')
 plt.show()</code></pre>
-          <pre class="cmd-out"># Punktwolke, Farbe = species, inkl. Legende</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">sns.heatmap(matrix, annot=True)</code>
-          <p class="cmd-desc">Matrix als Farbraster — z.B. Korrelationen, Confusion Matrix</p>
-          <pre class="cmd-code"><code class="language-python">sns.heatmap(df.corr(numeric_only=True), 
+      <pre class="ref-out"># Punktwolke, Farbe = species, inkl. Legende</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">sns.heatmap(matrix, annot=True)</p>
+        <p>Matrix als Farbraster — z.B. Korrelationen, Confusion Matrix</p>
+      </div>
+      <pre><code class="language-python">sns.heatmap(df.corr(numeric_only=True), 
             annot=True, cmap='coolwarm')
 plt.show()</code></pre>
-          <pre class="cmd-out"># Korrelationsmatrix mit 
+      <pre class="ref-out"># Korrelationsmatrix mit 
             Zahlenwerten in jeder Zelle</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">sns.boxplot(data=df, x=, y=)</code>
-          <p class="cmd-desc">Verteilung pro Kategorie — Median, Quartile, Ausreißer</p>
-          <pre class="cmd-code"><code class="language-python">sns.boxplot(data=df, x='species', y='petal_width')
-plt.show()</code></pre>
-          <pre class="cmd-out"># Box-Plot pro species mit 
-            Median, IQR, Ausreißer-Punkten</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">sns.histplot(data=df, x=, hue=, kde=True)</code>
-          <p class="cmd-desc">Histogramm mit optionaler Dichteschätzung (KDE)</p>
-          <pre class="cmd-code"><code class="language-python">sns.histplot(data=df, x='petal_width', hue='species', kde=True)
-plt.show()</code></pre>
-          <pre class="cmd-out"># Histogramm + glatte Dichtekurve, 
-            pro species eingefärbt</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">sns.pairplot(df, hue='col')</code>
-          <p class="cmd-desc">Alle Feature-Paare als Scatter-Matrix — schneller Überblick über Zusammenhänge</p>
-          <pre class="cmd-code"><code class="language-python">sns.pairplot(df, hue='species')
-plt.show()</code></pre>
-          <pre class="cmd-out"># Gitter aus Scatterplots für 
-jedes Feature-Paar + Histogramme auf der Diagonale</pre>
-        </div>
-        <div class="cmd-card">
-          <code class="cmd-head">sns.lineplot(data=df, x=, y=)</code>
-          <p class="cmd-desc">Liniendiagramm mit automatischem Konfidenzband bei mehreren Werten</p>
-          <pre class="cmd-code"><code class="language-python">sns.lineplot(data=df, x='epoch', y='loss')
-plt.show()</code></pre>
-          <pre class="cmd-out"># Linienverlauf, Schattierung = Konfidenzintervall</pre>
-        </div>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">sns.boxplot(data=df, x=, y=)</p>
+        <p>Verteilung pro Kategorie — Median, Quartile, Ausreißer</p>
       </div>
+      <pre><code class="language-python">sns.boxplot(data=df, x='species', y='petal_width')
+plt.show()</code></pre>
+      <pre class="ref-out"># Box-Plot pro species mit 
+            Median, IQR, Ausreißer-Punkten</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">sns.histplot(data=df, x=, hue=, kde=True)</p>
+        <p>Histogramm mit optionaler Dichteschätzung (KDE)</p>
+      </div>
+      <pre><code class="language-python">sns.histplot(data=df, x='petal_width', hue='species', kde=True)
+plt.show()</code></pre>
+      <pre class="ref-out"># Histogramm + glatte Dichtekurve, 
+            pro species eingefärbt</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">sns.pairplot(df, hue='col')</p>
+        <p>Alle Feature-Paare als Scatter-Matrix — schneller Überblick über Zusammenhänge</p>
+      </div>
+      <pre><code class="language-python">sns.pairplot(df, hue='species')
+plt.show()</code></pre>
+      <pre class="ref-out"># Gitter aus Scatterplots für 
+jedes Feature-Paar + Histogramme auf der Diagonale</pre>
+    </div>
+    <div class="ref-ex">
+      <div class="ref-ex-meta">
+        <p class="ref-sub">sns.lineplot(data=df, x=, y=)</p>
+        <p>Liniendiagramm mit automatischem Konfidenzband bei mehreren Werten</p>
+      </div>
+      <pre><code class="language-python">sns.lineplot(data=df, x='epoch', y='loss')
+plt.show()</code></pre>
+      <pre class="ref-out"># Linienverlauf, Schattierung = Konfidenzintervall</pre>
+    </div>
+  </div>
+  
       <div class="info-box">
         Seaborn baut auf Matplotlib auf — <code>plt.show()</code>, <code>plt.title()</code>, <code>plt.xlabel()</code> etc. funktionieren genauso. Mit <code>data=df</code> und Spaltennamen als <code>x=</code>/<code>y=</code>/<code>hue=</code> entfällt manuelles Indexieren.
       </div>
@@ -484,20 +581,26 @@ plt.show()</code></pre>
   </div>
 
   <site-footer caption="PRM · Während der Prüfung · Matplotlib &amp; Pandas-Referenz"></site-footer>
-
   <script>
-    const sideLinks = document.querySelectorAll('#section-nav a');
-    const sections = document.querySelectorAll('.pruef-section');
-    const setActive = () => {
-      let current = sections[0]?.id;
-      const probe = window.scrollY + 140;
+  (function(){
+    const bar      = document.getElementById('topic-filter-bar');
+    const sections = document.querySelectorAll('.pruef-section[data-topic]');
+    if (!bar) return;
+    bar.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-kf]');
+      if (!btn) return;
+      const kf = btn.dataset.kf;
+      bar.querySelectorAll('[data-kf]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       sections.forEach(sec => {
-        if (sec.offsetTop <= probe) current = sec.id;
+        sec.classList.toggle('kf-hidden', kf !== 'all' && sec.dataset.topic !== kf);
       });
-      sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
-    };
-    document.addEventListener('scroll', setActive, { passive: true });
-    setActive();
+      if (kf !== 'all'){
+        const first = [...sections].find(s => !s.classList.contains('kf-hidden'));
+        if (first) setTimeout(() => first.scrollIntoView({behavior:'smooth',block:'start'}), 40);
+      }
+    });
+  })();
   </script>
 </body>
 </html>

@@ -46,6 +46,9 @@ class SiteHeader extends HTMLElement {
     const nav = (id, href, label) =>
       `<a href="${href}" ${page === id ? 'class="active"' : ''}>${label}</a>`;
 
+    const depthPrefixNav = /\/(Kapitel\d|Pruefung)\//.test(location.pathname) ? '../' : './';
+    const searchPageHref = `${depthPrefixNav}Suche.html`;
+
     this.innerHTML = `
       <a href="#main-content" class="skip-link">Zum Inhalt springen</a>
       <header class="header">
@@ -75,6 +78,7 @@ class SiteHeader extends HTMLElement {
             ${nav('k6','../Kapitel6/Kapitel6.html','6 · GMM')}
             ${nav('k7','../Kapitel7/Kapitel7.html','7 · Evaluation')}
             ${nav('pruefung','../Pruefung/Pruefung.html','🆘 Prüfung')}
+            ${nav('suche', searchPageHref, '🔎 Suche')}
           </nav>
           <button class="search-btn" data-search-toggle aria-label="Suche öffnen" title="Suche (Strg+K)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -122,6 +126,69 @@ class SiteHeader extends HTMLElement {
     this._initTheme();
     this._initSearch();
     this._initSidebarToggle();
+    this._initSearchHighlight();
+  }
+
+  // Wenn man von der Suchseite via "?hl=<begriff>" hierher springt: den
+  // Treffer im Seiteninhalt markieren und dorthin scrollen.
+  _initSearchHighlight() {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('hl');
+    if (!q) return;
+
+    const run = () => {
+      let root = document.body;
+      if (location.hash) {
+        const target = document.querySelector(location.hash);
+        if (target) root = target;
+      }
+
+      const qLower = q.toLowerCase();
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: (n) => {
+          const p = n.parentElement;
+          if (!p || ['SCRIPT', 'STYLE', 'MARK'].includes(p.tagName)) return NodeFilter.FILTER_REJECT;
+          return n.nodeValue.toLowerCase().includes(qLower) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+        }
+      });
+      const nodes = [];
+      let n;
+      while ((n = walker.nextNode())) nodes.push(n);
+
+      for (const tn of nodes) {
+        const text = tn.nodeValue;
+        const lower = text.toLowerCase();
+        const frag = document.createDocumentFragment();
+        let rest = text, restLower = lower, idx;
+        while ((idx = restLower.indexOf(qLower)) !== -1) {
+          if (idx > 0) frag.appendChild(document.createTextNode(rest.slice(0, idx)));
+          const mark = document.createElement('mark');
+          mark.className = 'search-hl';
+          mark.textContent = rest.slice(idx, idx + q.length);
+          frag.appendChild(mark);
+          rest = rest.slice(idx + q.length);
+          restLower = restLower.slice(idx + q.length);
+        }
+        if (rest) frag.appendChild(document.createTextNode(rest));
+        tn.parentNode.replaceChild(frag, tn);
+      }
+
+      const first = document.querySelector('.search-hl');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Query-Parameter entfernen, damit ein Reload nicht erneut markiert
+      params.delete('hl');
+      const qs = params.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+    };
+
+    // Falls die Seite Code-Blöcke hat, erst hljs fertig hervorheben lassen,
+    // sonst würde unsere Markierung wieder überschrieben.
+    if (document.querySelector('pre code')) {
+      setTimeout(run, 300);
+    } else {
+      run();
+    }
   }
 
   _initSidebarToggle() {
@@ -147,13 +214,27 @@ class SiteHeader extends HTMLElement {
     let index = null;
     let activeIdx = -1;
 
-    const depthPrefix = /\/(Kapitel\d|Pruefung)\//.test(location.pathname) ? '../' : './';
+    const depthPrefix    = /\/(Kapitel\d|Pruefung)\//.test(location.pathname) ? '../' : './';
+    const searchPageHref = depthPrefix + 'Suche.html';
     const resolveUrl = (url) => url === 'index.html'
       ? (depthPrefix === './' ? './index.html' : '../index.html')
       : depthPrefix + url;
 
     const loadIndex = async () => {
       if (index) return index;
+      // 1. Bereits per <script src="search-index.js"> geladen (file:// kompatibel)
+      if (window.__searchIndex__) { index = window.__searchIndex__; return index; }
+      // 2. Script-Tag injizieren — funktioniert auch auf file:// wo fetch() blockiert ist
+      const jsUrl = new URL('./search-index.js', import.meta.url).href;
+      await new Promise(resolve => {
+        const s = document.createElement('script');
+        s.src = jsUrl;
+        s.onload = resolve;
+        s.onerror = resolve;
+        document.head.appendChild(s);
+      });
+      if (window.__searchIndex__) { index = window.__searchIndex__; return index; }
+      // 3. Fallback: fetch (funktioniert auf echtem Server)
       try {
         const res = await fetch(new URL('./search-index.json', import.meta.url));
         index = await res.json();
@@ -207,6 +288,13 @@ class SiteHeader extends HTMLElement {
           if (!context) context = snippetAround(entry.text, query);
         }
 
+        // Treffer, die nur im vollständigen Code einer Code-Zelle stecken
+        // (z.B. Funktionsnamen wie "train_test_split"), zählen ebenfalls.
+        if (entry.code && entry.code.toLowerCase().includes(q)) {
+          score += 3;
+          if (!context || context === entry.h1) context = snippetAround(entry.code, query);
+        }
+
         if (entry.chapter && entry.chapter.toLowerCase().includes(q)) { score += 1; }
 
         if (score > 0) matches.push({ entry, context: context || entry.text || entry.h1 || '', score });
@@ -222,7 +310,10 @@ class SiteHeader extends HTMLElement {
           <div class="search-result-chapter">${escapeHtml(entry.chapter)}${entry.h1 ? ' · ' + escapeHtml(entry.h1) : ''}</div>
           <div class="search-result-title">${highlight(entry.title || entry.h1 || '', query)}</div>
           <div class="search-result-context">${highlight(context, query)}</div>
-        </a>`).join('');
+        </a>`).join('') + `
+        <a class="search-result search-result-more" href="${searchPageHref}?q=${encodeURIComponent(query)}">
+          🔎 Alle ${matches.length} Treffer auf der Suchseite anzeigen
+        </a>`;
     };
 
     const setActive = (i) => {

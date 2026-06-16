@@ -7,6 +7,8 @@
   <meta name="description" content="Kompakte Code-Snippets der wichtigsten Algorithmen aus K1–K7 von Grund auf: Scaler, Train/Test-Split, Gini/Entropie, k-Means, Entscheidungsbaum, Bagging, EM-Algorithmus, Confusion-Matrix-Metriken."/>
   <script type="module" src="../header.js"></script>
   <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
   <style>
     .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-6) var(--space-4) 0;text-align:center}
@@ -26,46 +28,61 @@
       font-weight:800;font-size:var(--text-sm);flex-shrink:0;
     }
     .pruef-section p.lead{color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--space-3)}
+    #scaler      {--sec-color:#0d9488}
+    #gini        {--sec-color:#2563eb}
+    #splitsuche  {--sec-color:#7c3aed}
+    #kmeans      {--sec-color:#d97706}
+    #bagging     {--sec-color:#db2777}
+    #em          {--sec-color:#dc2626}
+    #metriken    {--sec-color:#059669}
+    #pca         {--sec-color:#6366f1}
+    #boosting    {--sec-color:#ea580c}
+    /* section accent on h2 border */
+    .pruef-section h2{border-bottom-color:color-mix(in oklab,var(--sec-color,var(--color-border)) 50%,var(--color-border));scroll-margin-top:7rem}
+    .pruef-num{background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 15%,var(--color-surface-2))!important;color:var(--sec-color,var(--color-primary))!important}
+    .kapitel-filter-bar button.lernpfad-step{appearance:none;background:none;border:none;cursor:pointer;font-family:inherit}
+    .kapitel-filter-bar button.lernpfad-step.kf-all{--lp-color:var(--color-primary)}
+    .kf-hidden{display:none!important}
+    /* ── Responsive layout override ── */
+    #main-content.content{max-width:none;padding:var(--space-6) var(--space-8)}
+    @media(max-width:900px){#main-content.content{padding:var(--space-4)}}
   </style>
 </head>
 <body>
   <site-header active="pruefung" title="Code-from-Scratch-Referenz – PRM V5"></site-header>
 
-  <div class="pruef-layout">
-    <nav class="pruef-side">
-      <div class="pruef-side-group">
-        <div class="pruef-side-label">Während der Prüfung</div>
-        <a href="cheatsheet.html">📋 Cheat-Sheet</a>
-        <a href="entscheidungshilfe.html">🧭 Entscheidungshilfe</a>
-        <a href="numpy-referenz.html">🔢 NumPy</a>
-        <a href="sklearn-referenz.html">🚀 sklearn</a>
-        <a href="matplotlib-pandas-referenz.html">📊 Matplotlib &amp; Pandas</a>
-        <a href="python-stdlib-referenz.html">🐍 Python-Stdlib</a>
-        <a href="code-scratch-referenz.html" class="active">🛠️ Von Scratch</a>
-      </div>
-      <div class="pruef-side-group" id="section-nav">
-        <div class="pruef-side-label">Auf dieser Seite</div>
-        <a href="#scaler">1 · Scaler &amp; Split</a>
-        <a href="#gini">2 · Gini/Entropie</a>
-        <a href="#splitsuche">3 · Split-Suche</a>
-        <a href="#kmeans">4 · k-Means</a>
-        <a href="#bagging">5 · Bagging</a>
-        <a href="#em">6 · EM-Algorithmus</a>
-        <a href="#metriken">7 · Metriken</a>
-        <a href="#pca">8 · PCA</a>
-        <a href="#boosting">9 · Gradient Boosting</a>
-      </div>
-    </nav>
+  <div class="layout">
+    <site-sidebar active="pruefung/scratch"></site-sidebar>
 
+  <main id="main-content" class="content">
     <div class="pruef-hero">
       <h1>🛠️ Von Scratch · Code-Referenz</h1>
       <p>Die Kernlogik der wichtigsten selbst implementierten Algorithmen — kompakt zum Nachschlagen, falls in der Prüfung "implementiere von Hand" gefragt ist.</p>
     </div>
-
-  <main id="main-content" class="pruef-main">
+    <nav class="lernpfad-bar kapitel-filter-bar" id="topic-filter-bar" aria-label="Nach Thema filtern">
+      <button class="lernpfad-step kf-all active" data-kf="all" style="--lp-color:var(--color-primary)"><span class="lp-icon">📚</span><span>Alle</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#0d9488" data-kf="scaler"><span class="lp-icon">⚖️</span><span>Scaler</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#2563eb" data-kf="gini"><span class="lp-icon">🌳</span><span>Gini/Entropie</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#7c3aed" data-kf="splitsuche"><span class="lp-icon">✂️</span><span>Split-Suche</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#d97706" data-kf="kmeans"><span class="lp-icon">🔵</span><span>k-Means</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#db2777" data-kf="bagging"><span class="lp-icon">🎲</span><span>Bagging</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#dc2626" data-kf="em"><span class="lp-icon">📐</span><span>EM</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#059669" data-kf="metriken"><span class="lp-icon">📊</span><span>Metriken</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#6366f1" data-kf="pca"><span class="lp-icon">🔢</span><span>PCA</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#ea580c" data-kf="boosting"><span class="lp-icon">🚀</span><span>Boosting</span></button>
+    </nav>
 
     <!-- ═══ 1 · SCALER & TRAIN/TEST SPLIT ═══ -->
-    <section class="pruef-section" id="scaler">
+    <section class="pruef-section" id="scaler" data-topic="scaler">
       <h2><span class="pruef-num">1</span> Scaler &amp; Train/Test-Split</h2>
       <p class="lead">Z-Score-Standardisierung und ein einfacher Split ohne sklearn.</p>
       <div class="code-cell">
@@ -96,7 +113,7 @@
     </section>
 
     <!-- ═══ 2 · GINI / ENTROPIE / INFORMATION GAIN ═══ -->
-    <section class="pruef-section" id="gini">
+    <section class="pruef-section" id="gini" data-topic="gini">
       <h2><span class="pruef-num">2</span> Gini, Entropie &amp; Information Gain</h2>
       <p class="lead">Splitkriterien für Entscheidungsbäume.</p>
       <div class="code-cell">
@@ -132,7 +149,7 @@
     </section>
 
     <!-- ═══ 3 · ENTSCHEIDUNGSBAUM SPLIT-SUCHE ═══ -->
-    <section class="pruef-section" id="splitsuche">
+    <section class="pruef-section" id="splitsuche" data-topic="splitsuche">
       <h2><span class="pruef-num">3</span> Entscheidungsbaum: Besten Split finden</h2>
       <p class="lead">Iteriert über alle Features und alle Schwellenwerte, wählt den Split mit dem höchsten Information Gain.</p>
       <div class="code-cell">
@@ -157,7 +174,7 @@
     </section>
 
     <!-- ═══ 4 · K-MEANS ═══ -->
-    <section class="pruef-section" id="kmeans">
+    <section class="pruef-section" id="kmeans" data-topic="kmeans">
       <h2><span class="pruef-num">4</span> k-Means-Algorithmus</h2>
       <p class="lead">Init → Zuweisung → Update, bis Konvergenz oder max_iter.</p>
       <div class="code-cell">
@@ -190,7 +207,7 @@
     </section>
 
     <!-- ═══ 5 · BAGGING ═══ -->
-    <section class="pruef-section" id="bagging">
+    <section class="pruef-section" id="bagging" data-topic="bagging">
       <h2><span class="pruef-num">5</span> Bagging (Bootstrap Aggregating)</h2>
       <p class="lead">Trainiert mehrere Modelle auf Bootstrap-Stichproben und kombiniert per Mehrheitsentscheid (Klassifikation) bzw. Mittelwert (Regression).</p>
       <div class="code-cell">
@@ -222,7 +239,7 @@
     </section>
 
     <!-- ═══ 6 · EM-ALGORITHMUS ═══ -->
-    <section class="pruef-section" id="em">
+    <section class="pruef-section" id="em" data-topic="em">
       <h2><span class="pruef-num">6</span> EM-Algorithmus (Gaussian Mixture)</h2>
       <p class="lead">E-Step: Verantwortlichkeiten (Soft-Zuordnung) berechnen. M-Step: Parameter (μ, Σ, π) anhand der Verantwortlichkeiten neu schätzen.</p>
       <div class="code-cell">
@@ -259,7 +276,7 @@ def e_step(X, means, covariances, weights):
     </section>
 
     <!-- ═══ 7 · CONFUSION-MATRIX-METRIKEN ═══ -->
-    <section class="pruef-section" id="metriken">
+    <section class="pruef-section" id="metriken" data-topic="metriken">
       <h2><span class="pruef-num">7</span> Confusion-Matrix-Metriken</h2>
       <p class="lead">Accuracy, Precision, Recall, F1 direkt aus TP/FP/FN/TN — siehe auch den <a href="cheatsheet.html#k7">Live-Rechner im Cheat-Sheet</a>.</p>
       <div class="code-cell">
@@ -292,7 +309,7 @@ def e_step(X, means, covariances, weights):
     </section>
 
     <!-- ═══ 8 · PCA ═══ -->
-    <section class="pruef-section" id="pca">
+    <section class="pruef-section" id="pca" data-topic="pca">
       <h2><span class="pruef-num">8</span> PCA via Eigenzerlegung</h2>
       <p class="lead">Zentrieren → Kovarianzmatrix → Eigenzerlegung → absteigend sortieren → projizieren.</p>
       <div class="code-cell">
@@ -335,7 +352,7 @@ def pca_inverse_transform(X_proj, mean, components):
     </section>
 
     <!-- ═══ 9 · GRADIENT BOOSTING ═══ -->
-    <section class="pruef-section" id="boosting">
+    <section class="pruef-section" id="boosting" data-topic="boosting">
       <h2><span class="pruef-num">9</span> Gradient Boosting</h2>
       <p class="lead">Startwert = Mittelwert von y → Residuen berechnen → flachen Baum auf Residuen fitten → additiv mit learning_rate aktualisieren → wiederholen.</p>
       <div class="code-cell">
@@ -376,21 +393,6 @@ def gb_fit(X, y, n_estimators=20, learning_rate=0.5, max_depth=1):
   <site-footer caption="PRM · Während der Prüfung · Code-from-Scratch-Referenz"></site-footer>
 
   <script>
-    const sideLinks = document.querySelectorAll('#section-nav a');
-    const sections = document.querySelectorAll('.pruef-section');
-    const setActive = () => {
-      let current = sections[0]?.id;
-      const probe = window.scrollY + 140;
-      sections.forEach(sec => {
-        if (sec.offsetTop <= probe) current = sec.id;
-      });
-      sideLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
-    };
-    document.addEventListener('scroll', setActive, { passive: true });
-    setActive();
-  </script>
-
-  <script>
     function copyCode(btn) {
       const code = btn.closest('.code-cell').querySelector('code').textContent;
       navigator.clipboard.writeText(code).then(() => {
@@ -399,6 +401,27 @@ def gb_fit(X, y, n_estimators=20, learning_rate=0.5, max_depth=1):
         setTimeout(() => { btn.textContent = original; }, 1500);
       });
     }
+  </script>
+  <script>
+  (function(){
+    const bar      = document.getElementById('topic-filter-bar');
+    const sections = document.querySelectorAll('.pruef-section[data-topic]');
+    if (!bar) return;
+    bar.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-kf]');
+      if (!btn) return;
+      const kf = btn.dataset.kf;
+      bar.querySelectorAll('[data-kf]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sections.forEach(sec => {
+        sec.classList.toggle('kf-hidden', kf !== 'all' && sec.dataset.topic !== kf);
+      });
+      if (kf !== 'all'){
+        const first = [...sections].find(s => !s.classList.contains('kf-hidden'));
+        if (first) setTimeout(() => first.scrollIntoView({behavior:'smooth',block:'start'}), 40);
+      }
+    });
+  })();
   </script>
 </body>
 </html>

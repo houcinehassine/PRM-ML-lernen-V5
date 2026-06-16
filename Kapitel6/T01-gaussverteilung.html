@@ -162,6 +162,31 @@ scipy:   [0.14358063 0.18324045 0.06907476]</pre>
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Gaußverteilung in 1D und 2D</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (gaussian_pdf_1d, gaussian_pdf_nd, mu2d, Sigma2d)
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6))
+
+xs = np.linspace(-3, 5, 200)
+axes[0].plot(xs, gaussian_pdf_1d(xs, mu=1.0, sigma2=1.0))
+axes[0].set_title("1D Gaußverteilung (μ=1, σ²=1)")
+axes[0].set_xlabel("x"); axes[0].set_ylabel("Dichte")
+
+xx, yy = np.meshgrid(np.linspace(-2, 4, 100), np.linspace(-2, 3, 100))
+grid = np.column_stack([xx.ravel(), yy.ravel()])
+Z = gaussian_pdf_nd(grid, mu2d, Sigma2d).reshape(xx.shape)
+axes[1].contourf(xx, yy, Z, levels=20, cmap='viridis')
+axes[1].set_title("2D Gaußverteilung — Konturen")
+axes[1].set_xlabel("x1"); axes[1].set_ylabel("x2")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
+          </div>
+
           <div class="vis-box">
             <div class="vis-box-label">📊 Visualisierung — Gaußverteilung in 1D und 2D</div>
             <p>
@@ -258,6 +283,29 @@ print(f"Genauigkeit mit wahren Parametern: {accuracy:.2%}")</code></pre>
                 <pre>Genauigkeit mit wahren Parametern: 97.60%</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Responsibilities &amp; Komponenten-Konturen</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X, r1, comp1, comp2)
+import matplotlib.pyplot as plt
+import numpy as np
+
+fig, ax = plt.subplots(figsize=(5.5, 4))
+sc = ax.scatter(X[:, 0], X[:, 1], c=r1, cmap='coolwarm', s=20, edgecolors='k', linewidths=0.3)
+
+xx, yy = np.meshgrid(
+    np.linspace(X[:, 0].min() - 1, X[:, 0].max() + 1, 100),
+    np.linspace(X[:, 1].min() - 1, X[:, 1].max() + 1, 100)
+)
+grid = np.column_stack([xx.ravel(), yy.ravel()])
+ax.contour(xx, yy, comp1.pdf(grid).reshape(xx.shape), levels=4, colors='blue', alpha=0.5)
+ax.contour(xx, yy, comp2.pdf(grid).reshape(xx.shape), levels=4, colors='red', alpha=0.5)
+
+fig.colorbar(sc, ax=ax, label='Responsibility r1')
+ax.set_title("GMM Responsibilities & Komponenten-Konturen")
+plt.show()
+</code></pre>
           </div>
 
           <div class="compare-grid">

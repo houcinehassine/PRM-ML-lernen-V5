@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aufgaben-Templates – PRM V5</title>
+  <meta name="description" content="Fertige, komplett lauffähige Code-Templates für die häufigsten Prüfungsaufgaben — direkt kopierbar ohne Nachdenken."/>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .pruef-hero{max-width:880px;margin:0 auto var(--space-6);padding:var(--space-6) var(--space-4) 0;text-align:center}
+    .pruef-hero h1{font-family:var(--font-display);font-size:var(--text-xl);margin-bottom:var(--space-2)}
+    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:64ch;margin:0 auto}
+    .pruef-section{max-width:880px;margin:0 auto var(--space-10);padding:0 var(--space-4)}
+    .pruef-section h2{
+      display:flex;align-items:center;gap:var(--space-3);
+      margin-bottom:var(--space-4);padding-bottom:var(--space-2);
+      border-bottom:2px solid var(--color-border);
+      scroll-margin-top:4.5rem;
+    }
+    .pruef-num{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:2rem;height:2rem;border-radius:var(--radius-md);
+      background:var(--color-primary-highlight);color:var(--color-primary);
+      font-weight:800;font-size:var(--text-sm);flex-shrink:0;
+    }
+    .pruef-section p.lead{color:var(--color-text-muted);font-size:var(--text-sm);margin-bottom:var(--space-3)}
+    #preprocessing  { --sec-color: #0d9488 }
+    #klassifikation { --sec-color: #2563eb }
+    #svm            { --sec-color: #7c3aed }
+    #clustering     { --sec-color: #d97706 }
+    #ensemble       { --sec-color: #db2777 }
+    #evaluation     { --sec-color: #059669 }
+    /* section accent on h2 border */
+    .pruef-section h2{border-bottom-color:color-mix(in oklab,var(--sec-color,var(--color-border)) 50%,var(--color-border));scroll-margin-top:7rem}
+    .pruef-num{background:color-mix(in oklab,var(--sec-color,var(--color-primary)) 15%,var(--color-surface-2))!important;color:var(--sec-color,var(--color-primary))!important}
+    .kapitel-filter-bar button.lernpfad-step{appearance:none;background:none;border:none;cursor:pointer;font-family:inherit}
+    .kapitel-filter-bar button.lernpfad-step.kf-all{--lp-color:var(--color-primary)}
+    .kf-hidden{display:none!important}
+    /* ── Responsive layout override ── */
+    #main-content.content{max-width:none;padding:var(--space-6) var(--space-8)}
+    @media(max-width:900px){#main-content.content{padding:var(--space-4)}}
+  </style>
+</head>
+<body>
+  <site-header active="pruefung" title="Aufgaben-Templates – PRM V5"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="pruefung/templates"></site-sidebar>
+
+  <main id="main-content" class="content">
+    <div class="pruef-hero">
+      <h1>📄 Aufgaben-Templates</h1>
+      <p>Fertige Templates für die häufigsten Prüfungsaufgaben. Kopiere, passe die Variablen an, fertig.</p>
+    </div>
+
+    <nav class="lernpfad-bar kapitel-filter-bar" id="topic-filter-bar" aria-label="Nach Thema filtern">
+      <button class="lernpfad-step kf-all active" data-kf="all" style="--lp-color:var(--color-primary)"><span class="lp-icon">📚</span><span>Alle</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#0d9488" data-kf="preprocessing"><span class="lp-icon">⚖️</span><span>K1 · Preprocessing</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#2563eb" data-kf="klassifikation"><span class="lp-icon">🤖</span><span>K2/K3 · Klassifikation</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#7c3aed" data-kf="svm"><span class="lp-icon">🔍</span><span>K3 · SVM &amp; Tuning</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#d97706" data-kf="clustering"><span class="lp-icon">🔵</span><span>K4/K6 · Clustering</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#db2777" data-kf="ensemble"><span class="lp-icon">🌲</span><span>K5 · Ensemble</span></button>
+      <span class="lp-sep">›</span>
+      <button class="lernpfad-step" style="--lp-color:#059669" data-kf="evaluation"><span class="lp-icon">📊</span><span>K7 · Evaluation</span></button>
+    </nav>
+
+    <!-- ═══ 1 · PREPROCESSING & SPLIT ═══ -->
+    <section class="pruef-section" id="preprocessing" data-topic="preprocessing">
+      <h2><span class="pruef-num">1</span> ⚖️ Preprocessing &amp; Split</h2>
+      <p class="lead">Imports, Datenvorbereitung, Train/Test-Split und Skalierung — die Basis jedes Prüfungsaufgabe.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, LabelEncoder, OneHotEncoder
+
+# ── Daten vorbereiten ──────────────────────────────────────
+# df = pd.read_csv('data.csv')
+X = df.drop(columns=['target']).to_numpy()
+y = df['target'].to_numpy()
+
+# Kategorische Zielvariable kodieren (wenn nötig)
+le = LabelEncoder()
+y = le.fit_transform(y)
+
+# ── Train/Test-Split ───────────────────────────────────────
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# ── Skalierung (IMMER nach dem Split!) ────────────────────
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)  # fit+transform auf Train
+X_test_s  = scaler.transform(X_test)       # nur transform auf Test</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 2 · KLASSIFIKATION ═══ -->
+    <section class="pruef-section" id="klassifikation" data-topic="klassifikation">
+      <h2><span class="pruef-num">2</span> 🤖 Klassifikation</h2>
+      <p class="lead">Logistische Regression und Multi-Modell-Vergleich für Klassifikationsaufgaben.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — Logistic Regression</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+model = LogisticRegression(max_iter=1000, random_state=42)
+model.fit(X_train_s, y_train)
+y_pred = model.predict(X_test_s)
+
+acc = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {acc:.4f}")
+print(classification_report(y_test, y_pred))</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — Mehrere Modelle vergleichen</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+
+modelle = {
+    'LogReg': LogisticRegression(max_iter=1000, random_state=42),
+    'KNN-5':  KNeighborsClassifier(n_neighbors=5),
+    'Tree':   DecisionTreeClassifier(max_depth=5, random_state=42),
+}
+for name, m in modelle.items():
+    m.fit(X_train_s, y_train)
+    acc = accuracy_score(y_test, m.predict(X_test_s))
+    print(f"{name:8s}: {acc:.4f}")</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 3 · SVM & TUNING ═══ -->
+    <section class="pruef-section" id="svm" data-topic="svm">
+      <h2><span class="pruef-num">3</span> 🔍 SVM &amp; Hyperparameter-Tuning</h2>
+      <p class="lead">SVM direkt anwenden oder mit GridSearchCV die besten Hyperparameter finden.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — SVM direkt</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, classification_report
+
+model = SVC(kernel='rbf', C=1.0, gamma='scale', random_state=42)
+model.fit(X_train_s, y_train)
+y_pred = model.predict(X_test_s)
+
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")
+print(classification_report(y_test, y_pred))</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — GridSearchCV für SVM</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    'C':      [0.1, 1, 10, 100],
+    'gamma':  [0.001, 0.01, 0.1, 'scale'],
+    'kernel': ['rbf', 'linear'],
+}
+base_model = SVC(random_state=42)
+grid = GridSearchCV(base_model, param_grid, cv=5, scoring='accuracy', n_jobs=-1)
+grid.fit(X_train_s, y_train)
+
+print("Beste Parameter:", grid.best_params_)
+print(f"Bester CV-Score: {grid.best_score_:.4f}")
+print(f"Test-Score:      {grid.score(X_test_s, y_test):.4f}")</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 4 · CLUSTERING ═══ -->
+    <section class="pruef-section" id="clustering" data-topic="clustering">
+      <h2><span class="pruef-num">4</span> 🔵 Clustering</h2>
+      <p class="lead">KMeans mit Elbow-Methode und Gaussian Mixture Model für unüberwachte Aufgaben.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — KMeans + Elbow</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+# Elbow-Methode: bestes k finden
+inertias = []
+for k in range(1, 11):
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    km.fit(X_train_s)
+    inertias.append(km.inertia_)
+# inertias plotten → Knick = bestes k
+
+# Mit bestem k fitten
+model = KMeans(n_clusters=3, random_state=42, n_init=10)
+labels = model.fit_predict(X_train_s)
+
+inertia = model.inertia_
+sil      = silhouette_score(X_train_s, labels)
+print(f"Inertia:          {inertia:.2f}")
+print(f"Silhouette Score: {sil:.3f}")  # nahe 1 = gut</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — GMM (Gaussian Mixture)</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.mixture import GaussianMixture
+from sklearn.metrics import silhouette_score
+
+gmm = GaussianMixture(n_components=3, covariance_type='full', random_state=42)
+gmm.fit(X_train_s)
+
+labels  = gmm.predict(X_train_s)            # harte Zuordnung
+probs   = gmm.predict_proba(X_train_s)      # Soft-Zuordnung (Verantwortlichkeiten)
+log_lik = gmm.score(X_train_s)              # Log-Likelihood pro Sample
+bic     = gmm.bic(X_train_s)               # Modellvergleich (niedriger = besser)
+aic     = gmm.aic(X_train_s)
+
+sil = silhouette_score(X_train_s, labels)
+print(f"BIC: {bic:.2f}  AIC: {aic:.2f}")
+print(f"Log-Likelihood: {log_lik:.3f}")
+print(f"Silhouette: {sil:.3f}")</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 5 · ENSEMBLE ═══ -->
+    <section class="pruef-section" id="ensemble" data-topic="ensemble">
+      <h2><span class="pruef-num">5</span> 🌲 Ensemble-Methoden</h2>
+      <p class="lead">Random Forest mit Feature Importance und Gradient Boosting für leistungsstarke Vorhersagen.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — Random Forest</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+import numpy as np
+
+rf = RandomForestClassifier(
+    n_estimators=100, max_depth=None,
+    max_features='sqrt', random_state=42
+)
+rf.fit(X_train_s, y_train)
+y_pred = rf.predict(X_test_s)
+
+acc = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {acc:.4f}")
+print(classification_report(y_test, y_pred))
+
+# Feature Importance
+importances = rf.feature_importances_
+indices     = np.argsort(importances)[::-1]
+print("Top-5 Features:", indices[:5], importances[indices[:5]])</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — Gradient Boosting</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import accuracy_score
+
+gbc = GradientBoostingClassifier(
+    n_estimators=100, learning_rate=0.1,
+    max_depth=3, random_state=42
+)
+gbc.fit(X_train_s, y_train)
+y_pred = gbc.predict(X_test_s)
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.4f}")</code></pre>
+      </div>
+    </section>
+
+    <!-- ═══ 6 · EVALUATION ═══ -->
+    <section class="pruef-section" id="evaluation" data-topic="evaluation">
+      <h2><span class="pruef-num">6</span> 📊 Evaluation</h2>
+      <p class="lead">Vollständige Metriken und Cross-Validation für eine robuste Modellbewertung.</p>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — Vollständige Evaluation</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    confusion_matrix, classification_report, roc_auc_score
+)
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+
+# ── Basis-Metriken ─────────────────────────────────────────
+y_pred = model.predict(X_test_s)
+print(f"Accuracy:  {accuracy_score(y_test, y_pred):.4f}")
+print(f"Precision: {precision_score(y_test, y_pred, average='weighted'):.4f}")
+print(f"Recall:    {recall_score(y_test, y_pred, average='weighted'):.4f}")
+print(f"F1-Score:  {f1_score(y_test, y_pred, average='weighted'):.4f}")
+print()
+print(classification_report(y_test, y_pred))
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))</code></pre>
+      </div>
+      <div class="code-cell">
+        <div class="code-cell-header">
+          <span>Python — Cross-Validation</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><code class="language-python">from sklearn.model_selection import cross_val_score, StratifiedKFold
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
+print(f"CV-Scores:  {scores}")
+print(f"Mean ± Std: {scores.mean():.4f} ± {scores.std():.4f}")</code></pre>
+      </div>
+    </section>
+
+  </main>
+  </div>
+
+  <site-footer caption="PRM · Während der Prüfung · Aufgaben-Templates"></site-footer>
+
+  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.code-cell').querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = original; }, 1500);
+      });
+    }
+  </script>
+  <script>
+  (function(){
+    const bar      = document.getElementById('topic-filter-bar');
+    const sections = document.querySelectorAll('.pruef-section[data-topic]');
+    if (!bar) return;
+    bar.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-kf]');
+      if (!btn) return;
+      const kf = btn.dataset.kf;
+      bar.querySelectorAll('[data-kf]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sections.forEach(sec => {
+        sec.classList.toggle('kf-hidden', kf !== 'all' && sec.dataset.topic !== kf);
+      });
+      if (kf !== 'all'){
+        const first = [...sections].find(s => !s.classList.contains('kf-hidden'));
+        if (first) setTimeout(() => first.scrollIntoView({behavior:'smooth',block:'start'}), 40);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

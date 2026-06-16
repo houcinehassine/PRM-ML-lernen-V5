@@ -198,13 +198,39 @@ sklearn Tree: 100.00%</pre>
             </div>
           </div>
 
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Entscheidungsregionen (Petal Length/Width)</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (X_tr, y_tr)
+import matplotlib.pyplot as plt
+import numpy as np
+
+X2 = X_tr[:, 2:4]
+dt2d = DecisionTreeScratch(max_depth=5)
+dt2d.fit(X2, y_tr)
+
+xx, yy = np.meshgrid(
+    np.linspace(X2[:, 0].min() - 0.5, X2[:, 0].max() + 0.5, 200),
+    np.linspace(X2[:, 1].min() - 0.5, X2[:, 1].max() + 0.5, 200)
+)
+Z = dt2d.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.contourf(xx, yy, Z, alpha=0.3, cmap='viridis')
+ax.scatter(X2[:, 0], X2[:, 1], c=y_tr, cmap='viridis', s=25, edgecolors='k', linewidths=0.3)
+ax.set_xlabel("Petal Length")
+ax.set_ylabel("Petal Width")
+ax.set_title("Entscheidungsbaum von Scratch — Entscheidungsregionen")
+plt.show()
+</code></pre>
+          </div>
+
           <div class="vis-box">
             <div class="vis-box-label">📊 Visualisierung — Baumstruktur &amp; Splits</div>
             <p>
               Stell dir den Baum als verschachtelte Wenn-Dann-Fragen vor: Der erste Split
               trennt z.B. anhand der Blütenblattlänge eine Klasse vollständig ab, weitere
-              Splits unterteilen die restlichen Klassen immer feiner. Jeder Split zerschneidet
-              den Feature-Raum mit einer achsenparallelen Linie (oder Ebene bei mehr Features) —
+              Splits unterteilen die restlichen Klassen immer feiner. Der Plot oben zeigt,
+              wie jeder Split den Feature-Raum mit einer achsenparallelen Linie zerschneidet —
               das Ergebnis sind rechteckige Entscheidungsregionen, eine pro Blatt.
             </p>
           </div>
@@ -300,6 +326,39 @@ print(f"Mit Regularisierung: {dt2.score(X_te, y_te):.2%}")</code></pre>
                 <pre>Mit Regularisierung: 100.00%</pre>
               </div>
             </div>
+          </div>
+
+          <div class="code-cell" data-runnable="true">
+            <div class="code-cell-header"><span class="cell-lang">🐍 Plot-Code — Ergebnis: Validation Curve &amp; regularisierte Regionen</span><button class="copy-btn" onclick="copyCode(this)">Kopieren</button></div>
+            <pre><code class="language-python"># baut auf der vorherigen Zelle auf (train_s, val_s, best_depth, X_tr, y_tr, params, dt2)
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.tree import DecisionTreeClassifier
+
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.6))
+
+depths = list(range(1, 15))
+axes[0].plot(depths, train_s.mean(axis=1), 'o-', label='Train')
+axes[0].plot(depths, val_s.mean(axis=1), 'o-', label='Validation')
+axes[0].axvline(best_depth, color='r', linestyle='--', label=f'best_depth={best_depth}')
+axes[0].set_xlabel("max_depth"); axes[0].set_ylabel("Accuracy")
+axes[0].set_title("Validation Curve"); axes[0].legend()
+
+X2 = X_tr[:, 2:4]
+dt2_2d = DecisionTreeClassifier(**params, random_state=42).fit(X2, y_tr)
+xx, yy = np.meshgrid(
+    np.linspace(X2[:, 0].min() - 0.5, X2[:, 0].max() + 0.5, 200),
+    np.linspace(X2[:, 1].min() - 0.5, X2[:, 1].max() + 0.5, 200)
+)
+Z = dt2_2d.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+axes[1].contourf(xx, yy, Z, alpha=0.3, cmap='viridis')
+axes[1].scatter(X2[:, 0], X2[:, 1], c=y_tr, cmap='viridis', s=25, edgecolors='k', linewidths=0.3)
+axes[1].set_xlabel("Petal Length"); axes[1].set_ylabel("Petal Width")
+axes[1].set_title("Regularisierter Baum — Regionen")
+
+plt.tight_layout()
+plt.show()
+</code></pre>
           </div>
 
           <div class="compare-grid">

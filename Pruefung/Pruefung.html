@@ -4,134 +4,281 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Während der Prüfung – PRM V5</title>
-  <meta name="description" content="Schnellzugriff für die Prüfung: Cheat-Sheet, Entscheidungshilfen, NumPy- und sklearn-Referenz sowie Code-from-Scratch-Übersicht."/>
+  <meta name="description" content="Schnellzugriff für die Prüfung: Cheat-Sheet, Entscheidungshilfen, Fehler-Guide, NumPy- und sklearn-Referenz sowie Code-from-Scratch-Übersicht."/>
   <script type="module" src="../header.js"></script>
   <script type="module" src="../footer.js"></script>
+  <script src="sidebar.js"></script>
+  <script type="module" src="../lernpfad.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
   <style>
-    .pruef-hero{max-width:880px;margin:0 auto var(--space-8);padding:var(--space-6) var(--space-4) 0;text-align:center}
-    .pruef-hero h1{font-family:var(--font-display);font-size:var(--text-xl);margin-bottom:var(--space-2)}
-    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:64ch;margin:0 auto}
+    /* ── Layout override: Pruefung.html nutzt full-width content ── */
+    #main-content.content{max-width:none;padding:var(--space-6) var(--space-8)}
+    @media(max-width:900px){#main-content.content{padding:var(--space-4)}}
+
+    /* ── Hero ── */
+    .pruef-hero{margin-bottom:var(--space-6)}
+    .pruef-hero h1{font-family:var(--font-display);font-size:clamp(1.6rem,3.5vw,2.2rem);margin-bottom:var(--space-2)}
+    .pruef-hero p{color:var(--color-text-muted);font-size:var(--text-sm);max-width:68ch;margin:0}
+
+    /* ── Schnellsuche-Banner ── */
+    .search-banner{
+      display:flex;align-items:center;gap:var(--space-3);
+      padding:var(--space-3) var(--space-4);
+      border-radius:var(--radius-lg);
+      background:color-mix(in oklab,var(--color-primary) 8%,var(--color-surface));
+      border:1px solid color-mix(in oklab,var(--color-primary) 20%,var(--color-border));
+      margin-bottom:var(--space-6);
+      flex-wrap:wrap;
+    }
+    .search-banner-text{flex:1;min-width:0}
+    .search-banner-text strong{display:block;font-size:.95rem;margin-bottom:.2rem}
+    .search-banner-text span{font-size:.85rem;color:var(--color-text-muted)}
+    .search-banner-btn{
+      display:inline-flex;align-items:center;gap:var(--space-2);
+      padding:.5rem 1.1rem;border-radius:var(--radius-md);
+      background:var(--color-primary);color:#fff;
+      text-decoration:none;font-size:.875rem;font-weight:600;
+      white-space:nowrap;transition:opacity .15s;
+    }
+    .search-banner-btn:hover{opacity:.88}
+    .search-banner kbd{
+      display:inline-flex;align-items:center;padding:.15rem .4rem;
+      border-radius:var(--radius-sm);
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      font-size:.8rem;font-family:var(--font-mono);color:var(--color-text-muted);
+    }
+
+    /* ── Schnellzugriff-Leiste ── */
+    .quick-bar{margin-bottom:var(--space-6)}
+    .quick-bar h2{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted);margin-bottom:var(--space-3)}
+    .quick-links{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+    .quick-link{
+      display:inline-flex;align-items:center;gap:var(--space-1);
+      padding:.4rem .9rem;border-radius:var(--radius-lg);
+      background:var(--color-surface-2);border:1px solid var(--color-border);
+      text-decoration:none;font-size:.84rem;color:var(--color-text);
+      transition:border-color .15s,background .15s;
+      white-space:nowrap;
+    }
+    .quick-link:hover{background:var(--color-surface);border-color:var(--color-primary);color:var(--color-primary)}
+
+    /* ── Referenz-Karten-Grid ── */
+    .ref-cards-heading{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted);margin-bottom:var(--space-3)}
+    .ref-cards-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      gap:var(--space-4);
+      margin-bottom:var(--space-10);
+    }
+    .ref-card{
+      display:flex;flex-direction:column;
+      border:1px solid var(--color-border);border-radius:var(--radius-lg);
+      background:var(--color-surface);overflow:hidden;
+      text-decoration:none;color:inherit;
+      transition:border-color .18s,transform .18s,box-shadow .18s;
+      border-top:3px solid var(--card-color,var(--color-primary));
+    }
+    .ref-card:hover{
+      border-color:var(--card-color,var(--color-primary));
+      transform:translateY(-2px);
+      box-shadow:0 4px 16px color-mix(in oklab,var(--card-color,var(--color-primary)) 14%,transparent);
+    }
+    .ref-card-body{padding:var(--space-4);flex:1;display:flex;flex-direction:column;gap:var(--space-2)}
+    .ref-card-icon{font-size:2rem;line-height:1;margin-bottom:var(--space-1)}
+    .ref-card-title{font-size:1.05rem;font-weight:700;font-family:var(--font-display);line-height:1.3}
+    .ref-card-desc{font-size:.875rem;color:var(--color-text-muted);line-height:1.55;flex:1}
+    .ref-card-footer{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:var(--space-3) var(--space-4);
+      border-top:1px solid var(--color-border);
+      background:color-mix(in oklab,var(--card-color,var(--color-primary)) 4%,var(--color-surface-2));
+    }
+    .ref-card-footer span{
+      font-size:.8rem;color:var(--color-text-muted);
+    }
+    .ref-card-open{
+      display:inline-flex;align-items:center;gap:.3rem;
+      font-size:.82rem;font-weight:600;
+      color:var(--card-color,var(--color-primary));
+    }
   </style>
 </head>
 <body>
   <site-header active="pruefung" title="Während der Prüfung – PRM V5"></site-header>
 
-  <main id="main-content">
+  <div class="layout">
+    <site-sidebar active="pruefung"></site-sidebar>
+
+  <main id="main-content" class="content">
+
+    <!-- Hero -->
     <div class="pruef-hero">
       <h1>🆘 Während der Prüfung</h1>
-      <p>Schnellzugriff auf alle Hilfsmittel, die unter Zeitdruck wirklich weiterhelfen — Formeln, Entscheidungshilfen und Referenzen für Code, NumPy und sklearn. Mit <kbd>Strg+K</kbd> findest du zusätzlich jeden Begriff per Volltextsuche.</p>
+      <p>Schnellzugriff auf alle Hilfsmittel, die unter Zeitdruck wirklich weiterhelfen — Formeln, Entscheidungshilfen, Fehler-Guide und Referenzen für Code, NumPy und sklearn.</p>
     </div>
 
-    <div class="kapitel-grid">
+    <!-- Schnellsuche-Banner -->
+    <div class="search-banner">
+      <div class="search-banner-text">
+        <strong>Volltextsuche über alle Referenzseiten</strong>
+        <span>Begriff eingeben und sofort den richtigen Abschnitt finden — <kbd>Strg+K</kbd> oder unten klicken</span>
+      </div>
+      <a href="../Suche.html" class="search-banner-btn">🔍 Suche öffnen →</a>
+    </div>
 
-      <a class="kcard" href="cheatsheet.html">
-        <div class="kcard-header">
-          <div class="kcard-num">📋</div>
-          <div class="kcard-title-group">
-            <div class="kcard-label">Formeln &amp; Algorithmen</div>
-            <div class="kcard-title">Cheat-Sheet ·<br>Formelsammlung</div>
-          </div>
+    <!-- Schnellzugriff-Leiste -->
+    <div class="quick-bar">
+      <h2>Was brauchst du jetzt?</h2>
+      <div class="quick-links">
+        <a class="quick-link" href="cheatsheet.html#k7">📊 Confusion-Matrix-Rechner</a>
+        <a class="quick-link" href="entscheidungshilfe.html">🧭 Welche Metrik?</a>
+        <a class="quick-link" href="entscheidungshilfe.html">🤔 Welches Modell?</a>
+        <a class="quick-link" href="fehler-guide.html">🔧 Fehler nachschlagen</a>
+        <a class="quick-link" href="sklearn-referenz.html">🚀 sklearn-Klasse finden</a>
+        <a class="quick-link" href="numpy-referenz.html">🔢 NumPy-Funktion finden</a>
+        <a class="quick-link" href="cheatsheet.html">📋 Alle Formeln</a>
+        <a class="quick-link" href="code-scratch-referenz.html">🛠️ Von-Scratch-Code</a>
+      </div>
+    </div>
+
+    <!-- Referenz-Karten -->
+    <p class="ref-cards-heading">Alle Referenzseiten</p>
+    <div class="ref-cards-grid">
+
+      <!-- Cheat-Sheet -->
+      <a class="ref-card" href="cheatsheet.html" style="--card-color:#2563eb">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">📋</div>
+          <div class="ref-card-title">Cheat-Sheet</div>
+          <div class="ref-card-desc">Alle Formeln aus K1–K7 auf einen Blick: Gini, Entropie, ROC/AUC, Bootstrap-CI, GMM-Update-Regeln. Mit Live-Rechner für Confusion-Matrix-Metriken.</div>
         </div>
-        <p class="kcard-desc">Alle Formeln aus K1–K7 auf einen Blick: Gini, Entropie, ROC/AUC, Bootstrap-CI, GMM-Update-Regeln. Mit Live-Rechner für Confusion-Matrix-Metriken und In-Page-Filter.</p>
-        <div class="kcard-topics">
-          <span class="kcard-topic">Gini · Entropie</span>
-          <span class="kcard-topic">ROC/AUC</span>
-          <span class="kcard-topic">Bootstrap-CI</span>
-          <span class="kcard-topic">EM-Update</span>
-        </div>
-        <div class="kcard-footer">
-          <span class="kcard-badge themen">7 Kapitel</span>
-          <span class="kcard-arrow">→</span>
+        <div class="ref-card-footer">
+          <span>7 Kapitel · Formeln &amp; Algorithmen</span>
+          <span class="ref-card-open">Öffnen →</span>
         </div>
       </a>
 
-      <a class="kcard" href="entscheidungshilfe.html">
-        <div class="kcard-header">
-          <div class="kcard-num">🧭</div>
-          <div class="kcard-title-group">
-            <div class="kcard-label">Entscheidungshilfe</div>
-            <div class="kcard-title">Welche Metrik /<br>Methode wann?</div>
-          </div>
+      <!-- Entscheidungshilfe -->
+      <a class="ref-card" href="entscheidungshilfe.html" style="--card-color:#0d9488">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">🧭</div>
+          <div class="ref-card-title">Entscheidungshilfe</div>
+          <div class="ref-card-desc">Welche Metrik bei Klassenungleichgewicht? Welches Modell für welches Problem? Scaling nötig? Welche CV-Strategie?</div>
         </div>
-        <p class="kcard-desc">Flowcharts &amp; Entscheidungstabellen: Welche Metrik bei Klassenungleichgewicht? Welches Modell für welches Problem? Scaling nötig? Welche CV-Strategie?</p>
-        <div class="kcard-topics">
-          <span class="kcard-topic">Metrik-Wahl</span>
-          <span class="kcard-topic">Modell-Wahl</span>
-          <span class="kcard-topic">Scaling</span>
-          <span class="kcard-topic">CV-Strategie</span>
-        </div>
-        <div class="kcard-footer">
-          <span class="kcard-badge themen">5 Entscheidungen</span>
-          <span class="kcard-arrow">→</span>
+        <div class="ref-card-footer">
+          <span>5 Entscheidungen · Flowcharts</span>
+          <span class="ref-card-open">Öffnen →</span>
         </div>
       </a>
 
-      <a class="kcard" href="numpy-referenz.html">
-        <div class="kcard-header">
-          <div class="kcard-num">🔢</div>
-          <div class="kcard-title-group">
-            <div class="kcard-label">NumPy</div>
-            <div class="kcard-title">Befehle &amp;<br>Funktionen</div>
-          </div>
+      <!-- Aufgabentypen -->
+      <a class="ref-card" href="aufgabentypen-guide.html" style="--card-color:#d97706">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">🎯</div>
+          <div class="ref-card-title">Aufgabentypen</div>
+          <div class="ref-card-desc">Erkenne die Aufgabe in 30 Sekunden: Klassifikation, Regression, Clustering, Dimensionsreduktion oder Evaluation? Typische Aufgabenformulierungen und der richtige Ansatz.</div>
         </div>
-        <p class="kcard-desc">Die wichtigsten NumPy-Funktionen für ML-Aufgaben: Arrays erstellen, Indexing/Slicing, Aggregation, lineare Algebra, Broadcasting, Zufallszahlen.</p>
-        <div class="kcard-topics">
-          <span class="kcard-topic">Arrays &amp; Shapes</span>
-          <span class="kcard-topic">Aggregation</span>
-          <span class="kcard-topic">Lineare Algebra</span>
-          <span class="kcard-topic">Broadcasting</span>
-        </div>
-        <div class="kcard-footer">
-          <span class="kcard-badge themen">6 Bereiche</span>
-          <span class="kcard-arrow">→</span>
+        <div class="ref-card-footer">
+          <span>Aufgabenerkennung · Muster</span>
+          <span class="ref-card-open">Öffnen →</span>
         </div>
       </a>
 
-      <a class="kcard" href="sklearn-referenz.html">
-        <div class="kcard-header">
-          <div class="kcard-num">🚀</div>
-          <div class="kcard-title-group">
-            <div class="kcard-label">scikit-learn</div>
-            <div class="kcard-title">Estimatoren &amp;<br>Hyperparameter</div>
-          </div>
+      <!-- Code-Templates -->
+      <a class="ref-card" href="aufgaben-templates.html" style="--card-color:#7c3aed">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">📄</div>
+          <div class="ref-card-title">Code-Templates</div>
+          <div class="ref-card-desc">Fertige, kopierfertige Code-Templates für die häufigsten Aufgabentypen: Klassifikation, Clustering, PCA, Cross-Validation, Hyperparameter-Tuning.</div>
         </div>
-        <p class="kcard-desc">Alle wichtigen sklearn-Klassen aus K1–K7 mit Konstruktor, zentralen Parametern und Hyperparametern inkl. Erklärung — SVC, RandomForest, KMeans, GaussianMixture und mehr.</p>
-        <div class="kcard-topics">
-          <span class="kcard-topic">SVC</span>
-          <span class="kcard-topic">RandomForest</span>
-          <span class="kcard-topic">KMeans / DBSCAN</span>
-          <span class="kcard-topic">GridSearchCV</span>
-        </div>
-        <div class="kcard-footer">
-          <span class="kcard-badge themen">10 Klassen</span>
-          <span class="kcard-arrow">→</span>
+        <div class="ref-card-footer">
+          <span>Templates · direkt kopierbar</span>
+          <span class="ref-card-open">Öffnen →</span>
         </div>
       </a>
 
-      <a class="kcard" href="code-scratch-referenz.html">
-        <div class="kcard-header">
-          <div class="kcard-num">🛠️</div>
-          <div class="kcard-title-group">
-            <div class="kcard-label">Von Scratch</div>
-            <div class="kcard-title">Code-Referenz ·<br>Kernlogik</div>
-          </div>
+      <!-- Fehler-Guide -->
+      <a class="ref-card" href="fehler-guide.html" style="--card-color:#dc2626">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">🔧</div>
+          <div class="ref-card-title">Fehler-Guide</div>
+          <div class="ref-card-desc">Häufige Python/sklearn-Fehlermeldungen mit sofortigem Fix: ValueError, NotFittedError, ConvergenceWarning, UndefinedMetricWarning — Ursache + Lösung in Sekunden.</div>
         </div>
-        <p class="kcard-desc">Die Kernlogik aller selbst implementierten Algorithmen kompakt als Code-Snippets: Gini/Entropie-Funktionen, k-Means-Loop, EM-Update, Scaler, Metriken-Funktionen.</p>
-        <div class="kcard-topics">
-          <span class="kcard-topic">Scaler &amp; Split</span>
-          <span class="kcard-topic">k-Means</span>
-          <span class="kcard-topic">Entscheidungsbaum</span>
-          <span class="kcard-topic">EM-Algorithmus</span>
+        <div class="ref-card-footer">
+          <span>11 Fehler · 3 Kategorien</span>
+          <span class="ref-card-open">Öffnen →</span>
         </div>
-        <div class="kcard-footer">
-          <span class="kcard-badge themen">7 Snippets</span>
-          <span class="kcard-arrow">→</span>
+      </a>
+
+      <!-- NumPy -->
+      <a class="ref-card" href="numpy-referenz.html" style="--card-color:#059669">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">🔢</div>
+          <div class="ref-card-title">NumPy</div>
+          <div class="ref-card-desc">Die wichtigsten NumPy-Funktionen für ML-Aufgaben: Arrays erstellen, Indexing/Slicing, Aggregation, lineare Algebra, Broadcasting, Zufallszahlen.</div>
+        </div>
+        <div class="ref-card-footer">
+          <span>6 Bereiche · Array-Operationen</span>
+          <span class="ref-card-open">Öffnen →</span>
+        </div>
+      </a>
+
+      <!-- sklearn -->
+      <a class="ref-card" href="sklearn-referenz.html" style="--card-color:#ea580c">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">🚀</div>
+          <div class="ref-card-title">sklearn</div>
+          <div class="ref-card-desc">Alle wichtigen sklearn-Klassen aus K1–K7 mit Konstruktor, Parametern und Hyperparametern: SVC, RandomForest, KMeans, GaussianMixture, GridSearchCV und mehr.</div>
+        </div>
+        <div class="ref-card-footer">
+          <span>10 Klassen · ML-Estimatoren</span>
+          <span class="ref-card-open">Öffnen →</span>
+        </div>
+      </a>
+
+      <!-- Matplotlib & Pandas -->
+      <a class="ref-card" href="matplotlib-pandas-referenz.html" style="--card-color:#db2777">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">📊</div>
+          <div class="ref-card-title">Matplotlib &amp; Pandas</div>
+          <div class="ref-card-desc">Plots erstellen, DataFrames bearbeiten, Daten laden, filtern, gruppieren und visualisieren — alle Befehle die in ML-Aufgaben immer wieder gebraucht werden.</div>
+        </div>
+        <div class="ref-card-footer">
+          <span>Plots · DataFrames · Visualisierung</span>
+          <span class="ref-card-open">Öffnen →</span>
+        </div>
+      </a>
+
+      <!-- Python-Stdlib -->
+      <a class="ref-card" href="python-stdlib-referenz.html" style="--card-color:#6366f1">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">🐍</div>
+          <div class="ref-card-title">Python-Stdlib</div>
+          <div class="ref-card-desc">List-/Dict-Comprehensions, itertools, collections, functools, sorted/groupby — das Python-Handwerkszeug für elegante Lösungen ohne externe Bibliotheken.</div>
+        </div>
+        <div class="ref-card-footer">
+          <span>Comprehensions · itertools · collections</span>
+          <span class="ref-card-open">Öffnen →</span>
+        </div>
+      </a>
+
+      <!-- Von Scratch -->
+      <a class="ref-card" href="code-scratch-referenz.html" style="--card-color:#b45309">
+        <div class="ref-card-body">
+          <div class="ref-card-icon">🛠️</div>
+          <div class="ref-card-title">Von Scratch</div>
+          <div class="ref-card-desc">Die Kernlogik der wichtigsten Algorithmen selbst implementiert: Gini/Entropie, k-Means-Loop, EM-Update, Scaler, Bagging, PCA, Gradient Boosting.</div>
+        </div>
+        <div class="ref-card-footer">
+          <span>9 Algorithmen · Eigenimplementierung</span>
+          <span class="ref-card-open">Öffnen →</span>
         </div>
       </a>
 
     </div>
+
   </main>
+  </div>
 
   <site-footer caption="PRM · Während der Prüfung · Schnellzugriff"></site-footer>
 </body>
